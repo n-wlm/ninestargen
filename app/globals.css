@@ -148,8 +148,8 @@
 .nsg-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 13px;
-  height: 13px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #ffffff;
   border: 1.5px solid #5E6AD2;
@@ -166,8 +166,8 @@
 }
 /* Firefox thumb */
 .nsg-slider::-moz-range-thumb {
-  width: 13px;
-  height: 13px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: #ffffff;
   border: 1.5px solid #5E6AD2;
@@ -177,4 +177,15 @@
 .nsg-slider::-moz-range-track {
   height: 4px;
   border-radius: 9999px;
+}
+/* Desktop: smaller thumb */
+@media (min-width: 1024px) {
+  .nsg-slider::-webkit-slider-thumb {
+    width: 13px;
+    height: 13px;
+  }
+  .nsg-slider::-moz-range-thumb {
+    width: 13px;
+    height: 13px;
+  }
 }

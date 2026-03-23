@@ -17,10 +17,10 @@ interface ControlPanelProps {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border-b border-[#F3F4F6]">
-      <div className="px-4 py-2 bg-[#F9FAFB] border-b border-[#F3F4F6]">
-        <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#6B7280]">{title}</p>
+      <div className="px-4 py-2.5 lg:py-2 bg-[#F9FAFB] border-b border-[#F3F4F6]">
+        <p className="text-[12px] lg:text-[10px] font-bold uppercase tracking-[0.1em] text-[#6B7280]">{title}</p>
       </div>
-      <div className="px-4 py-3 flex flex-col gap-3.5">{children}</div>
+      <div className="px-4 py-4 lg:py-3 flex flex-col gap-4 lg:gap-3.5">{children}</div>
     </div>
   );
 }
@@ -40,7 +40,7 @@ function SegmentedControl<T extends string>({
         <button
           key={v}
           onClick={() => onChange(v)}
-          className={`flex-1 py-1 text-[11px] rounded font-medium transition-all ${
+          className={`flex-1 py-2 lg:py-1 text-[13px] lg:text-[11px] rounded font-medium transition-all ${
             value === v
               ? 'bg-white text-[#111827] shadow-sm'
               : 'text-[#6B7280] hover:text-[#374151]'
@@ -56,7 +56,7 @@ function SegmentedControl<T extends string>({
 function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-[11px] font-medium text-[#6B7280]">{label}</span>
+      <span className="text-[13px] lg:text-[11px] font-medium text-[#6B7280]">{label}</span>
       <button
         onClick={() => onChange(!value)}
         className={`rounded-full transition-all relative shrink-0 ${value ? 'bg-[#5E6AD2]' : 'bg-[#D1D5DB]'}`}
@@ -73,16 +73,16 @@ function Toggle({ label, value, onChange }: { label: string; value: boolean; onC
 
 function StarTypeGrid({ value, onChange }: { value: StarType; onChange: (t: StarType) => void }) {
   return (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-3 lg:gap-2.5">
       {STAR_TYPE_GROUPS.map(({ label, types }) => (
         <div key={label}>
-          <p className="text-[10px] text-[#9CA3AF] mb-1.5">{label}</p>
-          <div className="grid grid-cols-2 gap-1">
+          <p className="text-[11px] lg:text-[10px] text-[#9CA3AF] mb-2 lg:mb-1.5">{label}</p>
+          <div className="grid grid-cols-2 gap-1.5 lg:gap-1">
             {types.map((t) => (
               <button
                 key={t}
                 onClick={() => onChange(t)}
-                className={`text-left px-2.5 py-1.5 rounded-md text-[11px] font-medium transition-all ${
+                className={`text-left px-3 py-2.5 lg:px-2.5 lg:py-1.5 rounded-md text-[13px] lg:text-[11px] font-medium transition-all ${
                   value === t
                     ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
                     : 'text-[#374151] hover:bg-[#F9FAFB] hover:text-[#111827]'

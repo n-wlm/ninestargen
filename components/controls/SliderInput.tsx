@@ -29,7 +29,6 @@ export default function SliderInput({
   const [inputVal, setInputVal] = useState(String(value));
   const isModified = Math.abs(value - defaultValue) > step * 0.01;
 
-  // Sync input when value changes externally
   useEffect(() => {
     setInputVal(format ? format(value) : String(step < 1 ? value.toFixed(2) : Math.round(value)));
   }, [value, format, step]);
@@ -40,20 +39,19 @@ export default function SliderInput({
     if (!isNaN(num)) {
       onChange(Math.min(max, Math.max(min, num)));
     } else {
-      // Reset display
       setInputVal(format ? format(value) : String(value));
     }
   }
 
   return (
     <div className="group">
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[11px] font-medium text-[#6B7280] tracking-wide uppercase select-none flex items-center gap-1">
-            {label}
-            {tooltip && (
-              <span title={tooltip} className="text-[#D1D5DB] hover:text-[#9CA3AF] transition-colors cursor-default text-[10px] leading-none">ⓘ</span>
-            )}
-          </span>
+      <div className="flex items-center justify-between mb-2 lg:mb-1.5">
+        <span className="text-[13px] lg:text-[11px] font-medium text-[#6B7280] tracking-wide uppercase select-none flex items-center gap-1">
+          {label}
+          {tooltip && (
+            <span title={tooltip} className="text-[#D1D5DB] hover:text-[#9CA3AF] transition-colors cursor-default text-[11px] lg:text-[10px] leading-none">ⓘ</span>
+          )}
+        </span>
         <div className="flex items-center gap-1">
           <input
             type="text"
@@ -66,13 +64,13 @@ export default function SliderInput({
               if (e.key === 'ArrowUp') { e.preventDefault(); onChange(Math.min(max, value + step)); }
               if (e.key === 'ArrowDown') { e.preventDefault(); onChange(Math.max(min, value - step)); }
             }}
-            className="w-14 text-right text-[11px] font-mono text-[#111827] bg-transparent border-b border-transparent hover:border-[#E5E7EB] focus:border-[#5E6AD2] focus:outline-none py-0 leading-none transition-colors"
+            className="w-16 lg:w-14 text-right text-[13px] lg:text-[11px] font-mono text-[#111827] bg-transparent border-b border-transparent hover:border-[#E5E7EB] focus:border-[#5E6AD2] focus:outline-none py-0 leading-none transition-colors"
           />
           {isModified && (
             <button
               onClick={() => onChange(defaultValue)}
               title="Reset to default"
-              className="text-[#9CA3AF] hover:text-[#5E6AD2] transition-colors leading-none text-xs ml-0.5"
+              className="text-[#9CA3AF] hover:text-[#5E6AD2] transition-colors leading-none text-sm lg:text-xs ml-0.5"
             >
               ↺
             </button>

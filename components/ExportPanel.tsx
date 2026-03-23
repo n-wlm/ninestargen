@@ -17,11 +17,11 @@ const RESOLUTIONS = [
   { label: '4K', value: 4096 },
 ];
 
-const FORMATS = [
+const FORMATS: { id: 'png' | 'svg' | 'jpeg'; label: string; desc: string; recommended?: boolean }[] = [
   { id: 'png',  label: 'PNG', desc: 'Lossless, transparent bg', recommended: true },
   { id: 'svg',  label: 'SVG', desc: 'Vector — infinite scale' },
   { id: 'jpeg', label: 'JPG', desc: 'Compressed, white bg' },
-] as const;
+];
 
 export default function ExportPanel({ svgRef, config, update }: ExportPanelProps) {
   const [loading, setLoading] = useState<string | null>(null);
@@ -73,16 +73,16 @@ export default function ExportPanel({ svgRef, config, update }: ExportPanelProps
   }
 
   return (
-    <div className="px-4 py-3 border-t border-[#F3F4F6] bg-white shrink-0">
+    <div className="px-4 py-3.5 lg:py-3 border-t border-[#F3F4F6] bg-white shrink-0">
       {/* Resolution row */}
-      <div className="flex items-center gap-2 mb-2.5">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-[#9CA3AF] shrink-0">Size</span>
-        <div className="flex gap-1 flex-1">
+      <div className="flex items-center gap-2 mb-3 lg:mb-2.5">
+        <span className="text-[12px] lg:text-[10px] font-semibold uppercase tracking-widest text-[#9CA3AF] shrink-0">Size</span>
+        <div className="flex gap-1.5 lg:gap-1 flex-1">
           {RESOLUTIONS.map(({ label, value }) => (
             <button
               key={value}
               onClick={() => { update('exportWidth', value); update('exportHeight', value); }}
-              className={`flex-1 py-1 text-[11px] rounded-md font-medium transition-all ${
+              className={`flex-1 py-2 lg:py-1 text-[13px] lg:text-[11px] rounded-md font-medium transition-all ${
                 config.exportWidth === value
                   ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
                   : 'bg-[#F3F4F6] text-[#6B7280] hover:text-[#374151]'
@@ -100,7 +100,7 @@ export default function ExportPanel({ svgRef, config, update }: ExportPanelProps
         <button
           onClick={() => setOpen((v) => !v)}
           disabled={loading !== null}
-          className="flex-1 py-2 rounded-md text-[12px] font-semibold bg-[#5E6AD2] hover:bg-[#4F5BBF] text-white transition-all disabled:opacity-40 shadow-sm flex items-center justify-center gap-1.5"
+          className="flex-1 py-2.5 lg:py-2 rounded-md text-[14px] lg:text-[12px] font-semibold bg-[#5E6AD2] hover:bg-[#4F5BBF] text-white transition-all disabled:opacity-40 shadow-sm flex items-center justify-center gap-1.5"
         >
           {loading ? (
             <span className="opacity-70">Downloading…</span>
@@ -138,15 +138,15 @@ export default function ExportPanel({ svgRef, config, update }: ExportPanelProps
               <button
                 key={id}
                 onClick={() => handleDownload(id)}
-                className="w-full px-3.5 py-2.5 text-left hover:bg-[#F9FAFB] transition-colors flex items-center justify-between group"
+                className="w-full px-4 py-3 lg:px-3.5 lg:py-2.5 text-left hover:bg-[#F9FAFB] transition-colors flex items-center justify-between group"
               >
                 <span className="flex items-center gap-2">
-                  <span className="text-[12px] font-semibold text-[#111827]">{label}</span>
+                  <span className="text-[14px] lg:text-[12px] font-semibold text-[#111827]">{label}</span>
                   {recommended && (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#DCFCE7] text-[#15803D]">Best</span>
+                    <span className="text-[11px] lg:text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-[#DCFCE7] text-[#15803D]">Best</span>
                   )}
                 </span>
-                <span className="text-[11px] text-[#9CA3AF] group-hover:text-[#6B7280]">{desc}</span>
+                <span className="text-[12px] lg:text-[11px] text-[#9CA3AF] group-hover:text-[#6B7280]">{desc}</span>
               </button>
             ))}
           </div>

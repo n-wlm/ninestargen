@@ -18,7 +18,7 @@ function Generator() {
   return (
     <div className="flex flex-col lg:flex-row flex-1 min-h-0">
       {/* Controls sidebar */}
-      <aside className="w-full lg:w-80 xl:w-88 shrink-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[#EAECF0] bg-white order-2 lg:order-1 h-[50vh] lg:h-full">
+      <aside className="w-full lg:w-80 xl:w-88 shrink-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[#EAECF0] bg-white order-2 lg:order-1 h-[58vh] lg:h-full">
         <div className="flex-1 overflow-y-auto min-h-0">
           <ControlPanel config={config} update={update} onReset={reset} />
         </div>
@@ -30,7 +30,7 @@ function Generator() {
       </aside>
 
       {/* Preview canvas */}
-      <section className="flex-1 flex items-center justify-center relative order-1 lg:order-2 min-h-[45vh] lg:min-h-0 bg-[#F7F8FA]">
+      <section className="flex-1 flex items-center justify-center relative order-1 lg:order-2 min-h-[38vh] lg:min-h-0 bg-[#F7F8FA]">
         {/* Subtle grid background */}
         <div
           className="absolute inset-0 opacity-[0.4]"
@@ -41,7 +41,7 @@ function Generator() {
         />
 
         {/* Star */}
-        <div className="relative z-10 w-full h-full flex items-center justify-center p-8 lg:p-14">
+        <div className="relative z-10 w-full h-full flex items-center justify-center p-5 lg:p-14">
           <StarPreview
             config={config}
             svgRef={svgRef}
