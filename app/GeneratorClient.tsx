@@ -18,7 +18,7 @@ function Generator() {
   return (
     <div className="flex flex-col lg:flex-row flex-1 min-h-0">
       {/* Controls sidebar */}
-      <aside className="w-full lg:w-70 xl:w-75 shrink-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[#EAECF0] bg-white order-2 lg:order-1 h-[50vh] lg:h-full">
+      <aside className="w-full lg:w-80 xl:w-88 shrink-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[#EAECF0] bg-white order-2 lg:order-1 h-[50vh] lg:h-full">
         <div className="flex-1 overflow-y-auto min-h-0">
           <ControlPanel config={config} update={update} onReset={reset} />
         </div>

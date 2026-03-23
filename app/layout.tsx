@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Inter, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import Link from 'next/link';
+import LogoStar from '@/components/LogoStar';
 
-const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' });
-const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono' });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mono', weight: ['400', '500'] });
 
 export const metadata: Metadata = {
   title: "Nine-Pointed Star Generator | Free Bahá'í Star Creator",
@@ -29,19 +30,18 @@ export const metadata: Metadata = {
     description: 'Create beautiful nine-pointed star images. Free, customizable, downloadable.',
   },
   robots: { index: true, follow: true },
+  icons: { icon: '/favicon.svg' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full`}>
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} h-full`}>
       <body className="font-sans antialiased bg-[#F7F8FA] text-[#111827] flex flex-col h-full">
         <TooltipProvider>
           {/* Nav */}
           <header className="h-11 flex items-center px-5 border-b border-[#EAECF0] bg-white shrink-0">
             <Link href="/" className="flex items-center gap-2 text-[#111827] hover:text-[#5E6AD2] transition-colors">
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="text-[#5E6AD2]">
-                <path d="M9 1L10.76 6.45H16.47L11.86 9.74L13.62 15.19L9 11.9L4.38 15.19L6.14 9.74L1.53 6.45H7.24L9 1Z" fill="currentColor"/>
-              </svg>
+              <LogoStar />
               <span className="text-[13px] font-semibold tracking-tight">NineStarGen</span>
             </Link>
 

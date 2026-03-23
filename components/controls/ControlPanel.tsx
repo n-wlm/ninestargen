@@ -3,7 +3,8 @@
 import SliderInput from './SliderInput';
 import { ColorControl, GradientBuilder } from './ColorControl';
 import type { StarConfig, StarType } from '@/types/star';
-import { DEFAULT_CONFIG, STAR_TYPE_LABELS, PHASE_1_TYPES, PHASE_2_TYPES, PHASE_3_TYPES } from '@/types/star';
+import { DEFAULT_CONFIG, STAR_TYPE_LABELS, STAR_TYPE_GROUPS } from '@/types/star';
+import { PALETTES } from '@/lib/color-palettes';
 
 interface ControlPanelProps {
   config: StarConfig;
@@ -15,9 +16,11 @@ interface ControlPanelProps {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="px-4 py-3 border-b border-[#F3F4F6]">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF] mb-3">{title}</p>
-      <div className="flex flex-col gap-3.5">{children}</div>
+    <div className="border-b border-[#F3F4F6]">
+      <div className="px-4 py-2 bg-[#F9FAFB] border-b border-[#F3F4F6]">
+        <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#6B7280]">{title}</p>
+      </div>
+      <div className="px-4 py-3 flex flex-col gap-3.5">{children}</div>
     </div>
   );
 }
@@ -56,11 +59,11 @@ function Toggle({ label, value, onChange }: { label: string; value: boolean; onC
       <span className="text-[11px] font-medium text-[#6B7280]">{label}</span>
       <button
         onClick={() => onChange(!value)}
-        className={`w-8 h-4.5 rounded-full transition-all relative shrink-0 ${value ? 'bg-[#5E6AD2]' : 'bg-[#D1D5DB]'}`}
+        className={`rounded-full transition-all relative shrink-0 ${value ? 'bg-[#5E6AD2]' : 'bg-[#D1D5DB]'}`}
         style={{ height: '18px', width: '32px' }}
       >
         <span
-          className={`absolute top-0.5 w-3.5 h-3.5 bg-white rounded-full shadow-sm transition-all`}
+          className="absolute top-0.5 w-3.5 h-3.5 bg-white rounded-full shadow-sm transition-all"
           style={{ left: value ? '14px' : '2px' }}
         />
       </button>
@@ -69,15 +72,9 @@ function Toggle({ label, value, onChange }: { label: string; value: boolean; onC
 }
 
 function StarTypeGrid({ value, onChange }: { value: StarType; onChange: (t: StarType) => void }) {
-  const groups = [
-    { label: 'Star Polygons', types: PHASE_1_TYPES },
-    { label: 'Extended', types: PHASE_2_TYPES },
-    { label: 'Artistic', types: PHASE_3_TYPES },
-  ];
-
   return (
     <div className="flex flex-col gap-2.5">
-      {groups.map(({ label, types }) => (
+      {STAR_TYPE_GROUPS.map(({ label, types }) => (
         <div key={label}>
           <p className="text-[10px] text-[#9CA3AF] mb-1.5">{label}</p>
           <div className="grid grid-cols-2 gap-1">
@@ -101,6 +98,24 @@ function StarTypeGrid({ value, onChange }: { value: StarType; onChange: (t: Star
   );
 }
 
+function PalettePicker({ onSelect }: {
+  onSelect: (p: { fillColor: string; gradientColors: string[] }) => void;
+}) {
+  return (
+    <div className="flex items-center gap-1.5 flex-wrap">
+      {PALETTES.map((p) => (
+        <button
+          key={p.id}
+          title={p.name}
+          onClick={() => onSelect({ fillColor: p.fillColor, gradientColors: p.gradientColors })}
+          className="w-5 h-5 rounded-full border-2 border-white shadow-sm hover:scale-110 transition-transform ring-1 ring-black/10 shrink-0"
+          style={{ background: p.swatch }}
+        />
+      ))}
+    </div>
+  );
+}
+
 const FILL_TYPES: { value: StarConfig['fillType']; label: string }[] = [
   { value: 'solid', label: 'Solid' },
   { value: 'linear-gradient', label: 'Linear' },
@@ -114,13 +129,17 @@ const STROKE_DASHES: { value: StarConfig['strokeDash']; label: string }[] = [
   { value: 'dotted', label: '···' },
 ];
 
-// Types that support curve intensity
-const USES_CURVE = new Set(['9-2', '9-4', '3-triangles', '3-rhombuses', 'spike', 'curved-outline', 'alt-length']);
-const USES_FILLRULE = new Set(['3-triangles', '3-rhombuses']);
-const USES_SPIRAL = new Set(['spiral']);
+const OUTER_CONTAINERS: { value: StarConfig['outerContainer']; label: string }[] = [
+  { value: 'none', label: 'None' },
+  { value: '9-gon', label: '9-Gon' },
+  { value: 'circle', label: 'Circle' },
+  { value: 'square', label: 'Square' },
+];
+
+const USES_CURVE = new Set(['9-2', '9-4', '3-triangles', 'spike', 'curved-outline']);
+const USES_FILLRULE = new Set(['3-triangles']);
 const USES_PETAL = new Set(['petal']);
-const USES_FRACTAL = new Set(['fractal']);
-const USES_ALT = new Set(['alt-length']);
+const USES_ROUNDING = new Set(['9-2', '9-4', '3-triangles', 'spike', 'kite', 'stellated', 'explosion']);
 
 // ── Main Panel ─────────────────────────────────────────────────────────────────
 
@@ -153,16 +172,18 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
         <Section title="Shape">
           <SliderInput
             label="Outer Radius"
+            tooltip="Distance from center to the outermost star point"
             value={config.outerRadius}
             defaultValue={D.outerRadius}
             min={60}
-            max={240}
+            max={270}
             step={1}
             onChange={(v) => update('outerRadius', v)}
           />
-          {!['9-2', '9-4', 'mandala'].includes(t) && (
+          {!['9-2', '9-4'].includes(t) && (
             <SliderInput
               label="Inner Ratio"
+              tooltip="Size of the inner vertices relative to outer radius"
               value={config.innerRadiusRatio}
               defaultValue={D.innerRadiusRatio}
               min={0.1}
@@ -174,6 +195,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
           )}
           <SliderInput
             label="Rotation"
+            tooltip="Rotate the star around its center"
             value={config.rotation}
             defaultValue={D.rotation}
             min={-180}
@@ -185,6 +207,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
           {USES_CURVE.has(t) && (
             <SliderInput
               label="Curve"
+              tooltip="Bend edges inward (negative) or outward (positive)"
               value={config.curveIntensity}
               defaultValue={D.curveIntensity}
               min={-1}
@@ -192,6 +215,19 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
               step={0.01}
               format={(v) => `${Math.round(v * 100)}%`}
               onChange={(v) => update('curveIntensity', v)}
+            />
+          )}
+          {USES_ROUNDING.has(t) && (
+            <SliderInput
+              label="Corner Rounding"
+              tooltip="Round the sharp tips of star points"
+              value={config.cornerRounding}
+              defaultValue={D.cornerRounding}
+              min={0}
+              max={1}
+              step={0.01}
+              format={(v) => `${Math.round(v * 100)}%`}
+              onChange={(v) => update('cornerRounding', v)}
             />
           )}
           {USES_FILLRULE.has(t) && (
@@ -207,44 +243,11 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
               />
             </div>
           )}
-          {USES_ALT.has(t) && (
-            <>
-              <SegmentedControl
-                options={[
-                  { value: 'short-long' as const, label: '2-step' },
-                  { value: 'short-mid-long' as const, label: '3-step' },
-                ]}
-                value={config.altLengthPattern}
-                onChange={(v) => update('altLengthPattern', v)}
-              />
-              <SliderInput
-                label="Short/Long Ratio"
-                value={config.altLengthRatio}
-                defaultValue={D.altLengthRatio}
-                min={0.3}
-                max={0.9}
-                step={0.01}
-                format={(v) => `${Math.round(v * 100)}%`}
-                onChange={(v) => update('altLengthRatio', v)}
-              />
-            </>
-          )}
-          {USES_SPIRAL.has(t) && (
-            <SliderInput
-              label="Twist per Point"
-              value={config.spiralTwist}
-              defaultValue={D.spiralTwist}
-              min={0}
-              max={40}
-              step={0.5}
-              format={(v) => `${v}°`}
-              onChange={(v) => update('spiralTwist', v)}
-            />
-          )}
           {USES_PETAL.has(t) && (
             <>
               <SliderInput
                 label="Petal Width"
+                tooltip="Controls how wide each petal is"
                 value={config.petalWidth}
                 defaultValue={D.petalWidth}
                 min={0.1}
@@ -255,6 +258,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
               />
               <SliderInput
                 label="Petal Curve"
+                tooltip="Controls the curvature of each petal"
                 value={config.petalCurve}
                 defaultValue={D.petalCurve}
                 min={0}
@@ -265,30 +269,15 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
               />
             </>
           )}
-          {USES_FRACTAL.has(t) && (
-            <div>
-              <p className="text-[10px] text-[#9CA3AF] mb-1.5">Depth</p>
-              <div className="flex gap-1">
-                {[1, 2, 3].map((d) => (
-                  <button
-                    key={d}
-                    onClick={() => update('fractalDepth', d)}
-                    className={`flex-1 py-1.5 rounded-md text-[11px] font-semibold transition-all ${
-                      config.fractalDepth === d
-                        ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
-                        : 'bg-[#F9FAFB] text-[#6B7280] hover:text-[#374151]'
-                    }`}
-                  >
-                    {d}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </Section>
 
         {/* FILL */}
         <Section title="Fill">
+          {/* Palette quick-pick */}
+          <PalettePicker onSelect={(p) => {
+            update('fillColor', p.fillColor);
+            update('gradientColors', p.gradientColors);
+          }} />
           <SegmentedControl
             options={FILL_TYPES}
             value={config.fillType}
@@ -310,6 +299,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
               onChange={(colors) => update('gradientColors', colors)}
               direction={config.gradientDirection}
               onDirectionChange={(d) => update('gradientDirection', d)}
+              isRadial={config.fillType === 'radial-gradient'}
             />
           )}
         </Section>
@@ -318,6 +308,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
         <Section title="Stroke">
           <SliderInput
             label="Width"
+            tooltip="Thickness of the star outline"
             value={config.strokeWidth}
             defaultValue={D.strokeWidth}
             min={0}
@@ -363,6 +354,52 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
           </div>
         </Section>
 
+        {/* OUTER CONTAINER */}
+        <Section title="Outer Container">
+          <SegmentedControl
+            options={OUTER_CONTAINERS}
+            value={config.outerContainer}
+            onChange={(v) => update('outerContainer', v)}
+          />
+          {config.outerContainer !== 'none' && (
+            <>
+              <SliderInput
+                label="Padding"
+                tooltip="Gap between star and outer container"
+                value={config.outerContainerPadding}
+                defaultValue={D.outerContainerPadding}
+                min={0}
+                max={50}
+                step={1}
+                format={(v) => `${v}px`}
+                onChange={(v) => update('outerContainerPadding', v)}
+              />
+              <ColorControl
+                label="Stroke"
+                value={config.outerContainerColor}
+                onChange={(v) => update('outerContainerColor', v)}
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => update('outerContainerFill', 'none')}
+                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                    config.outerContainerFill === 'none'
+                      ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
+                      : 'bg-[#F3F4F6] text-[#6B7280] hover:text-[#374151]'
+                  }`}
+                >
+                  No fill
+                </button>
+                <ColorControl
+                  label=""
+                  value={config.outerContainerFill === 'none' ? '#ffffff' : config.outerContainerFill}
+                  onChange={(v) => update('outerContainerFill', v)}
+                />
+              </div>
+            </>
+          )}
+        </Section>
+
         {/* INNER POLYGON */}
         <Section title="Inner Polygon">
           <Toggle
@@ -383,6 +420,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
         <Section title="Effects">
           <SliderInput
             label="Glow"
+            tooltip="Adds a colored halo around the star"
             value={config.glowRadius}
             defaultValue={D.glowRadius}
             min={0}
@@ -400,6 +438,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
           )}
           <SliderInput
             label="Shadow"
+            tooltip="Adds a drop shadow behind the star"
             value={config.shadowBlur}
             defaultValue={D.shadowBlur}
             min={0}
@@ -441,7 +480,6 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
           )}
         </Section>
 
-        {/* Spacer at bottom */}
         <div className="h-4" />
       </div>
     </div>

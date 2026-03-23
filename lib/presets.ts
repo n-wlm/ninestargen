@@ -13,7 +13,7 @@ function preset(id: string, name: string, category: Preset['category'], override
 }
 
 export const PRESETS: Preset[] = [
-  preset('classic-bahai', 'Classic Bahá\'í', 'classic', {
+  preset('classic-bahai', "Classic Bahá'í", 'classic', {
     starType: '3-triangles',
     fillType: 'none',
     strokeColor: '#C5961E',
@@ -49,15 +49,6 @@ export const PRESETS: Preset[] = [
     glowRadius: 12,
     innerRadiusRatio: 0.42,
   }),
-  preset('sacred-geometry', 'Sacred Geometry', 'classic', {
-    starType: 'compound',
-    fillType: 'none',
-    strokeColor: '#92400E',
-    strokeWidth: 1.5,
-    bgColor: '#FFFBEB',
-    showInnerPolygon: false,
-    innerRadiusRatio: 0.55,
-  }),
   preset('watercolor-petal', 'Watercolor Petal', 'decorative', {
     starType: 'petal',
     fillType: 'solid',
@@ -77,7 +68,7 @@ export const PRESETS: Preset[] = [
     bgColor: 'transparent',
     innerRadiusRatio: 0.45,
   }),
-  preset('rainbow-conic', 'Rainbow Conic', 'decorative', {
+  preset('rainbow-gradient', 'Rainbow', 'decorative', {
     starType: '9-2',
     fillType: 'linear-gradient',
     gradientColors: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6'],
@@ -105,15 +96,6 @@ export const PRESETS: Preset[] = [
     bgColor: '#FEF3C7',
     fillRule: 'evenodd',
   }),
-  preset('celtic-star', 'Celtic Star', 'artistic', {
-    starType: 'interlace',
-    fillType: 'none',
-    strokeColor: '#166534',
-    strokeWidth: 4,
-    strokeDash: 'solid',
-    bgColor: '#F0FDF4',
-    innerRadiusRatio: 0.38,
-  }),
   preset('flower-bloom', 'Flower Bloom', 'decorative', {
     starType: 'curved-outline',
     fillType: 'radial-gradient',
@@ -124,16 +106,13 @@ export const PRESETS: Preset[] = [
     curveIntensity: 0.65,
     innerRadiusRatio: 0.42,
   }),
-  preset('cosmic-spiral', 'Cosmic Spiral', 'artistic', {
-    starType: 'spiral',
-    fillType: 'solid',
-    fillColor: '#F59E0B',
-    fillOpacity: 0.9,
-    strokeColor: '#D97706',
-    strokeWidth: 1,
-    bgColor: '#1E1B4B',
-    spiralTwist: 18,
-    innerRadiusRatio: 0.3,
+  preset('explosion-burst', 'Explosion', 'artistic', {
+    starType: 'explosion',
+    fillType: 'linear-gradient',
+    gradientColors: ['#FDE047', '#F97316', '#EF4444'],
+    strokeWidth: 0,
+    bgColor: '#0F172A',
+    innerRadiusRatio: 0.15,
   }),
   preset('diamond-grid', 'Diamond Grid', 'geometric', {
     starType: 'kite',
@@ -145,40 +124,20 @@ export const PRESETS: Preset[] = [
     bgColor: '#EFF6FF',
     innerRadiusRatio: 0.38,
   }),
-  preset('soft-mandala', 'Soft Mandala', 'decorative', {
-    starType: 'mandala',
+preset('stellated-outline', 'Stellated', 'geometric', {
+    starType: 'stellated',
+    fillType: 'none',
+    strokeColor: '#0EA5E9',
+    strokeWidth: 2,
+    bgColor: '#F0F9FF',
+    innerRadiusRatio: 0.55,
+  }),
+  preset('indigo-solid', 'Indigo', 'modern', {
+    starType: '9-2',
     fillType: 'solid',
-    fillColor: '#A78BFA',
-    strokeColor: '#7C3AED',
-    strokeWidth: 1.5,
-    bgColor: '#F5F3FF',
-    innerRadiusRatio: 0.38,
-  }),
-  preset('fractal-mono', 'Fractal', 'artistic', {
-    starType: 'fractal',
-    fillType: 'solid',
-    fillColor: '#1F2937',
+    fillColor: '#5E6AD2',
     strokeWidth: 0,
-    bgColor: '#F9FAFB',
-    fractalDepth: 2,
-    innerRadiusRatio: 0.4,
-  }),
-  preset('explosion-burst', 'Explosion Burst', 'artistic', {
-    starType: 'explosion',
-    fillType: 'linear-gradient',
-    gradientColors: ['#FDE047', '#F97316', '#EF4444'],
-    strokeWidth: 0,
-    bgColor: '#0F172A',
-    innerRadiusRatio: 0.15,
-  }),
-  preset('concentric-rings', 'Concentric Rings', 'geometric', {
-    starType: 'concentric',
-    fillType: 'radial-gradient',
-    gradientColors: ['#6366F1', '#8B5CF6', '#EC4899'],
-    strokeColor: '#4F46E5',
-    strokeWidth: 1,
-    bgColor: '#FFFFFF',
-    innerRadiusRatio: 0.38,
+    bgColor: 'transparent',
   }),
 ];
 

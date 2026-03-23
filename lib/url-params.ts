@@ -1,4 +1,4 @@
-import type { StarConfig, StarType, FillType, StrokeDash, FillRule, AltLengthPattern, GradientDirection } from '@/types/star';
+import type { StarConfig, StarType, FillType, StrokeDash, FillRule, GradientDirection, OuterContainer } from '@/types/star';
 import { DEFAULT_CONFIG } from '@/types/star';
 
 // Short key map to keep URLs concise
@@ -17,8 +17,12 @@ const KEY_MAP = {
   strokeDash: 'sd',
   bgColor: 'bg',
   curveIntensity: 'ci',
-  cornerRadius: 'cr',
+  cornerRounding: 'cr',
   fillRule: 'fr',
+  outerContainer: 'oc',
+  outerContainerPadding: 'ocp',
+  outerContainerColor: 'occ',
+  outerContainerFill: 'ocf',
   showInnerPolygon: 'sip',
   innerPolygonColor: 'ipc',
   glowColor: 'glc',
@@ -27,13 +31,8 @@ const KEY_MAP = {
   shadowColor: 'shc',
   shadowOffsetX: 'shx',
   shadowOffsetY: 'shy',
-  altLengthPattern: 'alp',
-  altLengthRatio: 'alr',
-  spiralTwist: 'st',
   petalWidth: 'pw',
   petalCurve: 'pc',
-  fractalDepth: 'fd',
-  interlaceGap: 'ig',
   exportWidth: 'ew',
   exportHeight: 'eh',
 } as const;
@@ -86,11 +85,11 @@ export function paramsToConfig(params: URLSearchParams): StarConfig {
       case 'fillRule':
         config.fillRule = value as FillRule;
         break;
-      case 'altLengthPattern':
-        config.altLengthPattern = value as AltLengthPattern;
-        break;
       case 'gradientDirection':
         config.gradientDirection = value as GradientDirection;
+        break;
+      case 'outerContainer':
+        config.outerContainer = value as OuterContainer;
         break;
       case 'gradientColors':
         config.gradientColors = value.split(',').filter(Boolean);
@@ -104,17 +103,14 @@ export function paramsToConfig(params: URLSearchParams): StarConfig {
       case 'fillOpacity':
       case 'strokeWidth':
       case 'curveIntensity':
-      case 'cornerRadius':
+      case 'cornerRounding':
+      case 'outerContainerPadding':
       case 'glowRadius':
       case 'shadowBlur':
       case 'shadowOffsetX':
       case 'shadowOffsetY':
-      case 'altLengthRatio':
-      case 'spiralTwist':
       case 'petalWidth':
       case 'petalCurve':
-      case 'fractalDepth':
-      case 'interlaceGap':
       case 'exportWidth':
       case 'exportHeight':
         (config as unknown as Record<string, unknown>)[longKey] = parseFloat(value);

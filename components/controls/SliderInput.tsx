@@ -5,6 +5,7 @@ import { Slider } from '@/components/ui/slider';
 
 interface SliderInputProps {
   label: string;
+  tooltip?: string;
   value: number;
   defaultValue: number;
   min: number;
@@ -16,6 +17,7 @@ interface SliderInputProps {
 
 export default function SliderInput({
   label,
+  tooltip,
   value,
   defaultValue,
   min,
@@ -46,7 +48,12 @@ export default function SliderInput({
   return (
     <div className="group">
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[11px] font-medium text-[#6B7280] tracking-wide uppercase select-none">{label}</span>
+        <span className="text-[11px] font-medium text-[#6B7280] tracking-wide uppercase select-none flex items-center gap-1">
+            {label}
+            {tooltip && (
+              <span title={tooltip} className="text-[#D1D5DB] hover:text-[#9CA3AF] transition-colors cursor-default text-[10px] leading-none">ⓘ</span>
+            )}
+          </span>
         <div className="flex items-center gap-1">
           <input
             type="text"

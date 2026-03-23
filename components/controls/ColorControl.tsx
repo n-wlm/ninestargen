@@ -18,11 +18,16 @@ export function ColorControl({ label, value, onChange, showOpacity, opacity = 1,
         <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">{label}</span>
       )}
       <div className="flex items-center gap-2">
-        <label className="relative cursor-pointer">
+        <label className="relative cursor-pointer group/swatch">
           <span
             className="block w-7 h-7 rounded-md border border-black/10 shadow-sm"
             style={{ background: value }}
           />
+          <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/swatch:opacity-100 transition-opacity">
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="drop-shadow-sm">
+              <path d="M6.5 1.5l2 2-5 5H1.5v-2l5-5z" stroke="white" strokeWidth="1.2" strokeLinejoin="round"/>
+            </svg>
+          </span>
           <input
             type="color"
             value={value}
@@ -64,7 +69,7 @@ const DIR_OPTIONS: { value: StarConfig['gradientDirection']; label: string }[] =
   { value: 'to-top-right', label: '↗' },
 ];
 
-export function GradientBuilder({ colors, onChange, direction, onDirectionChange }: GradientBuilderProps) {
+export function GradientBuilder({ colors, onChange, direction, onDirectionChange, isRadial = false }: GradientBuilderProps & { isRadial?: boolean }) {
   const updateColor = (i: number, color: string) => {
     const next = [...colors];
     next[i] = color;
@@ -73,7 +78,8 @@ export function GradientBuilder({ colors, onChange, direction, onDirectionChange
 
   return (
     <div className="flex flex-col gap-2.5">
-      {/* Direction */}
+      {/* Direction — linear only */}
+      {!isRadial && (
       <div className="flex items-center gap-1">
         {DIR_OPTIONS.map((d) => (
           <button
@@ -89,6 +95,7 @@ export function GradientBuilder({ colors, onChange, direction, onDirectionChange
           </button>
         ))}
       </div>
+      )}
 
       {/* Preview bar */}
       <div
@@ -100,11 +107,16 @@ export function GradientBuilder({ colors, onChange, direction, onDirectionChange
       <div className="flex flex-col gap-1.5">
         {colors.map((color, i) => (
           <div key={i} className="flex items-center gap-2">
-            <label className="relative cursor-pointer">
+            <label className="relative cursor-pointer group/swatch">
               <span
                 className="block w-6 h-6 rounded border border-black/10 shadow-sm"
                 style={{ background: color }}
               />
+              <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/swatch:opacity-100 transition-opacity">
+                <svg width="9" height="9" viewBox="0 0 10 10" fill="none" className="drop-shadow-sm">
+                  <path d="M6.5 1.5l2 2-5 5H1.5v-2l5-5z" stroke="white" strokeWidth="1.2" strokeLinejoin="round"/>
+                </svg>
+              </span>
               <input
                 type="color"
                 value={color}

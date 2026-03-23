@@ -4,9 +4,10 @@ import { useId } from 'react';
 import type { StarConfig } from '@/types/star';
 import { buildStarPaths, buildInnerPolygonPath } from '@/lib/star-geometry';
 
-const VIEWBOX_SIZE = 500;
+const VIEWBOX_SIZE = 600;
 const CX = VIEWBOX_SIZE / 2;
 const CY = VIEWBOX_SIZE / 2;
+const TWO_PI = Math.PI * 2;
 
 interface StarPreviewProps {
   config: StarConfig;
@@ -21,6 +22,14 @@ function dashArray(dash: StarConfig['strokeDash']): string | undefined {
   return undefined;
 }
 
+function ngon9Path(cx: number, cy: number, r: number, rot: number): string {
+  const pts = Array.from({ length: 9 }, (_, i) => {
+    const a = rot + (TWO_PI * i) / 9;
+    return `${(cx + r * Math.cos(a)).toFixed(3)},${(cy + r * Math.sin(a)).toFixed(3)}`;
+  });
+  return `M ${pts.join(' L ')} Z`;
+}
+
 export default function StarPreview({ config, className, style, svgRef }: StarPreviewProps) {
   const id = useId().replace(/:/g, '_');
   const gradId = `grad_${id}`;
@@ -30,20 +39,14 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
   const paths = buildStarPaths(CX, CY, config);
   const innerPath = config.showInnerPolygon ? buildInnerPolygonPath(CX, CY, config) : null;
 
-  // Determine fill attribute
+  const isOverlapping = config.starType === '3-triangles';
+
   function getFill(index: number): string {
     if (config.fillType === 'none') return 'none';
     if (config.fillType === 'solid') return config.fillColor;
-
-    // For concentric, each ring gets its own gradient stop color
-    if (config.starType === 'concentric') {
-      const stops = config.gradientColors;
-      return stops[index % stops.length] ?? config.fillColor;
-    }
     return `url(#${gradId})`;
   }
 
-  // Gradient angle
   function gradientCoords() {
     const dir = config.gradientDirection;
     if (dir === 'to-bottom') return { x1: '0%', y1: '0%', x2: '0%', y2: '100%' };
@@ -53,9 +56,6 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
     return { x1: '0%', y1: '0%', x2: '100%', y2: '100%' };
   }
 
-  const isOverlapping = ['3-triangles', '3-rhombuses', '3-squares'].includes(config.starType);
-  const isMultiPath = isOverlapping || config.starType === 'compound' || config.starType === 'concentric' || config.starType === 'mandala';
-
   const strokeProps = {
     stroke: config.strokeWidth > 0 ? config.strokeColor : 'none',
     strokeWidth: config.strokeWidth,
@@ -63,6 +63,13 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
   };
+
+  // Outer container
+  const containerR = config.outerRadius + config.outerContainerPadding;
+  const containerFill = config.outerContainerFill === 'none' ? 'none' : config.outerContainerFill;
+  const containerStroke = config.outerContainerColor;
+  const containerStrokeW = 1.5;
+  const baseRot = (config.rotation * Math.PI) / 180;
 
   return (
     <svg
@@ -75,33 +82,23 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
       role="img"
     >
       <defs>
-        {/* Gradient */}
         {config.fillType === 'linear-gradient' && (
           <linearGradient id={gradId} {...gradientCoords()} gradientUnits="objectBoundingBox">
             {config.gradientColors.map((color, i) => (
-              <stop
-                key={i}
-                offset={`${(i / (config.gradientColors.length - 1)) * 100}%`}
-                stopColor={color}
-              />
+              <stop key={i} offset={`${(i / (config.gradientColors.length - 1)) * 100}%`} stopColor={color} />
             ))}
           </linearGradient>
         )}
         {config.fillType === 'radial-gradient' && (
           <radialGradient id={gradId} cx="50%" cy="50%" r="50%" gradientUnits="objectBoundingBox">
             {config.gradientColors.map((color, i) => (
-              <stop
-                key={i}
-                offset={`${(i / (config.gradientColors.length - 1)) * 100}%`}
-                stopColor={color}
-              />
+              <stop key={i} offset={`${(i / (config.gradientColors.length - 1)) * 100}%`} stopColor={color} />
             ))}
           </radialGradient>
         )}
 
-        {/* Glow / Shadow filter */}
         {hasFilter && (
-          <filter id={filterId} x="-30%" y="-30%" width="160%" height="160%">
+          <filter id={filterId} x="-40%" y="-40%" width="180%" height="180%">
             {config.glowRadius > 0 && (
               <>
                 <feGaussianBlur in="SourceGraphic" stdDeviation={config.glowRadius} result="blur" />
@@ -125,9 +122,31 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
         )}
       </defs>
 
-      {/* Background */}
       {config.bgColor !== 'transparent' && (
         <rect width={VIEWBOX_SIZE} height={VIEWBOX_SIZE} fill={config.bgColor} />
+      )}
+
+      {/* Outer container (behind star) */}
+      {config.outerContainer !== 'none' && (
+        <>
+          {config.outerContainer === 'circle' && (
+            <circle cx={CX} cy={CY} r={containerR} fill={containerFill} stroke={containerStroke} strokeWidth={containerStrokeW} />
+          )}
+          {config.outerContainer === '9-gon' && (
+            <path d={ngon9Path(CX, CY, containerR, baseRot)} fill={containerFill} stroke={containerStroke} strokeWidth={containerStrokeW} />
+          )}
+          {config.outerContainer === 'square' && (
+            <rect
+              x={CX - containerR}
+              y={CY - containerR}
+              width={containerR * 2}
+              height={containerR * 2}
+              fill={containerFill}
+              stroke={containerStroke}
+              strokeWidth={containerStrokeW}
+            />
+          )}
+        </>
       )}
 
       {/* Star paths */}
@@ -137,22 +156,12 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
         filter={hasFilter ? `url(#${filterId})` : undefined}
       >
         {paths.map((d, i) => (
-          <path
-            key={i}
-            d={d}
-            fill={getFill(i)}
-            {...strokeProps}
-          />
+          <path key={i} d={d} fill={getFill(i)} {...strokeProps} />
         ))}
       </g>
 
-      {/* Inner polygon overlay */}
       {innerPath && (
-        <path
-          d={innerPath}
-          fill={config.innerPolygonColor}
-          stroke="none"
-        />
+        <path d={innerPath} fill={config.innerPolygonColor} stroke="none" />
       )}
     </svg>
   );
