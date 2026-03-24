@@ -4,7 +4,7 @@ import PresetCard from '@/components/gallery/PresetCard';
 import { PRESETS, PRESET_CATEGORIES } from '@/lib/presets';
 
 export const metadata: Metadata = {
-  title: "Star Gallery | Nine-Pointed Star Presets | NineStarGen",
+  title: "Star Gallery | Nine-Pointed Star Presets | ninestar.app",
   description:
     "Browse and download ready-made nine-pointed star designs. Click any preset to customize it in the editor. Classic Bahá'í stars, modern gradients, geometric patterns, and artistic styles.",
 };

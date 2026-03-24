@@ -273,8 +273,6 @@ export function buildStarPaths(cx: number, cy: number, cfg: StarConfig): string[
     case '3-triangles':    return build3Triangles(cx, cy, cfg);
     case 'spike':          return buildSpike(cx, cy, cfg);
     case 'kite':           return buildKite(cx, cy, cfg);
-    case 'stellated':      return buildStellated(cx, cy, cfg);
-    case 'explosion':      return buildExplosion(cx, cy, cfg);
     case 'petal':          return buildPetal(cx, cy, cfg);
     case 'curved-outline': return buildCurvedOutline(cx, cy, cfg);
     default:               return build9_2(cx, cy, cfg);

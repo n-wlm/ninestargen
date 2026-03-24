@@ -68,15 +68,6 @@ export const PRESETS: Preset[] = [
     bgColor: 'transparent',
     innerRadiusRatio: 0.45,
   }),
-  preset('rainbow-gradient', 'Rainbow', 'decorative', {
-    starType: '9-2',
-    fillType: 'linear-gradient',
-    gradientColors: ['#EF4444', '#F97316', '#EAB308', '#22C55E', '#3B82F6', '#8B5CF6'],
-    gradientDirection: 'to-bottom-right',
-    strokeWidth: 0,
-    bgColor: '#FFFFFF',
-    innerRadiusRatio: 0.36,
-  }),
   preset('crystalline', 'Crystalline', 'geometric', {
     starType: 'spike',
     fillType: 'linear-gradient',
@@ -106,14 +97,6 @@ export const PRESETS: Preset[] = [
     curveIntensity: 0.65,
     innerRadiusRatio: 0.42,
   }),
-  preset('explosion-burst', 'Explosion', 'artistic', {
-    starType: 'explosion',
-    fillType: 'linear-gradient',
-    gradientColors: ['#FDE047', '#F97316', '#EF4444'],
-    strokeWidth: 0,
-    bgColor: '#0F172A',
-    innerRadiusRatio: 0.15,
-  }),
   preset('diamond-grid', 'Diamond Grid', 'geometric', {
     starType: 'kite',
     fillType: 'solid',
@@ -123,14 +106,6 @@ export const PRESETS: Preset[] = [
     strokeWidth: 1.5,
     bgColor: '#EFF6FF',
     innerRadiusRatio: 0.38,
-  }),
-preset('stellated-outline', 'Stellated', 'geometric', {
-    starType: 'stellated',
-    fillType: 'none',
-    strokeColor: '#0EA5E9',
-    strokeWidth: 2,
-    bgColor: '#F0F9FF',
-    innerRadiusRatio: 0.55,
   }),
   preset('indigo-solid', 'Indigo', 'modern', {
     starType: '9-2',

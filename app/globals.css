@@ -129,6 +129,17 @@
   }
 }
 
+/* ── Custom keyframe animations ──────────────────────────── */
+@keyframes mesh-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
 /* ── Native range slider ──────────────────────────────────── */
 .nsg-slider {
   -webkit-appearance: none;

@@ -4,8 +4,6 @@ export type StarType =
   | '3-triangles'
   | 'spike'
   | 'kite'
-  | 'stellated'
-  | 'explosion'
   | 'petal'
   | 'curved-outline';
 
@@ -119,14 +117,10 @@ export const STAR_TYPE_LABELS: Record<StarType, string> = {
   '3-triangles': 'Triple Triangle',
   spike: 'Spike Star',
   kite: 'Kite Star',
-  stellated: 'Stellated 9-gon',
-  explosion: 'Explosion',
   petal: 'Petal Rose',
   'curved-outline': 'Curved Outline',
 };
 
-export const STAR_TYPE_GROUPS: { label: string; types: StarType[] }[] = [
-  { label: 'Polygon', types: ['9-2', '9-4', '3-triangles'] },
-  { label: 'Radial',  types: ['spike', 'kite', 'stellated', 'explosion'] },
-  { label: 'Organic', types: ['petal', 'curved-outline'] },
+export const STAR_TYPES_ORDERED: StarType[] = [
+  '9-2', '9-4', '3-triangles', 'spike', 'kite', 'petal', 'curved-outline',
 ];

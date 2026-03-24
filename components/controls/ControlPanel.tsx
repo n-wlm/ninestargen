@@ -2,8 +2,9 @@
 
 import SliderInput from './SliderInput';
 import { ColorControl, GradientBuilder } from './ColorControl';
+import StarPreview from '@/components/StarPreview';
 import type { StarConfig, StarType } from '@/types/star';
-import { DEFAULT_CONFIG, STAR_TYPE_LABELS, STAR_TYPE_GROUPS } from '@/types/star';
+import { DEFAULT_CONFIG, STAR_TYPE_LABELS, STAR_TYPES_ORDERED } from '@/types/star';
 import { PALETTES } from '@/lib/color-palettes';
 
 interface ControlPanelProps {
@@ -71,28 +72,55 @@ function Toggle({ label, value, onChange }: { label: string; value: boolean; onC
   );
 }
 
-function StarTypeGrid({ value, onChange }: { value: StarType; onChange: (t: StarType) => void }) {
+// Minimal config used only for corner previews — neutral indigo, no bg, no stroke
+const PREVIEW_BASE: StarConfig = {
+  ...DEFAULT_CONFIG,
+  fillType: 'solid',
+  fillColor: '#5E6AD2',
+  fillOpacity: 1,
+  strokeWidth: 0,
+  bgColor: 'transparent',
+  outerContainer: 'none',
+  showInnerPolygon: false,
+  glowRadius: 0,
+  shadowBlur: 0,
+  outerRadius: 220,
+  innerRadiusRatio: 0.38,
+  curveIntensity: 0,
+  cornerRounding: 0,
+  rotation: -90,
+};
+
+function StarCornerPreview({ starType }: { starType: StarType }) {
+  const cfg: StarConfig = { ...PREVIEW_BASE, starType };
+  // Render star at 2× size, clip to top-left quarter
   return (
-    <div className="flex flex-col gap-3 lg:gap-2.5">
-      {STAR_TYPE_GROUPS.map(({ label, types }) => (
-        <div key={label}>
-          <p className="text-[11px] lg:text-[10px] text-[#9CA3AF] mb-2 lg:mb-1.5">{label}</p>
-          <div className="grid grid-cols-2 gap-1.5 lg:gap-1">
-            {types.map((t) => (
-              <button
-                key={t}
-                onClick={() => onChange(t)}
-                className={`text-left px-3 py-2.5 lg:px-2.5 lg:py-1.5 rounded-md text-[13px] lg:text-[11px] font-medium transition-all ${
-                  value === t
-                    ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
-                    : 'text-[#374151] hover:bg-[#F9FAFB] hover:text-[#111827]'
-                }`}
-              >
-                {STAR_TYPE_LABELS[t]}
-              </button>
-            ))}
-          </div>
-        </div>
+    <div className="shrink-0 overflow-hidden rounded-sm" style={{ width: 28, height: 28 }}>
+      <div style={{ width: 56, height: 56 }}>
+        <StarPreview config={cfg} className="w-full h-full" />
+      </div>
+    </div>
+  );
+}
+
+function StarTypeList({ value, onChange }: { value: StarType; onChange: (t: StarType) => void }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      {STAR_TYPES_ORDERED.map((t) => (
+        <button
+          key={t}
+          onClick={() => onChange(t)}
+          className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md transition-all text-left ${
+            value === t
+              ? 'bg-[#EEF2FF] ring-1 ring-inset ring-[#C7D2FE]'
+              : 'hover:bg-[#F9FAFB]'
+          }`}
+        >
+          <StarCornerPreview starType={t} />
+          <span className={`text-[13px] lg:text-[11px] font-medium ${value === t ? 'text-[#5E6AD2]' : 'text-[#374151]'}`}>
+            {STAR_TYPE_LABELS[t]}
+          </span>
+        </button>
       ))}
     </div>
   );
@@ -139,7 +167,7 @@ const OUTER_CONTAINERS: { value: StarConfig['outerContainer']; label: string }[]
 const USES_CURVE = new Set(['9-2', '9-4', '3-triangles', 'spike', 'curved-outline']);
 const USES_FILLRULE = new Set(['3-triangles']);
 const USES_PETAL = new Set(['petal']);
-const USES_ROUNDING = new Set(['9-2', '9-4', '3-triangles', 'spike', 'kite', 'stellated', 'explosion']);
+const USES_ROUNDING = new Set(['9-2', '9-4', '3-triangles', 'spike', 'kite']);
 
 // ── Main Panel ─────────────────────────────────────────────────────────────────
 
@@ -165,7 +193,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
 
         {/* STAR TYPE */}
         <Section title="Type">
-          <StarTypeGrid value={config.starType} onChange={(t) => update('starType', t)} />
+          <StarTypeList value={config.starType} onChange={(t) => update('starType', t)} />
         </Section>
 
         {/* SHAPE */}
@@ -271,39 +299,6 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
           )}
         </Section>
 
-        {/* FILL */}
-        <Section title="Fill">
-          {/* Palette quick-pick */}
-          <PalettePicker onSelect={(p) => {
-            update('fillColor', p.fillColor);
-            update('gradientColors', p.gradientColors);
-          }} />
-          <SegmentedControl
-            options={FILL_TYPES}
-            value={config.fillType}
-            onChange={(v) => update('fillType', v)}
-          />
-          {config.fillType === 'solid' && (
-            <ColorControl
-              label="Color"
-              value={config.fillColor}
-              onChange={(v) => update('fillColor', v)}
-              showOpacity
-              opacity={config.fillOpacity}
-              onOpacityChange={(v) => update('fillOpacity', v)}
-            />
-          )}
-          {(config.fillType === 'linear-gradient' || config.fillType === 'radial-gradient') && (
-            <GradientBuilder
-              colors={config.gradientColors}
-              onChange={(colors) => update('gradientColors', colors)}
-              direction={config.gradientDirection}
-              onDirectionChange={(d) => update('gradientDirection', d)}
-              isRadial={config.fillType === 'radial-gradient'}
-            />
-          )}
-        </Section>
-
         {/* STROKE */}
         <Section title="Stroke">
           <SliderInput
@@ -330,6 +325,36 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
                 onChange={(v) => update('strokeDash', v)}
               />
             </>
+          )}
+        </Section>
+
+        {/* FILL */}
+        <Section title="Fill">
+          {/* Palette quick-pick */}
+          <PalettePicker onSelect={(p) => {
+            update('fillColor', p.fillColor);
+            update('gradientColors', p.gradientColors);
+          }} />
+          <SegmentedControl
+            options={FILL_TYPES}
+            value={config.fillType}
+            onChange={(v) => update('fillType', v)}
+          />
+          {config.fillType === 'solid' && (
+            <ColorControl
+              label="Color"
+              value={config.fillColor}
+              onChange={(v) => update('fillColor', v)}
+            />
+          )}
+          {(config.fillType === 'linear-gradient' || config.fillType === 'radial-gradient') && (
+            <GradientBuilder
+              colors={config.gradientColors}
+              onChange={(colors) => update('gradientColors', colors)}
+              direction={config.gradientDirection}
+              onDirectionChange={(d) => update('gradientDirection', d)}
+              isRadial={config.fillType === 'radial-gradient'}
+            />
           )}
         </Section>
 
@@ -397,22 +422,6 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
                 />
               </div>
             </>
-          )}
-        </Section>
-
-        {/* INNER POLYGON */}
-        <Section title="Inner Polygon">
-          <Toggle
-            label="Show inner 9-gon"
-            value={config.showInnerPolygon}
-            onChange={(v) => update('showInnerPolygon', v)}
-          />
-          {config.showInnerPolygon && (
-            <ColorControl
-              label="Color"
-              value={config.innerPolygonColor}
-              onChange={(v) => update('innerPolygonColor', v)}
-            />
           )}
         </Section>
 
