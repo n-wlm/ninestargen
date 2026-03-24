@@ -87,15 +87,13 @@ export const PRESETS: Preset[] = [
     bgColor: '#FEF3C7',
     fillRule: 'evenodd',
   }),
-  preset('flower-bloom', 'Flower Bloom', 'decorative', {
-    starType: 'curved-outline',
-    fillType: 'radial-gradient',
-    gradientColors: ['#FDF4FF', '#F0ABFC', '#A855F7'],
-    strokeColor: '#7E22CE',
-    strokeWidth: 1,
+  preset('linked-petals', 'Linked Petals', 'geometric', {
+    starType: 'kite',
+    innerRadiusRatio: 0.85,
+    fillType: 'solid',
+    fillColor: '#111827',
+    strokeWidth: 0,
     bgColor: '#FFFFFF',
-    curveIntensity: 0.65,
-    innerRadiusRatio: 0.42,
   }),
   preset('diamond-grid', 'Diamond Grid', 'geometric', {
     starType: 'kite',

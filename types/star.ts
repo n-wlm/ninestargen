@@ -4,8 +4,7 @@ export type StarType =
   | '3-triangles'
   | 'spike'
   | 'kite'
-  | 'petal'
-  | 'curved-outline';
+  | 'petal';
 
 export type FillType = 'solid' | 'linear-gradient' | 'radial-gradient' | 'none';
 export type StrokeDash = 'solid' | 'dashed' | 'dotted';
@@ -77,14 +76,14 @@ export const DEFAULT_CONFIG: StarConfig = {
   cornerRounding: 0,
   fillRule: 'nonzero',
 
-  fillType: 'solid',
+  fillType: 'none',
   fillColor: '#5E6AD2',
   gradientColors: ['#5E6AD2', '#8B5CF6', '#EC4899'],
   gradientDirection: 'to-bottom-right',
   fillOpacity: 1,
 
   strokeColor: '#4F46E5',
-  strokeWidth: 0,
+  strokeWidth: 3,
   strokeDash: 'solid',
 
   bgColor: 'transparent',
@@ -118,9 +117,8 @@ export const STAR_TYPE_LABELS: Record<StarType, string> = {
   spike: 'Spike Star',
   kite: 'Kite Star',
   petal: 'Petal Rose',
-  'curved-outline': 'Curved Outline',
 };
 
 export const STAR_TYPES_ORDERED: StarType[] = [
-  '9-2', '9-4', '3-triangles', 'spike', 'kite', 'petal', 'curved-outline',
+  '9-2', '9-4', '3-triangles', 'spike', 'kite', 'petal',
 ];

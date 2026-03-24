@@ -68,16 +68,16 @@ function PresetCard({ preset, onSelect }: { preset: Preset; onSelect: () => void
         transformStyle: 'preserve-3d',
         cursor: 'pointer',
       }}
-      className="group flex flex-col rounded-xl border border-white/10 bg-white/5 hover:border-indigo-400/40 hover:bg-white/10 transition-colors overflow-hidden"
+      className="group flex flex-col rounded-xl border border-[#E5E7EB] bg-white hover:border-[#C7D2FE] hover:bg-[#F5F7FF] transition-colors overflow-hidden shadow-sm"
     >
       {/* Star preview */}
-      <div className="aspect-square p-3 flex items-center justify-center bg-white/5">
+      <div className="aspect-square p-3 flex items-center justify-center bg-[#F9FAFB]">
         <StarPreview config={preset.config} className="w-full h-full" />
       </div>
 
       {/* Info */}
       <div className="px-2.5 py-2 flex flex-col gap-1">
-        <span className="text-[12px] font-medium text-white/90 truncate leading-tight">{preset.name}</span>
+        <span className="text-[12px] font-medium text-[#111827] truncate leading-tight">{preset.name}</span>
         <span className={`self-start text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full border ${CATEGORY_BADGE[preset.category] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
           {preset.category}
         </span>
@@ -171,7 +171,7 @@ export default function AppHeader() {
               transition={{ duration: 0.18 }}
             >
               <motion.div
-                className="bg-[#0F1117] rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto border border-white/10"
+                className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto border border-[#E5E7EB]"
                 initial={{ y: 28, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 16, opacity: 0 }}
@@ -179,24 +179,22 @@ export default function AppHeader() {
               >
 
                 {/* ── Hero section ── */}
-                <div className="relative overflow-hidden px-8 pt-8 pb-7 shrink-0">
-                  {/* Animated mesh gradient background */}
+                <div className="relative overflow-hidden px-8 pt-8 pb-7 shrink-0 border-b border-[#F3F4F6]">
+                  {/* Subtle light gradient background */}
                   <div
-                    className="absolute inset-0 opacity-30"
+                    className="absolute inset-0"
                     style={{
-                      background: 'linear-gradient(135deg, #4F46E5 0%, #1e1b4b 35%, #0f172a 60%, #312e81 100%)',
+                      background: 'linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 40%, #EEF2FF 70%, #E0E7FF 100%)',
                       backgroundSize: '300% 300%',
                       animation: 'mesh-shift 8s ease infinite',
                     }}
                   />
-                  {/* Noise overlay for texture */}
-                  <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
 
                   <div className="relative flex items-start justify-between gap-4">
                     <div>
                       {/* Eyebrow */}
                       <motion.p
-                        className="text-indigo-400 text-[11px] font-semibold uppercase tracking-widest mb-2"
+                        className="text-indigo-500 text-[11px] font-semibold uppercase tracking-widest mb-2"
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.05, duration: 0.3 }}
@@ -205,13 +203,13 @@ export default function AppHeader() {
                       </motion.p>
 
                       {/* Main heading */}
-                      <h2 className="text-white text-2xl font-bold tracking-tight leading-snug mb-1">
+                      <h2 className="text-[#111827] text-2xl font-bold tracking-tight leading-snug mb-1">
                         <SplitText text="Create stunning nine-pointed stars." delay={0.12} />
                       </h2>
 
                       {/* Sub heading */}
                       <motion.p
-                        className="text-white/50 text-[13px] mt-2 mb-4"
+                        className="text-[#6B7280] text-[13px] mt-2 mb-4"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.45, duration: 0.4 }}
@@ -236,7 +234,7 @@ export default function AppHeader() {
                               hidden: { opacity: 0, scale: 0.85 },
                               visible: { opacity: 1, scale: 1, transition: { duration: 0.25, ease: 'easeOut' } },
                             }}
-                            className="px-2.5 py-1 rounded-full border border-white/15 bg-white/8 text-white/70 text-[11px] font-medium backdrop-blur-sm"
+                            className="px-2.5 py-1 rounded-full border border-indigo-200 bg-white text-indigo-600 text-[11px] font-medium"
                           >
                             {pill}
                           </motion.span>
@@ -248,7 +246,7 @@ export default function AppHeader() {
                     <motion.button
                       onClick={closeModal}
                       aria-label="Close"
-                      className="mt-0.5 p-1.5 rounded-lg text-white/40 hover:text-white/80 hover:bg-white/10 transition-colors shrink-0"
+                      className="mt-0.5 p-1.5 rounded-lg text-[#9CA3AF] hover:text-[#374151] hover:bg-[#F3F4F6] transition-colors shrink-0"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.2 }}
@@ -279,13 +277,13 @@ export default function AppHeader() {
                 </div>
 
                 {/* ── Footer ── */}
-                <div className="px-8 py-4 border-t border-white/10 bg-white/3 shrink-0 flex items-center justify-between gap-4">
-                  <p className="text-[11px] text-white/30">
-                    Reopen anytime via <span className="text-white/50 font-medium">Templates</span> in the menu.
+                <div className="px-8 py-4 border-t border-[#F3F4F6] bg-[#F9FAFB] shrink-0 flex items-center justify-between gap-4">
+                  <p className="text-[11px] text-[#9CA3AF]">
+                    Reopen anytime via <span className="text-[#6B7280] font-medium">Templates</span> in the menu.
                   </p>
                   <motion.button
                     onClick={() => { router.push('/'); closeModal(); }}
-                    className="px-4 py-2 rounded-lg border border-white/15 bg-white/8 hover:bg-white/12 text-[12px] font-medium text-white/70 hover:text-white transition-colors shrink-0"
+                    className="px-4 py-2 rounded-lg border border-[#E5E7EB] bg-white hover:bg-[#F3F4F6] text-[12px] font-medium text-[#374151] hover:text-[#111827] transition-colors shrink-0"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
                   >

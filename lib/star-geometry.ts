@@ -155,21 +155,21 @@ function buildSpike(cx: number, cy: number, cfg: StarConfig): string[] {
 }
 
 // ── Kite Star ─────────────────────────────────────────────────────────────────
+// Each petal spans from one inter-petal midpoint to the next, meeting at the tip.
+// Adjacent petals share their side points — fully connected, no gaps or inner star.
 function buildKite(cx: number, cy: number, cfg: StarConfig): string[] {
   const R = cfg.outerRadius;
   const inner = R * cfg.innerRadiusRatio;
   const baseRot = toRad(cfg.rotation);
   const halfStep = Math.PI / N;
-  const narrow = 0.25;
   const parts: string[] = [];
   for (let i = 0; i < N; i++) {
     const tipAngle = baseRot + (TWO_PI * i) / N;
     parts.push(buildPolygonPath([
-      pt(cx, cy, R,           tipAngle),
-      pt(cx, cy, inner,       tipAngle + halfStep * narrow),
-      pt(cx, cy, inner * 0.2, tipAngle + Math.PI),
-      pt(cx, cy, inner,       tipAngle - halfStep * narrow),
-    ], cfg.cornerRounding, R, 0));
+      pt(cx, cy, inner, tipAngle - halfStep),
+      pt(cx, cy, R,     tipAngle),
+      pt(cx, cy, inner, tipAngle + halfStep),
+    ], cfg.cornerRounding, R, cfg.curveIntensity));
   }
   return [parts.join(' ')];
 }
@@ -230,33 +230,6 @@ function buildPetal(cx: number, cy: number, cfg: StarConfig): string[] {
   return [parts.join(' ')];
 }
 
-// ── Curved Outline ────────────────────────────────────────────────────────────
-function buildCurvedOutline(cx: number, cy: number, cfg: StarConfig): string[] {
-  const R = cfg.outerRadius;
-  const r = R * cfg.innerRadiusRatio;
-  const baseRot = toRad(cfg.rotation);
-  const halfStep = Math.PI / N;
-  const intensity = cfg.curveIntensity === 0 ? 0.4 : cfg.curveIntensity;
-
-  const pts: [number, number][] = [];
-  for (let i = 0; i < N; i++) {
-    const outerAngle = baseRot + (TWO_PI * i) / N;
-    pts.push(pt(cx, cy, R, outerAngle));
-    pts.push(pt(cx, cy, r, outerAngle + halfStep));
-  }
-
-  const parts = [moveTo(pts[0])];
-  for (let i = 0; i < pts.length; i++) {
-    const from = pts[i];
-    const to = pts[(i + 1) % pts.length];
-    const offset = R * intensity * 0.3;
-    const cp = perpendicularCP(from, to, offset);
-    parts.push(`Q ${fmt(cp[0])},${fmt(cp[1])} ${fmt(to[0])},${fmt(to[1])}`);
-  }
-  parts.push('Z');
-  return [parts.join(' ')];
-}
-
 // ── Inner polygon ─────────────────────────────────────────────────────────────
 export function buildInnerPolygonPath(cx: number, cy: number, cfg: StarConfig): string {
   const r = cfg.outerRadius * cfg.innerRadiusRatio * 0.95;
@@ -274,7 +247,6 @@ export function buildStarPaths(cx: number, cy: number, cfg: StarConfig): string[
     case 'spike':          return buildSpike(cx, cy, cfg);
     case 'kite':           return buildKite(cx, cy, cfg);
     case 'petal':          return buildPetal(cx, cy, cfg);
-    case 'curved-outline': return buildCurvedOutline(cx, cy, cfg);
     default:               return build9_2(cx, cy, cfg);
   }
 }
