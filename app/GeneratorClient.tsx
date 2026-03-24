@@ -37,7 +37,7 @@ function Generator() {
     <div className="flex flex-col lg:flex-row flex-1 min-h-0">
       {/* Controls sidebar */}
       <motion.aside
-        className="w-full lg:w-80 xl:w-88 shrink-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[#EAECF0] bg-white order-2 lg:order-1 h-[58vh] lg:h-full"
+        className="w-full lg:w-80 xl:w-88 flex-1 min-h-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[#EAECF0] bg-white order-2 lg:order-1 lg:flex-none lg:h-full"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.25, ease: 'easeOut' }}
@@ -53,7 +53,7 @@ function Generator() {
 
       {/* Preview canvas */}
       <motion.section
-        className="flex-1 flex items-center justify-center relative order-1 lg:order-2 min-h-[38vh] lg:min-h-0 bg-[#F7F8FA]"
+        className="shrink-0 h-[40svh] flex items-center justify-center relative order-1 lg:order-2 lg:h-auto lg:shrink lg:flex-1 lg:min-h-0 bg-[#F7F8FA]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}

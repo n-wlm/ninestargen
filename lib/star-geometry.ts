@@ -44,7 +44,7 @@ function perpendicularCP(
 
 function edgeTo(from: [number, number], to: [number, number], R: number, intensity: number): string {
   if (intensity === 0) return lineTo(to);
-  const offset = R * intensity * 0.3;
+  const offset = intensity;
   const cp = perpendicularCP(from, to, offset);
   return `Q ${fmt(cp[0])},${fmt(cp[1])} ${fmt(to[0])},${fmt(to[1])}`;
 }

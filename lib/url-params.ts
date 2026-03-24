@@ -1,4 +1,4 @@
-import type { StarConfig, StarType, FillType, StrokeDash, FillRule, GradientDirection, OuterContainer } from '@/types/star';
+import type { StarConfig, StarType, FillType, StrokeDash, GradientDirection, OuterContainer } from '@/types/star';
 import { DEFAULT_CONFIG } from '@/types/star';
 
 // Short key map to keep URLs concise
@@ -18,7 +18,6 @@ const KEY_MAP = {
   bgColor: 'bg',
   curveIntensity: 'ci',
   cornerRounding: 'cr',
-  fillRule: 'fr',
   outerContainer: 'oc',
   outerContainerPadding: 'ocp',
   outerContainerColor: 'occ',
@@ -81,9 +80,6 @@ export function paramsToConfig(params: URLSearchParams): StarConfig {
         break;
       case 'strokeDash':
         config.strokeDash = value as StrokeDash;
-        break;
-      case 'fillRule':
-        config.fillRule = value as FillRule;
         break;
       case 'gradientDirection':
         config.gradientDirection = value as GradientDirection;

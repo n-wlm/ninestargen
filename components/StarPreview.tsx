@@ -39,8 +39,6 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
   const paths = buildStarPaths(CX, CY, config);
   const innerPath = config.showInnerPolygon ? buildInnerPolygonPath(CX, CY, config) : null;
 
-  const isOverlapping = config.starType === '3-triangles';
-
   function getFill(index: number): string {
     if (config.fillType === 'none') return 'none';
     if (config.fillType === 'solid') return config.fillColor;
@@ -150,11 +148,7 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
       )}
 
       {/* Star paths */}
-      <g
-        fillRule={isOverlapping ? config.fillRule : 'nonzero'}
-        opacity={config.fillOpacity}
-        filter={hasFilter ? `url(#${filterId})` : undefined}
-      >
+      <g opacity={config.fillOpacity} filter={hasFilter ? `url(#${filterId})` : undefined}>
         {paths.map((d, i) => (
           <path key={i} d={d} fill={getFill(i)} {...strokeProps} />
         ))}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import type { StarConfig } from '@/types/star';
 import { configToParams, paramsToConfig } from '@/lib/url-params';
 import { DEFAULT_CONFIG } from '@/types/star';
@@ -10,7 +10,6 @@ export function useUrlSync(
   config: StarConfig,
   setConfig: (c: StarConfig) => void,
 ) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const isMounting = useRef(true);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -34,13 +33,13 @@ export function useUrlSync(
       const params = configToParams(config);
       const query = params.toString();
       const url = query ? `/?${query}` : '/';
-      router.replace(url, { scroll: false });
+      window.history.replaceState(null, '', url);
     }, 300);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, [config, router]);
+  }, [config]);
 }
 
 export function getConfigFromSearchParams(searchParams: URLSearchParams): StarConfig {

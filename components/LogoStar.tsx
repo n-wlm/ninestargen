@@ -37,7 +37,7 @@ export default function LogoStar() {
       style={{ transition: 'opacity 0.3s', opacity: fading ? 0 : 1 }}
       aria-hidden
     >
-      <g fillRule={cfg.fillRule}>
+      <g>
         {paths.map((d, i) => (
           <path
             key={i}

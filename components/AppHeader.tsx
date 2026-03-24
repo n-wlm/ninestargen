@@ -6,20 +6,10 @@ import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import LogoStar from '@/components/LogoStar';
 import StarPreview from '@/components/StarPreview';
-import SplitText from '@/components/ui/SplitText';
 import { PRESETS } from '@/lib/presets';
 import { configToParams } from '@/lib/url-params';
+import { normalizePresetConfig } from '@/lib/preset-normalization';
 import type { Preset } from '@/lib/presets';
-
-// ── Category badge colors (still used on cards) ────────────────────────────────
-
-const CATEGORY_BADGE: Record<string, string> = {
-  classic:    'bg-amber-50 text-amber-700 border-amber-200',
-  modern:     'bg-indigo-50 text-indigo-700 border-indigo-200',
-  decorative: 'bg-pink-50 text-pink-700 border-pink-200',
-  geometric:  'bg-blue-50 text-blue-700 border-blue-200',
-  artistic:   'bg-purple-50 text-purple-700 border-purple-200',
-};
 
 const FEATURE_PILLS = ['9 star styles', 'Gradients', 'SVG · PNG · JPG', 'Free & instant'];
 
@@ -47,20 +37,22 @@ function useTilt(maxDeg = 6) {
 
 function PresetCard({ preset, onSelect }: { preset: Preset; onSelect: () => void }) {
   const { ref, tilt, handleMove, handleLeave } = useTilt(5);
+  const previewConfig = normalizePresetConfig(preset.config);
 
   return (
     <motion.div
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
       whileHover={{ scale: 1.025 }}
       whileTap={{ scale: 0.97 }}
       ref={ref}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
       onClick={onSelect}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') onSelect();
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={preset.name}
       style={{
         perspective: 800,
         rotateX: tilt.x,
@@ -68,19 +60,16 @@ function PresetCard({ preset, onSelect }: { preset: Preset; onSelect: () => void
         transformStyle: 'preserve-3d',
         cursor: 'pointer',
       }}
-      className="group flex flex-col rounded-xl border border-[#E5E7EB] bg-white hover:border-[#C7D2FE] hover:bg-[#F5F7FF] transition-colors overflow-hidden shadow-sm"
+      className="group flex flex-col rounded-xl border border-[#E5E7EB] bg-white hover:border-[#C7D2FE] transition-colors overflow-hidden shadow-sm hover:shadow-md"
     >
       {/* Star preview */}
-      <div className="aspect-square p-3 flex items-center justify-center bg-[#F9FAFB]">
-        <StarPreview config={preset.config} className="w-full h-full" />
+      <div className="aspect-square p-3 flex items-center justify-center bg-white rounded-lg overflow-hidden">
+        <StarPreview config={previewConfig} className="w-full h-full rounded-lg" />
       </div>
 
-      {/* Info */}
-      <div className="px-2.5 py-2 flex flex-col gap-1">
+      {/* Name only */}
+      <div className="px-2.5 py-2">
         <span className="text-[12px] font-medium text-[#111827] truncate leading-tight">{preset.name}</span>
-        <span className={`self-start text-[9px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-full border ${CATEGORY_BADGE[preset.category] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-          {preset.category}
-        </span>
       </div>
     </motion.div>
   );
@@ -106,12 +95,13 @@ export default function AppHeader() {
   }, []);
 
   const selectPreset = useCallback((preset: Preset) => {
+    const normalizedConfig = normalizePresetConfig(preset.config);
     if (pathname === '/') {
-      window.dispatchEvent(new CustomEvent('nsg:apply-preset', { detail: preset.config }));
-      const params = configToParams(preset.config).toString();
+      window.dispatchEvent(new CustomEvent('nsg:apply-preset', { detail: normalizedConfig }));
+      const params = configToParams(normalizedConfig).toString();
       router.replace(params ? `/?${params}` : '/', { scroll: false });
     } else {
-      const params = configToParams(preset.config).toString();
+      const params = configToParams(normalizedConfig).toString();
       router.push(params ? `/?${params}` : '/');
     }
     closeModal();
@@ -185,8 +175,6 @@ export default function AppHeader() {
                     className="absolute inset-0"
                     style={{
                       background: 'linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 40%, #EEF2FF 70%, #E0E7FF 100%)',
-                      backgroundSize: '300% 300%',
-                      animation: 'mesh-shift 8s ease infinite',
                     }}
                   />
 
@@ -204,7 +192,7 @@ export default function AppHeader() {
 
                       {/* Main heading */}
                       <h2 className="text-[#111827] text-2xl font-bold tracking-tight leading-snug mb-1">
-                        <SplitText text="Create stunning nine-pointed stars." delay={0.12} />
+                        Select a template to get started.
                       </h2>
 
                       {/* Sub heading */}
@@ -263,15 +251,8 @@ export default function AppHeader() {
                 {/* ── Preset grid ── */}
                 <div className="flex-1 overflow-y-auto min-h-0 px-8 py-6">
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
-                    {PRESETS.map((preset, i) => (
-                      <motion.div
-                        key={preset.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: i * 0.025, duration: 0.22 }}
-                      >
-                        <PresetCard preset={preset} onSelect={() => selectPreset(preset)} />
-                      </motion.div>
+                    {PRESETS.map((preset) => (
+                      <PresetCard key={preset.id} preset={preset} onSelect={() => selectPreset(preset)} />
                     ))}
                   </div>
                 </div>

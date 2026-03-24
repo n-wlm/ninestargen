@@ -93,12 +93,9 @@ const PREVIEW_BASE: StarConfig = {
 
 function StarCornerPreview({ starType }: { starType: StarType }) {
   const cfg: StarConfig = { ...PREVIEW_BASE, starType };
-  // Render star at 2× size, clip to top-left quarter
   return (
-    <div className="shrink-0 overflow-hidden rounded-sm" style={{ width: 28, height: 28 }}>
-      <div style={{ width: 56, height: 56 }}>
-        <StarPreview config={cfg} className="w-full h-full" />
-      </div>
+    <div className="shrink-0 rounded-sm" style={{ width: 28, height: 28 }}>
+      <StarPreview config={cfg} className="w-full h-full" />
     </div>
   );
 }
@@ -164,12 +161,12 @@ const OUTER_CONTAINERS: { value: StarConfig['outerContainer']; label: string }[]
   { value: 'square', label: 'Square' },
 ];
 
-const USES_CURVE = new Set(['9-2', '9-4', '3-triangles', 'spike', 'curved-outline']);
-const USES_FILLRULE = new Set(['3-triangles']);
-const USES_PETAL = new Set(['petal']);
-const USES_ROUNDING = new Set(['9-2', '9-4', '3-triangles', 'spike', 'kite']);
-
 // ── Main Panel ─────────────────────────────────────────────────────────────────
+
+const NO_INNER_RATIO = new Set(['9-2', '9-4']);
+const NO_CURVE = new Set(['petal']);
+const NO_ROUNDING = new Set(['petal']);
+const NO_PETAL = new Set(['9-2', '9-4', '3-triangles', 'spike', 'kite']);
 
 export default function ControlPanel({ config, update, onReset }: ControlPanelProps) {
   const t = config.starType;
@@ -208,19 +205,18 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
             step={1}
             onChange={(v) => update('outerRadius', v)}
           />
-          {!['9-2', '9-4'].includes(t) && (
-            <SliderInput
-              label="Inner Ratio"
-              tooltip="Size of the inner vertices relative to outer radius"
-              value={config.innerRadiusRatio}
-              defaultValue={D.innerRadiusRatio}
-              min={0.1}
-              max={0.9}
-              step={0.01}
-              format={(v) => v.toFixed(2)}
-              onChange={(v) => update('innerRadiusRatio', v)}
-            />
-          )}
+          <SliderInput
+            label="Inner Ratio"
+            tooltip="Size of the inner vertices relative to outer radius"
+            value={config.innerRadiusRatio}
+            defaultValue={D.innerRadiusRatio}
+            min={0.1}
+            max={0.9}
+            step={0.01}
+            format={(v) => v.toFixed(2)}
+            onChange={(v) => update('innerRadiusRatio', v)}
+            disabled={NO_INNER_RATIO.has(t)}
+          />
           <SliderInput
             label="Rotation"
             tooltip="Rotate the star around its center"
@@ -231,72 +227,56 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
             step={1}
             format={(v) => `${v}°`}
             onChange={(v) => update('rotation', v)}
+            resetLabel="Set to default"
           />
-          {USES_CURVE.has(t) && (
-            <SliderInput
-              label="Curve"
-              tooltip="Bend edges inward (negative) or outward (positive)"
-              value={config.curveIntensity}
-              defaultValue={D.curveIntensity}
-              min={-1}
-              max={1}
-              step={0.01}
-              format={(v) => `${Math.round(v * 100)}%`}
-              onChange={(v) => update('curveIntensity', v)}
-            />
-          )}
-          {USES_ROUNDING.has(t) && (
-            <SliderInput
-              label="Corner Rounding"
-              tooltip="Round the sharp tips of star points"
-              value={config.cornerRounding}
-              defaultValue={D.cornerRounding}
-              min={0}
-              max={1}
-              step={0.01}
-              format={(v) => `${Math.round(v * 100)}%`}
-              onChange={(v) => update('cornerRounding', v)}
-            />
-          )}
-          {USES_FILLRULE.has(t) && (
-            <div>
-              <p className="text-[10px] text-[#9CA3AF] mb-1.5">Overlap</p>
-              <SegmentedControl
-                options={[
-                  { value: 'evenodd' as const, label: 'Cut-out' },
-                  { value: 'nonzero' as const, label: 'Filled' },
-                ]}
-                value={config.fillRule}
-                onChange={(v) => update('fillRule', v)}
-              />
-            </div>
-          )}
-          {USES_PETAL.has(t) && (
-            <>
-              <SliderInput
-                label="Petal Width"
-                tooltip="Controls how wide each petal is"
-                value={config.petalWidth}
-                defaultValue={D.petalWidth}
-                min={0.1}
-                max={1}
-                step={0.01}
-                format={(v) => `${Math.round(v * 100)}%`}
-                onChange={(v) => update('petalWidth', v)}
-              />
-              <SliderInput
-                label="Petal Curve"
-                tooltip="Controls the curvature of each petal"
-                value={config.petalCurve}
-                defaultValue={D.petalCurve}
-                min={0}
-                max={1}
-                step={0.01}
-                format={(v) => `${Math.round(v * 100)}%`}
-                onChange={(v) => update('petalCurve', v)}
-              />
-            </>
-          )}
+          <SliderInput
+            label="Curve Radius"
+            tooltip="Bend edges inward (negative) or outward (positive)"
+            value={config.curveIntensity}
+            defaultValue={D.curveIntensity}
+            min={-250}
+            max={250}
+            step={1}
+            format={(v) => String(Math.round(v))}
+            onChange={(v) => update('curveIntensity', v)}
+            disabled={NO_CURVE.has(t)}
+          />
+          <SliderInput
+            label="Corner Rounding"
+            tooltip="Round the sharp tips of star points"
+            value={config.cornerRounding}
+            defaultValue={D.cornerRounding}
+            min={0}
+            max={1}
+            step={0.01}
+            format={(v) => `${Math.round(v * 100)}%`}
+            onChange={(v) => update('cornerRounding', v)}
+            disabled={NO_ROUNDING.has(t)}
+          />
+          <SliderInput
+            label="Petal Width"
+            tooltip="Controls how wide each petal is"
+            value={config.petalWidth}
+            defaultValue={D.petalWidth}
+            min={0.1}
+            max={1}
+            step={0.01}
+            format={(v) => `${Math.round(v * 100)}%`}
+            onChange={(v) => update('petalWidth', v)}
+            disabled={NO_PETAL.has(t)}
+          />
+          <SliderInput
+            label="Petal Curve"
+            tooltip="Controls the curvature of each petal"
+            value={config.petalCurve}
+            defaultValue={D.petalCurve}
+            min={0}
+            max={1}
+            step={0.01}
+            format={(v) => `${Math.round(v * 100)}%`}
+            onChange={(v) => update('petalCurve', v)}
+            disabled={NO_PETAL.has(t)}
+          />
         </Section>
 
         {/* STROKE */}

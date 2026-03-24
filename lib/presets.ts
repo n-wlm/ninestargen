@@ -19,7 +19,6 @@ export const PRESETS: Preset[] = [
     strokeColor: '#C5961E',
     strokeWidth: 3,
     bgColor: '#FFFFFF',
-    fillRule: 'evenodd',
     outerRadius: 210,
     innerRadiusRatio: 0.45,
   }),
@@ -28,8 +27,9 @@ export const PRESETS: Preset[] = [
     fillType: 'solid',
     fillColor: '#0F172A',
     strokeWidth: 0,
-    bgColor: '#FFFFFF',
     innerRadiusRatio: 0.35,
+    curveIntensity: 29,
+    cornerRounding: 0.03,
   }),
   preset('sunset-gradient', 'Sunset Gradient', 'modern', {
     starType: '9-2',
@@ -63,9 +63,11 @@ export const PRESETS: Preset[] = [
   preset('outline-enneagram', 'Outline Enneagram', 'geometric', {
     starType: '9-4',
     fillType: 'none',
-    strokeColor: '#6366F1',
+    fillColor: '#111827',
+    gradientColors: ['#374151', '#111827'],
+    strokeColor: '#000000',
     strokeWidth: 2,
-    bgColor: 'transparent',
+    curveIntensity: -100,
     innerRadiusRatio: 0.45,
   }),
   preset('crystalline', 'Crystalline', 'geometric', {
@@ -85,7 +87,6 @@ export const PRESETS: Preset[] = [
     strokeColor: '#78350F',
     strokeWidth: 2,
     bgColor: '#FEF3C7',
-    fillRule: 'evenodd',
   }),
   preset('linked-petals', 'Linked Petals', 'geometric', {
     starType: 'kite',
@@ -105,12 +106,23 @@ export const PRESETS: Preset[] = [
     bgColor: '#EFF6FF',
     innerRadiusRatio: 0.38,
   }),
-  preset('indigo-solid', 'Indigo', 'modern', {
-    starType: '9-2',
+  preset('indigo-solid', 'Leafburst', 'modern', {
+    starType: 'spike',
     fillType: 'solid',
-    fillColor: '#5E6AD2',
+    fillColor: '#10B981',
+    gradientColors: ['#10B981', '#059669'],
     strokeWidth: 0,
     bgColor: 'transparent',
+    innerRadiusRatio: 0.34,
+    curveIntensity: 121,
+  }),
+  preset('golden-kite', 'Golden Kite', 'decorative', {
+    starType: 'kite',
+    fillType: 'radial-gradient',
+    fillColor: '#F59E0B',
+    gradientColors: ['#F59E0B', '#D97706'],
+    strokeWidth: 0,
+    cornerRounding: 1,
   }),
 ];
 

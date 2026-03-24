@@ -8,7 +8,6 @@ export type StarType =
 
 export type FillType = 'solid' | 'linear-gradient' | 'radial-gradient' | 'none';
 export type StrokeDash = 'solid' | 'dashed' | 'dotted';
-export type FillRule = 'evenodd' | 'nonzero';
 export type GradientDirection = 'to-bottom' | 'to-right' | 'to-bottom-right' | 'to-top-right';
 export type OuterContainer = 'none' | '9-gon' | 'circle' | 'square';
 
@@ -22,7 +21,6 @@ export interface StarConfig {
   // --- Shape modifiers ---
   curveIntensity: number;     // -1–1
   cornerRounding: number;     // 0–1 (rounds sharp tips)
-  fillRule: FillRule;
 
   // --- Fill ---
   fillType: FillType;
@@ -74,7 +72,6 @@ export const DEFAULT_CONFIG: StarConfig = {
 
   curveIntensity: 0,
   cornerRounding: 0,
-  fillRule: 'nonzero',
 
   fillType: 'none',
   fillColor: '#5E6AD2',
