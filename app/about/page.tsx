@@ -9,16 +9,14 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="relative flex-1 min-h-0 overflow-y-auto">
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(120% 120% at 0% 0%, #e0e7ff 0%, transparent 45%), radial-gradient(120% 120% at 100% 100%, #fde68a 0%, transparent 40%), linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f8fafc 100%)",
-        }}
-      />
-
-      <div className="relative flex min-h-full items-start justify-center px-4 py-6 sm:items-center sm:py-10">
+    <div
+      className="flex-1 min-h-0 overflow-y-auto"
+      style={{
+        background:
+          "radial-gradient(120% 120% at 0% 0%, #e0e7ff 0%, transparent 45%), radial-gradient(120% 120% at 100% 100%, #fde68a 0%, transparent 40%), linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f8fafc 100%)",
+      }}
+    >
+      <div className="flex min-h-full items-start justify-center px-4 py-6 sm:items-center sm:py-10">
         <article className="w-full max-w-xl rounded-2xl border border-[#E5E7EB] bg-white/95 backdrop-blur-sm shadow-[0_30px_80px_rgba(15,23,42,0.16)] p-6 sm:p-8">
           <div className="flex items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-2">
