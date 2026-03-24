@@ -163,7 +163,7 @@ const OUTER_CONTAINERS: { value: StarConfig['outerContainer']; label: string }[]
 
 // ── Main Panel ─────────────────────────────────────────────────────────────────
 
-const NO_INNER_RATIO = new Set(['9-2', '9-4']);
+const NO_INNER_RATIO = new Set(['9-2', '9-4', '3-triangles', 'petal']);
 const NO_CURVE = new Set(['petal']);
 const NO_ROUNDING = new Set(['petal']);
 const NO_PETAL = new Set(['9-2', '9-4', '3-triangles', 'spike', 'kite']);
