@@ -122,7 +122,7 @@ export default function TemplatesModal({
             transition={{ duration: 0.18 }}
           >
             <motion.div
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto border border-[#E5E7EB]"
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92dvh] sm:max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto border border-[#E5E7EB]"
               initial={{ y: 28, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 16, opacity: 0 }}
@@ -131,7 +131,7 @@ export default function TemplatesModal({
               aria-modal="true"
               aria-label="Template selector"
             >
-              <div className="relative overflow-hidden px-8 pt-8 pb-7 shrink-0 border-b border-[#F3F4F6]">
+              <div className="relative overflow-hidden px-5 pt-5 pb-4 sm:px-8 sm:pt-8 sm:pb-7 shrink-0 border-b border-[#F3F4F6]">
                 <div
                   className="absolute inset-0"
                   style={{
@@ -143,7 +143,7 @@ export default function TemplatesModal({
                 <div className="relative flex items-start justify-between gap-4">
                   <div>
                     <motion.p
-                      className="text-indigo-500 text-[11px] font-semibold uppercase tracking-widest mb-2"
+                      className="text-indigo-500 text-[11px] font-semibold uppercase tracking-widest mb-1.5 sm:mb-2"
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.05, duration: 0.3 }}
@@ -151,21 +151,22 @@ export default function TemplatesModal({
                       Welcome to ninestar.app
                     </motion.p>
 
-                    <h2 className="text-[#111827] text-2xl font-bold tracking-tight leading-snug mb-1">
+                    <h2 className="text-[#111827] text-xl sm:text-2xl font-bold tracking-tight leading-tight sm:leading-snug mb-2 sm:mb-1 max-w-[18ch]">
                       Select a template to get started.
                     </h2>
 
                     <motion.p
-                      className="text-[#6B7280] text-[13px] mt-2 mb-4"
+                      className="text-[#6B7280] text-[12px] sm:text-[13px] mt-1.5 sm:mt-2 mb-2 sm:mb-4 max-w-[34ch]"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.45, duration: 0.4 }}
                     >
-                      Customize shape, color, and gradients, then export as SVG, PNG, or JPG.
+                      Customize shape, color, and gradients.
+                      <span className="hidden sm:inline"> Then export as SVG, PNG, or JPG.</span>
                     </motion.p>
 
                     <motion.div
-                      className="flex flex-wrap gap-2"
+                      className="hidden sm:flex flex-wrap gap-2"
                       initial="hidden"
                       animate="visible"
                       variants={{
@@ -219,7 +220,7 @@ export default function TemplatesModal({
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto min-h-0 px-8 py-6">
+              <div className="flex-1 overflow-y-auto min-h-0 px-5 py-4 sm:px-8 sm:py-6">
                 <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
                   {PRESETS.map((preset) => (
                     <PresetCard
@@ -231,13 +232,18 @@ export default function TemplatesModal({
                 </div>
               </div>
 
-              <div className="px-8 py-4 border-t border-[#F3F4F6] bg-[#F9FAFB] shrink-0 flex items-center justify-between gap-4">
-                <p className="text-[11px] text-[#9CA3AF]">
-                  Reopen anytime via <span className="text-[#6B7280] font-medium">Templates</span> in the menu.
+              <div className="px-5 py-3 sm:px-8 sm:py-4 border-t border-[#F3F4F6] bg-[#F9FAFB] shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                <p className="text-[12px] sm:text-[11px] text-[#9CA3AF] leading-snug sm:leading-normal">
+                  <span className="sm:hidden">
+                    Open again from <span className="text-[#6B7280] font-medium">Templates</span>.
+                  </span>
+                  <span className="hidden sm:inline">
+                    Reopen anytime via <span className="text-[#6B7280] font-medium">Templates</span> in the menu.
+                  </span>
                 </p>
                 <motion.button
                   onClick={onStartFromScratch}
-                  className="px-4 py-2 rounded-lg border border-[#E5E7EB] bg-white hover:bg-[#F3F4F6] text-[12px] font-medium text-[#374151] hover:text-[#111827] transition-colors shrink-0"
+                  className="w-full sm:w-auto px-4 py-2 rounded-lg border border-[#E5E7EB] bg-white hover:bg-[#F3F4F6] text-[13px] sm:text-[12px] font-medium text-[#374151] hover:text-[#111827] transition-colors shrink-0"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
                 >

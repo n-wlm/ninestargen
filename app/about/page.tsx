@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="relative flex-1 overflow-hidden">
+    <div className="relative flex-1 min-h-0 overflow-y-auto">
       <div
         className="absolute inset-0"
         style={{
@@ -18,7 +18,7 @@ export default function AboutPage() {
         }}
       />
 
-      <div className="relative flex min-h-full items-center justify-center px-4 py-10">
+      <div className="relative flex min-h-full items-start justify-center px-4 py-6 sm:items-center sm:py-10">
         <article className="w-full max-w-xl rounded-2xl border border-[#E5E7EB] bg-white/95 backdrop-blur-sm shadow-[0_30px_80px_rgba(15,23,42,0.16)] p-6 sm:p-8">
           <div className="flex items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-2">
