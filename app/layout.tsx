@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import AppHeader from "@/components/AppHeader";
@@ -72,6 +73,7 @@ export default function RootLayout({
           <AppHeader />
           <main className="flex-1 flex flex-col min-h-0">{children}</main>
         </TooltipProvider>
+        <Analytics />
       </body>
     </html>
   );

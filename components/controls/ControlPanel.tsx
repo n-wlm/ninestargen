@@ -427,7 +427,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
           )}
           <SliderInput
             label="Shadow"
-            tooltip="Adds a drop shadow behind the star"
+            tooltip="Adds a soft shadow evenly around the star"
             value={config.shadowBlur}
             defaultValue={D.shadowBlur}
             min={0}
@@ -443,28 +443,6 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
                 value={config.shadowColor.slice(0, 7)}
                 onChange={(v) => update('shadowColor', v)}
               />
-              <div className="grid grid-cols-2 gap-2">
-                <SliderInput
-                  label="Offset X"
-                  value={config.shadowOffsetX}
-                  defaultValue={D.shadowOffsetX}
-                  min={-20}
-                  max={20}
-                  step={1}
-                  format={(v) => `${v}px`}
-                  onChange={(v) => update('shadowOffsetX', v)}
-                />
-                <SliderInput
-                  label="Offset Y"
-                  value={config.shadowOffsetY}
-                  defaultValue={D.shadowOffsetY}
-                  min={-20}
-                  max={20}
-                  step={1}
-                  format={(v) => `${v}px`}
-                  onChange={(v) => update('shadowOffsetY', v)}
-                />
-              </div>
             </>
           )}
         </Section>

@@ -28,8 +28,6 @@ const KEY_MAP = {
   glowRadius: 'glr',
   shadowBlur: 'shb',
   shadowColor: 'shc',
-  shadowOffsetX: 'shx',
-  shadowOffsetY: 'shy',
   petalWidth: 'pw',
   petalCurve: 'pc',
   exportWidth: 'ew',
@@ -39,6 +37,7 @@ const KEY_MAP = {
 const REVERSE_MAP = Object.fromEntries(
   Object.entries(KEY_MAP).map(([k, v]) => [v, k]),
 ) as Record<string, keyof StarConfig>;
+const LEGACY_IGNORED_KEYS = new Set(['shx', 'shy']);
 
 export function configToParams(config: StarConfig): URLSearchParams {
   const params = new URLSearchParams();
@@ -69,7 +68,10 @@ export function paramsToConfig(params: URLSearchParams): StarConfig {
 
   for (const [shortKey, value] of params.entries()) {
     const longKey = REVERSE_MAP[shortKey];
-    if (!longKey) continue;
+    if (!longKey) {
+      if (LEGACY_IGNORED_KEYS.has(shortKey)) continue;
+      continue;
+    }
 
     switch (longKey) {
       case 'starType':
@@ -103,8 +105,6 @@ export function paramsToConfig(params: URLSearchParams): StarConfig {
       case 'outerContainerPadding':
       case 'glowRadius':
       case 'shadowBlur':
-      case 'shadowOffsetX':
-      case 'shadowOffsetY':
       case 'petalWidth':
       case 'petalCurve':
       case 'exportWidth':

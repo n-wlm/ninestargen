@@ -39,7 +39,7 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
   const paths = buildStarPaths(CX, CY, config);
   const innerPath = config.showInnerPolygon ? buildInnerPolygonPath(CX, CY, config) : null;
 
-  function getFill(index: number): string {
+  function getFill(): string {
     if (config.fillType === 'none') return 'none';
     if (config.fillType === 'solid') return config.fillColor;
     return `url(#${gradId})`;
@@ -96,26 +96,26 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
         )}
 
         {hasFilter && (
-          <filter id={filterId} x="-40%" y="-40%" width="180%" height="180%">
-            {config.glowRadius > 0 && (
+          <filter id={filterId} x="-60%" y="-60%" width="220%" height="220%" colorInterpolationFilters="sRGB">
+            {config.shadowBlur > 0 && (
               <>
-                <feGaussianBlur in="SourceGraphic" stdDeviation={config.glowRadius} result="blur" />
-                <feFlood floodColor={config.glowColor} result="glowColor" />
-                <feComposite in="glowColor" in2="blur" operator="in" result="glow" />
-                <feMerge>
-                  <feMergeNode in="glow" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
+                <feGaussianBlur in="SourceAlpha" stdDeviation={config.shadowBlur} result="shadowBlur" />
+                <feFlood floodColor={config.shadowColor} result="shadowColor" />
+                <feComposite in="shadowColor" in2="shadowBlur" operator="in" result="shadow" />
               </>
             )}
-            {config.shadowBlur > 0 && config.glowRadius === 0 && (
-              <feDropShadow
-                dx={config.shadowOffsetX}
-                dy={config.shadowOffsetY}
-                stdDeviation={config.shadowBlur}
-                floodColor={config.shadowColor}
-              />
+            {config.glowRadius > 0 && (
+              <>
+                <feGaussianBlur in="SourceGraphic" stdDeviation={config.glowRadius} result="glowBlur" />
+                <feFlood floodColor={config.glowColor} result="glowColor" />
+                <feComposite in="glowColor" in2="glowBlur" operator="in" result="glow" />
+              </>
             )}
+            <feMerge>
+              {config.shadowBlur > 0 && <feMergeNode in="shadow" />}
+              {config.glowRadius > 0 && <feMergeNode in="glow" />}
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
           </filter>
         )}
       </defs>
@@ -150,7 +150,7 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
       {/* Star paths */}
       <g opacity={config.fillOpacity} filter={hasFilter ? `url(#${filterId})` : undefined}>
         {paths.map((d, i) => (
-          <path key={i} d={d} fill={getFill(i)} {...strokeProps} />
+          <path key={i} d={d} fill={getFill()} {...strokeProps} />
         ))}
       </g>
 

@@ -52,8 +52,6 @@ export interface StarConfig {
   glowRadius: number;
   shadowBlur: number;
   shadowColor: string;
-  shadowOffsetX: number;
-  shadowOffsetY: number;
 
   // --- Petal-specific ---
   petalWidth: number;
@@ -97,8 +95,6 @@ export const DEFAULT_CONFIG: StarConfig = {
   glowRadius: 0,
   shadowBlur: 0,
   shadowColor: '#00000066',
-  shadowOffsetX: 0,
-  shadowOffsetY: 4,
 
   petalWidth: 0.4,
   petalCurve: 0.6,
