@@ -1,5 +1,7 @@
 'use client';
 
+import { ArrowDown, ArrowDownRight, ArrowRight, ArrowUpRight, type LucideIcon } from 'lucide-react';
+
 import type { StarConfig } from '@/types/star';
 
 interface ColorControlProps {
@@ -63,11 +65,11 @@ interface GradientBuilderProps {
   isRadial?: boolean;
 }
 
-const DIR_OPTIONS: { value: StarConfig['gradientDirection']; label: string }[] = [
-  { value: 'to-bottom', label: '↓' },
-  { value: 'to-right', label: '→' },
-  { value: 'to-bottom-right', label: '↘' },
-  { value: 'to-top-right', label: '↗' },
+const DIR_OPTIONS: { value: StarConfig['gradientDirection']; icon: LucideIcon; ariaLabel: string }[] = [
+  { value: 'to-bottom', icon: ArrowDown, ariaLabel: 'Gradient direction: down' },
+  { value: 'to-right', icon: ArrowRight, ariaLabel: 'Gradient direction: right' },
+  { value: 'to-bottom-right', icon: ArrowDownRight, ariaLabel: 'Gradient direction: down-right' },
+  { value: 'to-top-right', icon: ArrowUpRight, ariaLabel: 'Gradient direction: up-right' },
 ];
 
 export function GradientBuilder({ colors, onChange, direction, onDirectionChange, isRadial = false }: GradientBuilderProps) {
@@ -82,19 +84,26 @@ export function GradientBuilder({ colors, onChange, direction, onDirectionChange
       {/* Direction — linear only */}
       {!isRadial && (
         <div className="flex items-center gap-1.5 lg:gap-1">
-          {DIR_OPTIONS.map((d) => (
-            <button
-              key={d.value}
-              onClick={() => onDirectionChange(d.value)}
-              className={`w-9 h-9 lg:w-7 lg:h-7 rounded-md text-base lg:text-sm font-medium transition-all ${
+          {DIR_OPTIONS.map((d) => {
+            const Icon = d.icon;
+
+            return (
+              <button
+                key={d.value}
+                type="button"
+                onClick={() => onDirectionChange(d.value)}
+                aria-label={d.ariaLabel}
+                title={d.ariaLabel}
+                className={`inline-flex w-9 h-9 lg:w-7 lg:h-7 items-center justify-center rounded-md transition-all ${
                 direction === d.value
                   ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
                   : 'bg-[#F3F4F6] text-[#6B7280] hover:text-[#374151]'
-              }`}
-            >
-              {d.label}
-            </button>
-          ))}
+                }`}
+              >
+                <Icon aria-hidden="true" className="h-[18px] w-[18px] lg:h-[14px] lg:w-[14px] pointer-events-none" strokeWidth={2.25} />
+              </button>
+            );
+          })}
         </div>
       )}
 
