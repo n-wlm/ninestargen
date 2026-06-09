@@ -1,7 +1,8 @@
 'use client';
 
-import SliderInput from './SliderInput';
+import SliderInput, { parsePercent } from './SliderInput';
 import { ColorControl, GradientBuilder } from './ColorControl';
+import { Section, SegmentedControl } from './primitives';
 import StarPreview from '@/components/StarPreview';
 import type { StarConfig, StarType } from '@/types/star';
 import { DEFAULT_CONFIG, STAR_TYPE_LABELS, STAR_TYPES_ORDERED } from '@/types/star';
@@ -14,63 +15,6 @@ interface ControlPanelProps {
 }
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="border-b border-[#F3F4F6]">
-      <div className="px-4 py-2.5 lg:py-2 bg-[#F9FAFB] border-b border-[#F3F4F6]">
-        <p className="text-[12px] lg:text-[10px] font-bold uppercase tracking-[0.1em] text-[#6B7280]">{title}</p>
-      </div>
-      <div className="px-4 py-4 lg:py-3 flex flex-col gap-4 lg:gap-3.5">{children}</div>
-    </div>
-  );
-}
-
-function SegmentedControl<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: { value: T; label: string }[];
-  value: T;
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div className="flex rounded-md bg-[#F3F4F6] p-0.5 gap-0.5">
-      {options.map(({ value: v, label }) => (
-        <button
-          key={v}
-          onClick={() => onChange(v)}
-          className={`flex-1 py-2 lg:py-1 text-[13px] lg:text-[11px] rounded font-medium transition-all ${
-            value === v
-              ? 'bg-white text-[#111827] shadow-sm'
-              : 'text-[#6B7280] hover:text-[#374151]'
-          }`}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-[13px] lg:text-[11px] font-medium text-[#6B7280]">{label}</span>
-      <button
-        onClick={() => onChange(!value)}
-        className={`rounded-full transition-all relative shrink-0 ${value ? 'bg-[#5E6AD2]' : 'bg-[#D1D5DB]'}`}
-        style={{ height: '18px', width: '32px' }}
-      >
-        <span
-          className="absolute top-0.5 w-3.5 h-3.5 bg-white rounded-full shadow-sm transition-all"
-          style={{ left: value ? '14px' : '2px' }}
-        />
-      </button>
-    </div>
-  );
-}
 
 // Minimal config used only for corner previews — neutral indigo, no bg, no stroke
 const PREVIEW_BASE: StarConfig = {
@@ -201,9 +145,10 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
             value={config.outerRadius}
             defaultValue={D.outerRadius}
             min={60}
-            max={270}
+            max={350}
             step={1}
             onChange={(v) => update('outerRadius', v)}
+            resetLabel="Set to default"
           />
           <SliderInput
             label="Inner Ratio"
@@ -250,6 +195,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
             max={1}
             step={0.01}
             format={(v) => `${Math.round(v * 100)}%`}
+            parse={parsePercent}
             onChange={(v) => update('cornerRounding', v)}
             disabled={NO_ROUNDING.has(t)}
           />
@@ -262,6 +208,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
             max={1}
             step={0.01}
             format={(v) => `${Math.round(v * 100)}%`}
+            parse={parsePercent}
             onChange={(v) => update('petalWidth', v)}
             disabled={NO_PETAL.has(t)}
           />
@@ -274,6 +221,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
             max={1}
             step={0.01}
             format={(v) => `${Math.round(v * 100)}%`}
+            parse={parsePercent}
             onChange={(v) => update('petalCurve', v)}
             disabled={NO_PETAL.has(t)}
           />
@@ -374,7 +322,7 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
                 value={config.outerContainerPadding}
                 defaultValue={D.outerContainerPadding}
                 min={0}
-                max={50}
+                max={45}
                 step={1}
                 format={(v) => `${v}px`}
                 onChange={(v) => update('outerContainerPadding', v)}
@@ -446,6 +394,13 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
             </>
           )}
         </Section>
+
+        {/* Subtle hint for power users — discoverable, not loud */}
+        <div className="px-4 py-3.5">
+          <p className="text-[10px] lg:text-[10px] text-[#C7CAD1] leading-relaxed">
+            Tip: type a value past a slider&apos;s range to push shapes into exotic territory.
+          </p>
+        </div>
 
         <div className="h-4" />
       </div>

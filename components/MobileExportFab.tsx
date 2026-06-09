@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { exportSVG, exportRaster } from '@/lib/export';
-import type { StarConfig } from '@/types/star';
 
 interface Props {
   svgRef: React.RefObject<SVGSVGElement | null>;
-  config: StarConfig;
-  update: <K extends keyof StarConfig>(key: K, value: StarConfig[K]) => void;
+  exportWidth: number;
+  exportHeight: number;
+  onSize: (width: number, height: number) => void;
+  filename?: string;
 }
 
 const RESOLUTIONS = [
@@ -24,7 +25,7 @@ const FORMATS = [
   { id: 'jpeg' as const, label: 'JPG' },
 ];
 
-export default function MobileExportFab({ svgRef, config, update }: Props) {
+export default function MobileExportFab({ svgRef, exportWidth, exportHeight, onSize, filename = 'star' }: Props) {
   const [open, setOpen]     = useState(false);
   const [format, setFormat] = useState<'png' | 'svg' | 'jpeg'>('png');
   const [loading, setLoading] = useState(false);
@@ -40,10 +41,10 @@ export default function MobileExportFab({ svgRef, config, update }: Props) {
     setLoading(true);
     try {
       if (format === 'svg') {
-        exportSVG(svgRef.current, 'star.svg');
+        exportSVG(svgRef.current, `${filename}.svg`);
         showToast('Downloaded as SVG');
       } else {
-        await exportRaster(svgRef.current, format, config.exportWidth, config.exportHeight);
+        await exportRaster(svgRef.current, format, exportWidth, exportHeight, `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`);
         showToast(`Downloaded as ${format.toUpperCase()}`);
       }
     } catch {
@@ -103,9 +104,9 @@ export default function MobileExportFab({ svgRef, config, update }: Props) {
                 {RESOLUTIONS.map(({ label, value }) => (
                   <button
                     key={value}
-                    onClick={() => { update('exportWidth', value); update('exportHeight', value); }}
+                    onClick={() => onSize(value, value)}
                     className={`flex-1 py-2 rounded-lg text-[13px] font-medium transition-colors ${
-                      config.exportWidth === value
+                      exportWidth === value
                         ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
                         : 'bg-[#F3F4F6] text-[#6B7280]'
                     }`}

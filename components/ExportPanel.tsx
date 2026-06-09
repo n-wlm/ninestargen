@@ -3,12 +3,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
 import { exportSVG, exportRaster } from '@/lib/export';
-import type { StarConfig } from '@/types/star';
 
 interface ExportPanelProps {
   svgRef: React.RefObject<SVGSVGElement | null>;
-  config: StarConfig;
-  update: <K extends keyof StarConfig>(key: K, value: StarConfig[K]) => void;
+  exportWidth: number;
+  exportHeight: number;
+  onSize: (width: number, height: number) => void;
+  filename?: string;
 }
 
 const RESOLUTIONS = [
@@ -24,7 +25,7 @@ const FORMATS: { id: 'png' | 'svg' | 'jpeg'; label: string; desc: string; recomm
   { id: 'jpeg', label: 'JPG', desc: 'Compressed, white bg' },
 ];
 
-export default function ExportPanel({ svgRef, config, update }: ExportPanelProps) {
+export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize, filename = 'star' }: ExportPanelProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; key: number } | null>(null);
   const [open, setOpen] = useState(false);
@@ -52,10 +53,10 @@ export default function ExportPanel({ svgRef, config, update }: ExportPanelProps
     setLoading(format);
     try {
       if (format === 'svg') {
-        exportSVG(svgRef.current, 'star.svg');
+        exportSVG(svgRef.current, `${filename}.svg`);
         showToast('Downloaded as SVG');
       } else {
-        await exportRaster(svgRef.current, format, config.exportWidth, config.exportHeight);
+        await exportRaster(svgRef.current, format, exportWidth, exportHeight, `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`);
         showToast(`Downloaded as ${format.toUpperCase()}`);
       }
     } catch {
@@ -73,11 +74,11 @@ export default function ExportPanel({ svgRef, config, update }: ExportPanelProps
         <LayoutGroup id="resolution">
           <div className="flex gap-1.5 lg:gap-1 flex-1">
             {RESOLUTIONS.map(({ label, value }) => {
-              const active = config.exportWidth === value;
+              const active = exportWidth === value;
               return (
                 <button
                   key={value}
-                  onClick={() => { update('exportWidth', value); update('exportHeight', value); }}
+                  onClick={() => onSize(value, value)}
                   className={`relative flex-1 py-2 lg:py-1 text-[13px] lg:text-[11px] rounded-md font-medium transition-colors z-10 ${
                     active ? 'text-[#5E6AD2]' : 'bg-[#F3F4F6] text-[#6B7280] hover:text-[#374151]'
                   }`}

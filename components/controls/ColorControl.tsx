@@ -1,8 +1,48 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { ArrowDown, ArrowDownRight, ArrowRight, ArrowUpRight, type LucideIcon } from 'lucide-react';
 
 import type { StarConfig } from '@/types/star';
+
+// Accepts "#abc", "abc", "#aabbcc", "aabbcc" → "#AABBCC"; null if invalid.
+function normalizeHex(raw: string): string | null {
+  let s = raw.trim().replace(/^#/, '');
+  if (/^[0-9a-fA-F]{3}$/.test(s)) s = s.split('').map((c) => c + c).join('');
+  if (/^[0-9a-fA-F]{6}$/.test(s)) return '#' + s.toUpperCase();
+  return null;
+}
+
+// Editable hex field — type or paste a code, committed on Enter/blur.
+function HexInput({ value, onChange, className }: { value: string; onChange: (v: string) => void; className?: string }) {
+  const [text, setText] = useState(value);
+  useEffect(() => setText(value), [value]);
+
+  function commit() {
+    const next = normalizeHex(text);
+    if (next) onChange(next);
+    else setText(value);
+  }
+
+  return (
+    <input
+      type="text"
+      value={text}
+      spellCheck={false}
+      autoCapitalize="off"
+      autoCorrect="off"
+      onChange={(e) => setText(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          commit();
+          (e.target as HTMLInputElement).blur();
+        }
+      }}
+      className={className}
+    />
+  );
+}
 
 interface ColorControlProps {
   label: string;
@@ -37,7 +77,11 @@ export function ColorControl({ label, value, onChange, showOpacity, opacity = 1,
             className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
           />
         </label>
-        <span className="text-[12px] lg:text-[11px] font-mono text-[#6B7280] uppercase tracking-wide">{value}</span>
+        <HexInput
+          value={value}
+          onChange={onChange}
+          className="w-[72px] lg:w-[68px] text-[12px] lg:text-[11px] font-mono text-[#6B7280] uppercase tracking-wide bg-transparent border-b border-transparent hover:border-[#E5E7EB] focus:border-[#5E6AD2] focus:outline-none py-0.5 transition-colors"
+        />
         {showOpacity && onOpacityChange && (
           <div className="flex items-center gap-1.5 ml-auto">
             <input
@@ -134,7 +178,11 @@ export function GradientBuilder({ colors, onChange, direction, onDirectionChange
                 className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
               />
             </label>
-            <span className="text-[12px] lg:text-[11px] font-mono text-[#6B7280] uppercase flex-1">{color}</span>
+            <HexInput
+              value={color}
+              onChange={(v) => updateColor(i, v)}
+              className="flex-1 min-w-0 text-[12px] lg:text-[11px] font-mono text-[#6B7280] uppercase bg-transparent border-b border-transparent hover:border-[#E5E7EB] focus:border-[#5E6AD2] focus:outline-none py-0.5 transition-colors"
+            />
             {colors.length > 2 && (
               <button
                 onClick={() => onChange(colors.filter((_, idx) => idx !== i))}

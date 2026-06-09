@@ -3,6 +3,11 @@
 import { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
 
+// Strips non-numeric characters and returns the typed number as-is (1:1 units).
+export const stripNumber = (raw: string) => parseFloat(raw.replace(/[^0-9.\-]/g, ""));
+// Inverse of a `${Math.round(v * 100)}%` formatter: typed "50" → 0.5.
+export const parsePercent = (raw: string) => stripNumber(raw) / 100;
+
 interface SliderInputProps {
   label: string;
   tooltip?: string;
@@ -12,6 +17,10 @@ interface SliderInputProps {
   max: number;
   step?: number;
   format?: (v: number) => string;
+  /** Inverse of `format` — converts the typed display string back to a model value. */
+  parse?: (raw: string) => number;
+  /** Magnetic snap targets (model units) applied while dragging the slider. */
+  snap?: number[];
   onChange: (v: number) => void;
   disabled?: boolean;
   resetLabel?: string;
@@ -26,6 +35,8 @@ export default function SliderInput({
   max,
   step = 1,
   format,
+  parse,
+  snap,
   onChange,
   disabled,
   resetLabel,
@@ -42,13 +53,28 @@ export default function SliderInput({
   }, [value, format, step]);
 
   function commitInput(raw: string) {
-    const stripped = raw.replace(/[^0-9.\-]/g, "");
-    const num = parseFloat(stripped);
+    const num = parse ? parse(raw) : stripNumber(raw);
     if (!isNaN(num)) {
       onChange(num);
     } else {
       setInputVal(format ? format(value) : String(value));
     }
+  }
+
+  // Snap to the nearest target if the dragged value lands within a small threshold.
+  function applySnap(v: number): number {
+    if (!snap || snap.length === 0) return v;
+    const threshold = (max - min) * 0.02;
+    let best = v;
+    let bestDist = Infinity;
+    for (const s of snap) {
+      const d = Math.abs(s - v);
+      if (d < bestDist) {
+        bestDist = d;
+        best = s;
+      }
+    }
+    return bestDist <= threshold ? best : v;
   }
 
   return (
@@ -120,7 +146,7 @@ export default function SliderInput({
         max={max}
         step={step}
         value={[Math.min(max, Math.max(min, value))]}
-        onValueChange={(v) => onChange(Array.isArray(v) ? v[0] : v)}
+        onValueChange={(v) => onChange(applySnap(Array.isArray(v) ? v[0] : v))}
         className="w-full"
       />
     </div>

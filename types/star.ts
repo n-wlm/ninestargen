@@ -64,7 +64,7 @@ export interface StarConfig {
 
 export const DEFAULT_CONFIG: StarConfig = {
   starType: '9-2',
-  outerRadius: 220,
+  outerRadius: 250,
   innerRadiusRatio: 0.38,
   rotation: -90,
 
