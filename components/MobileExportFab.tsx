@@ -10,6 +10,8 @@ interface Props {
   exportHeight: number;
   onSize: (width: number, height: number) => void;
   filename?: string;
+  onDownloaded?: (format: 'svg' | 'png' | 'jpeg') => void;
+  disabled?: boolean; // nothing to export (e.g. images mode with no layers)
 }
 
 const RESOLUTIONS = [
@@ -25,7 +27,7 @@ const FORMATS = [
   { id: 'jpeg' as const, label: 'JPG' },
 ];
 
-export default function MobileExportFab({ svgRef, exportWidth, exportHeight, onSize, filename = 'star' }: Props) {
+export default function MobileExportFab({ svgRef, exportWidth, exportHeight, onSize, filename = 'star', onDownloaded, disabled }: Props) {
   const [open, setOpen]     = useState(false);
   const [format, setFormat] = useState<'png' | 'svg' | 'jpeg'>('png');
   const [loading, setLoading] = useState(false);
@@ -47,6 +49,7 @@ export default function MobileExportFab({ svgRef, exportWidth, exportHeight, onS
         await exportRaster(svgRef.current, format, exportWidth, exportHeight, `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`);
         showToast(`Downloaded as ${format.toUpperCase()}`);
       }
+      onDownloaded?.(format);
     } catch {
       showToast('Export failed');
     }
@@ -58,10 +61,12 @@ export default function MobileExportFab({ svgRef, exportWidth, exportHeight, onS
     <>
       {/* FAB trigger */}
       <motion.button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-semibold bg-[#5E6AD2] text-white shadow-md"
-        whileHover={{ scale: 1.04 }}
-        whileTap={{ scale: 0.95 }}
+        onClick={() => !disabled && setOpen(true)}
+        disabled={disabled}
+        title={disabled ? 'Add an image first' : undefined}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-semibold bg-[var(--nsg-accent)] text-white shadow-md disabled:opacity-40"
+        whileHover={disabled ? undefined : { scale: 1.04 }}
+        whileTap={disabled ? undefined : { scale: 0.95 }}
         aria-label="Export"
       >
         <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
@@ -99,7 +104,7 @@ export default function MobileExportFab({ svgRef, exportWidth, exportHeight, onS
               <p className="text-[13px] font-bold text-[#111827] mb-4">Export</p>
 
               {/* Size */}
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9CA3AF] mb-2">Size</p>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#6B7280] mb-2">Size</p>
               <div className="flex gap-2 mb-4">
                 {RESOLUTIONS.map(({ label, value }) => (
                   <button
@@ -107,7 +112,7 @@ export default function MobileExportFab({ svgRef, exportWidth, exportHeight, onS
                     onClick={() => onSize(value, value)}
                     className={`flex-1 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                       exportWidth === value
-                        ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
+                        ? 'bg-[var(--nsg-accent-soft)] text-[var(--nsg-accent)] ring-1 ring-inset ring-[var(--nsg-accent-ring)]'
                         : 'bg-[#F3F4F6] text-[#6B7280]'
                     }`}
                   >
@@ -117,7 +122,7 @@ export default function MobileExportFab({ svgRef, exportWidth, exportHeight, onS
               </div>
 
               {/* Format */}
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#9CA3AF] mb-2">Format</p>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-[#6B7280] mb-2">Format</p>
               <div className="flex gap-2 mb-5">
                 {FORMATS.map(({ id, label }) => (
                   <button
@@ -125,7 +130,7 @@ export default function MobileExportFab({ svgRef, exportWidth, exportHeight, onS
                     onClick={() => setFormat(id)}
                     className={`flex-1 py-2 rounded-lg text-[13px] font-medium transition-colors ${
                       format === id
-                        ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
+                        ? 'bg-[var(--nsg-accent-soft)] text-[var(--nsg-accent)] ring-1 ring-inset ring-[var(--nsg-accent-ring)]'
                         : 'bg-[#F3F4F6] text-[#6B7280]'
                     }`}
                   >

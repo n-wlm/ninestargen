@@ -1,0 +1,7 @@
+{
+  "project": "ninestar.app",
+  "accent": "#5E6AD2",
+  "theme": "auto",
+  "offline": true,
+  "output": "documentation.html"
+}

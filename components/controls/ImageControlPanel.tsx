@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Eye, EyeOff, ChevronDown, ChevronUp, Trash2, ImagePlus } from 'lucide-react';
+import { Eye, EyeOff, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Trash2, ImagePlus } from 'lucide-react';
 import SliderInput, { parsePercent } from './SliderInput';
 import { ColorControl } from './ColorControl';
-import { Section, SegmentedControl, Toggle } from './primitives';
+import { Section, SegmentedControl, Toggle, ConfirmButton } from './primitives';
 import type { CompositionConfig, ImageLayer, SymmetryCount } from '@/types/composition';
 import { LAYER_LIMITS, MAX_LAYERS } from '@/types/composition';
 import { ACCEPT_ATTR, fileToLayer, UploadError } from '@/lib/image-upload';
@@ -74,23 +74,24 @@ function LayerCard({
           )}
         </button>
 
-        {/* Reorder */}
+        {/* Reorder — arrows, distinct from the expand chevron.
+            List is shown reversed (top = front = end of array), so "up" = +1 in array order. */}
         <div className="flex items-center">
           <button
-            onClick={() => reorderLayer(layer.id, -1)}
+            onClick={() => reorderLayer(layer.id, 1)}
             disabled={index === 0}
             title="Move forward"
-            className="p-1 text-[#9CA3AF] hover:text-[#5E6AD2] disabled:opacity-25 disabled:hover:text-[#9CA3AF] transition-colors"
+            className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[var(--nsg-accent)] hover:bg-[#F3F4F6] disabled:opacity-25 disabled:hover:text-[#9CA3AF] disabled:hover:bg-transparent transition-colors"
           >
-            <ChevronUp className="w-4 h-4" />
+            <ArrowUp className="w-4 h-4" />
           </button>
           <button
-            onClick={() => reorderLayer(layer.id, 1)}
+            onClick={() => reorderLayer(layer.id, -1)}
             disabled={index === total - 1}
             title="Move back"
-            className="p-1 text-[#9CA3AF] hover:text-[#5E6AD2] disabled:opacity-25 disabled:hover:text-[#9CA3AF] transition-colors"
+            className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[var(--nsg-accent)] hover:bg-[#F3F4F6] disabled:opacity-25 disabled:hover:text-[#9CA3AF] disabled:hover:bg-transparent transition-colors"
           >
-            <ChevronDown className="w-4 h-4" />
+            <ArrowDown className="w-4 h-4" />
           </button>
         </div>
 
@@ -98,16 +99,19 @@ function LayerCard({
         <button
           onClick={() => updateLayer(layer.id, { visible: !layer.visible })}
           title={layer.visible ? 'Hide layer' : 'Show layer'}
-          className="p-1 text-[#9CA3AF] hover:text-[#5E6AD2] transition-colors"
+          className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[var(--nsg-accent)] hover:bg-[#F3F4F6] transition-colors"
         >
           {layer.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
         </button>
+
+        {/* Separator to set delete apart from the frequent actions */}
+        <span className="w-px h-4 bg-[#EAECF0] mx-0.5 shrink-0" aria-hidden="true" />
 
         {/* Delete */}
         <button
           onClick={() => removeLayer(layer.id)}
           title="Delete layer"
-          className="p-1 text-[#9CA3AF] hover:text-[#EF4444] transition-colors"
+          className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[#EF4444] hover:bg-[#FEF2F2] transition-colors"
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -160,7 +164,7 @@ function LayerCard({
             onChange={(v) => updateLayer(layer.id, { spin: v })}
           />
           <SliderInput
-            label="Offset"
+            label="Angle"
             tooltip="Rotate the whole arrangement"
             value={layer.angleOffset}
             defaultValue={LAYER_LIMITS.angleOffset.default}
@@ -171,6 +175,28 @@ function LayerCard({
             snap={Array.from({ length: layer.count * 2 + 1 }, (_, i) => (360 / (layer.count * 2)) * i)}
             onChange={(v) => updateLayer(layer.id, { angleOffset: v })}
             resetLabel="Set to default"
+          />
+          <SliderInput
+            label="Offset X"
+            tooltip="Shift the image sideways within each copy (off-centre)"
+            value={layer.offsetX}
+            defaultValue={LAYER_LIMITS.offsetX.default}
+            min={LAYER_LIMITS.offsetX.min}
+            max={LAYER_LIMITS.offsetX.max}
+            step={LAYER_LIMITS.offsetX.step}
+            format={(v) => String(Math.round(v))}
+            onChange={(v) => updateLayer(layer.id, { offsetX: v })}
+          />
+          <SliderInput
+            label="Offset Y"
+            tooltip="Shift the image in/out (toward or away from the center)"
+            value={layer.offsetY}
+            defaultValue={LAYER_LIMITS.offsetY.default}
+            min={LAYER_LIMITS.offsetY.min}
+            max={LAYER_LIMITS.offsetY.max}
+            step={LAYER_LIMITS.offsetY.step}
+            format={(v) => String(Math.round(v))}
+            onChange={(v) => updateLayer(layer.id, { offsetY: v })}
           />
           <SliderInput
             label="Opacity"
@@ -203,6 +229,7 @@ export default function ImageControlPanel({
   const [error, setError] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const atLimit = config.layers.length >= MAX_LAYERS;
+  const hasLayers = config.layers.length > 0;
 
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -248,12 +275,15 @@ export default function ImageControlPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-4 h-11 border-b border-[#F3F4F6] shrink-0">
         <span className="text-[12px] font-semibold text-[#111827] tracking-tight">Layers</span>
-        <button
-          onClick={onReset}
-          className="text-[11px] text-[#9CA3AF] hover:text-[#5E6AD2] transition-colors font-medium"
-        >
-          Clear all
-        </button>
+        <ConfirmButton
+          label="Clear all"
+          message="Remove all layers? This can't be undone."
+          confirmLabel="Clear"
+          onConfirm={onReset}
+          destructive
+          align="center"
+          className="text-[11px] text-[#6B7280] hover:text-[var(--nsg-accent)] transition-colors font-medium"
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -270,10 +300,13 @@ export default function ImageControlPanel({
           <button
             onClick={() => fileRef.current?.click()}
             disabled={atLimit}
-            className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg border-2 border-dashed transition-all text-[13px] lg:text-[12px] font-medium ${
+            className={`w-full flex items-center justify-center gap-2 font-medium transition-all ${
               atLimit
-                ? 'border-[#E5E7EB] text-[#D1D5DB] cursor-not-allowed'
-                : 'border-[#C7D2FE] text-[#5E6AD2] hover:bg-[#EEF2FF] hover:border-[#A5B4FC]'
+                ? 'py-3 rounded-lg border-2 border-dashed border-[#E5E7EB] text-[#D1D5DB] cursor-not-allowed text-[13px] lg:text-[12px]'
+                : hasLayers
+                  // Demoted to a slim secondary button once a layer exists — keeps the layer stack the focus
+                  ? 'py-2 rounded-md bg-[#F3F4F6] text-[#6B7280] hover:bg-[var(--nsg-accent-soft)] hover:text-[var(--nsg-accent)] text-[12px] lg:text-[11px]'
+                  : 'py-3 rounded-lg border-2 border-dashed border-[var(--nsg-accent-ring)] text-[var(--nsg-accent)] hover:bg-[var(--nsg-accent-soft)] hover:border-[var(--nsg-accent-border)] text-[13px] lg:text-[12px]'
             }`}
           >
             <ImagePlus className="w-4 h-4" />
@@ -308,7 +341,7 @@ export default function ImageControlPanel({
               onClick={() => update('bgColor', 'transparent')}
               className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                 config.bgColor === 'transparent'
-                  ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
+                  ? 'bg-[var(--nsg-accent-soft)] text-[var(--nsg-accent)] ring-1 ring-inset ring-[var(--nsg-accent-ring)]'
                   : 'bg-[#F3F4F6] text-[#6B7280] hover:text-[#374151]'
               }`}
             >
@@ -352,7 +385,7 @@ export default function ImageControlPanel({
                   onClick={() => update('outerContainerFill', 'none')}
                   className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
                     config.outerContainerFill === 'none'
-                      ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
+                      ? 'bg-[var(--nsg-accent-soft)] text-[var(--nsg-accent)] ring-1 ring-inset ring-[var(--nsg-accent-ring)]'
                       : 'bg-[#F3F4F6] text-[#6B7280] hover:text-[#374151]'
                   }`}
                 >

@@ -49,6 +49,13 @@
 }
 
 :root {
+  /* Per-mode accent palette (geometry = indigo by default; images overrides to teal). */
+  --nsg-accent: #5E6AD2;
+  --nsg-accent-strong: #4F5BBF;
+  --nsg-accent-soft: #EEF2FF;
+  --nsg-accent-ring: #C7D2FE;
+  --nsg-accent-border: #A5B4FC;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -167,13 +174,13 @@
   height: 20px;
   border-radius: 50%;
   background: #ffffff;
-  border: 1.5px solid #5E6AD2;
+  border: 1.5px solid var(--nsg-accent);
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 .nsg-slider::-webkit-slider-thumb:hover {
-  border-color: #4F5BBF;
+  border-color: var(--nsg-accent-strong);
   box-shadow: 0 0 0 3px rgba(94,106,210,0.18);
 }
 .nsg-slider:active::-webkit-slider-thumb {
@@ -185,7 +192,7 @@
   height: 20px;
   border-radius: 50%;
   background: #ffffff;
-  border: 1.5px solid #5E6AD2;
+  border: 1.5px solid var(--nsg-accent);
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
   cursor: pointer;
 }

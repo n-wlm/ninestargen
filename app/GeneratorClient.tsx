@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, Suspense } from 'react';
 import { motion } from 'motion/react';
+import { History } from 'lucide-react';
 import StarPreview from '@/components/StarPreview';
 import ImagePreview from '@/components/ImagePreview';
 import ImageEmptyState from '@/components/ImageEmptyState';
@@ -11,9 +12,14 @@ import { SegmentedControl } from '@/components/controls/primitives';
 import ExportPanel from '@/components/ExportPanel';
 import MobileExportFab from '@/components/MobileExportFab';
 import ShareButton from '@/components/ShareButton';
+import SaveDesignModal from '@/components/SaveDesignModal';
+import HistoryPanel from '@/components/HistoryPanel';
 import { useStarConfig } from '@/hooks/useStarConfig';
 import { useComposition } from '@/hooks/useComposition';
 import { useUrlSync } from '@/hooks/useUrlSync';
+import { addHistory, loadHistory, removeHistory, clearHistory, type HistoryEntry } from '@/lib/history';
+import type { StarConfig } from '@/types/star';
+import type { CompositionConfig } from '@/types/composition';
 
 type Mode = 'geometry' | 'images';
 
@@ -21,6 +27,15 @@ const MODE_OPTIONS: { value: Mode; label: string }[] = [
   { value: 'geometry', label: 'Geometry' },
   { value: 'images', label: 'Images' },
 ];
+
+// Images mode uses a teal accent to feel distinct from geometry's indigo.
+const IMAGES_ACCENT = {
+  '--nsg-accent': '#0D9488',
+  '--nsg-accent-strong': '#0F766E',
+  '--nsg-accent-soft': '#F0FDFA',
+  '--nsg-accent-ring': '#99F6E4',
+  '--nsg-accent-border': '#5EEAD4',
+} as React.CSSProperties;
 
 function Generator() {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -30,7 +45,22 @@ function Generator() {
   const comp = useComposition();
   const [snapKey, setSnapKey] = useState(0);
 
+  // Download history (local to the browser).
+  const [entries, setEntries] = useState<HistoryEntry[]>([]);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [savePrompt, setSavePrompt] = useState<{ open: boolean; mode: Mode; link?: string; format?: string }>({
+    open: false,
+    mode: 'geometry',
+  });
+
   useUrlSync(config, setConfig);
+
+  // Load after mount (not during render) so server and client first paint match —
+  // localStorage only exists in the browser.
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEntries(loadHistory());
+  }, []);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -44,6 +74,31 @@ function Generator() {
 
   const isImages = mode === 'images';
 
+  // Snapshot the design on every download, then offer to save the link.
+  function handleDownloaded(format: 'svg' | 'png' | 'jpeg') {
+    const link = !isImages && typeof window !== 'undefined' ? window.location.href : undefined;
+    setEntries(
+      addHistory(
+        isImages
+          ? { mode: 'images', format, config: comp.config }
+          : { mode: 'geometry', format, config, link },
+      ),
+    );
+    setSavePrompt({ open: true, mode, link, format: format === 'jpeg' ? 'jpg' : format });
+  }
+
+  function restore(entry: HistoryEntry) {
+    if (entry.mode === 'geometry') {
+      setConfig(entry.config as StarConfig);
+      setMode('geometry');
+    } else {
+      comp.setConfig(entry.config as CompositionConfig);
+      setMode('images');
+    }
+    setSnapKey((k) => k + 1);
+    setHistoryOpen(false);
+  }
+
   const exportProps = isImages
     ? {
         svgRef,
@@ -51,6 +106,8 @@ function Generator() {
         exportHeight: comp.config.exportHeight,
         onSize: (w: number, h: number) => { comp.update('exportWidth', w); comp.update('exportHeight', h); },
         filename: 'ninestar-composition',
+        onDownloaded: handleDownloaded,
+        disabled: comp.config.layers.length === 0,
       }
     : {
         svgRef,
@@ -58,10 +115,11 @@ function Generator() {
         exportHeight: config.exportHeight,
         onSize: (w: number, h: number) => { update('exportWidth', w); update('exportHeight', h); },
         filename: 'star',
+        onDownloaded: handleDownloaded,
       };
 
   return (
-    <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+    <div className="flex flex-col lg:flex-row flex-1 min-h-0" style={isImages ? IMAGES_ACCENT : undefined}>
       {/* Controls sidebar */}
       <motion.aside
         className="w-full lg:w-80 xl:w-88 flex-1 min-h-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[#EAECF0] bg-white order-2 lg:order-1 lg:flex-none lg:h-full"
@@ -141,6 +199,22 @@ function Generator() {
           )}
         </div>
 
+        {/* History — top left */}
+        <div className="absolute top-3 left-3 z-20">
+          <button
+            onClick={() => setHistoryOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium border bg-white/90 border-[#E5E7EB] text-[#6B7280] hover:text-[#111827] hover:border-[#D1D5DB] backdrop-blur-sm transition-colors"
+          >
+            <History className="w-3.5 h-3.5" />
+            History
+            {entries.length > 0 && (
+              <span className="ml-0.5 px-1.5 rounded-full bg-[var(--nsg-accent-soft)] text-[var(--nsg-accent)] text-[10px] font-semibold">
+                {entries.length}
+              </span>
+            )}
+          </button>
+        </div>
+
         {/* Share — top right (geometry mode only; image compositions aren't URL-encoded) */}
         {!isImages && (
           <div className="absolute top-3 right-3 z-20">
@@ -153,6 +227,26 @@ function Generator() {
           <MobileExportFab {...exportProps} />
         </div>
       </motion.section>
+
+      {/* Save-design prompt after a download */}
+      <SaveDesignModal
+        open={savePrompt.open}
+        mode={savePrompt.mode}
+        link={savePrompt.link}
+        format={savePrompt.format}
+        onClose={() => setSavePrompt((s) => ({ ...s, open: false }))}
+        onOpenHistory={() => setHistoryOpen(true)}
+      />
+
+      {/* History panel */}
+      <HistoryPanel
+        open={historyOpen}
+        entries={entries}
+        onClose={() => setHistoryOpen(false)}
+        onRestore={restore}
+        onDelete={(id) => setEntries(removeHistory(id))}
+        onClear={() => setEntries(clearHistory())}
+      />
     </div>
   );
 }

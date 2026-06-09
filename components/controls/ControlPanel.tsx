@@ -1,8 +1,9 @@
 'use client';
 
+import { Lightbulb } from 'lucide-react';
 import SliderInput, { parsePercent } from './SliderInput';
 import { ColorControl, GradientBuilder } from './ColorControl';
-import { Section, SegmentedControl } from './primitives';
+import { Section, SegmentedControl, ConfirmButton } from './primitives';
 import StarPreview from '@/components/StarPreview';
 import type { StarConfig, StarType } from '@/types/star';
 import { DEFAULT_CONFIG, STAR_TYPE_LABELS, STAR_TYPES_ORDERED } from '@/types/star';
@@ -121,12 +122,15 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
       {/* Header */}
       <div className="flex items-center justify-between px-4 h-11 border-b border-[#F3F4F6] shrink-0">
         <span className="text-[12px] font-semibold text-[#111827] tracking-tight">Controls</span>
-        <button
-          onClick={onReset}
-          className="text-[11px] text-[#9CA3AF] hover:text-[#5E6AD2] transition-colors font-medium"
-        >
-          Reset all
-        </button>
+        <ConfirmButton
+          label="Reset all"
+          message="Reset all settings to their defaults?"
+          confirmLabel="Reset"
+          onConfirm={onReset}
+          destructive
+          align="center"
+          className="text-[11px] text-[#6B7280] hover:text-[var(--nsg-accent)] transition-colors font-medium"
+        />
       </div>
 
       {/* Scrollable content */}
@@ -395,9 +399,10 @@ export default function ControlPanel({ config, update, onReset }: ControlPanelPr
           )}
         </Section>
 
-        {/* Subtle hint for power users — discoverable, not loud */}
-        <div className="px-4 py-3.5">
-          <p className="text-[10px] lg:text-[10px] text-[#C7CAD1] leading-relaxed">
+        {/* Subtle hint for power users — discoverable, not loud, but readable */}
+        <div className="px-4 py-3.5 flex items-start gap-1.5">
+          <Lightbulb className="w-3 h-3 text-[#9CA3AF] mt-[1px] shrink-0" aria-hidden="true" />
+          <p className="text-[10px] text-[#6B7280] leading-relaxed">
             Tip: type a value past a slider&apos;s range to push shapes into exotic territory.
           </p>
         </div>

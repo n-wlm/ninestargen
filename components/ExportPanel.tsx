@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
 import { exportSVG, exportRaster } from '@/lib/export';
+import { copyText } from '@/lib/clipboard';
 
 interface ExportPanelProps {
   svgRef: React.RefObject<SVGSVGElement | null>;
@@ -10,6 +11,8 @@ interface ExportPanelProps {
   exportHeight: number;
   onSize: (width: number, height: number) => void;
   filename?: string;
+  onDownloaded?: (format: 'svg' | 'png' | 'jpeg') => void;
+  disabled?: boolean; // nothing to export (e.g. images mode with no layers)
 }
 
 const RESOLUTIONS = [
@@ -25,7 +28,7 @@ const FORMATS: { id: 'png' | 'svg' | 'jpeg'; label: string; desc: string; recomm
   { id: 'jpeg', label: 'JPG', desc: 'Compressed, white bg' },
 ];
 
-export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize, filename = 'star' }: ExportPanelProps) {
+export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize, filename = 'star', onDownloaded, disabled }: ExportPanelProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; key: number } | null>(null);
   const [open, setOpen] = useState(false);
@@ -59,6 +62,7 @@ export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize,
         await exportRaster(svgRef.current, format, exportWidth, exportHeight, `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`);
         showToast(`Downloaded as ${format.toUpperCase()}`);
       }
+      onDownloaded?.(format);
     } catch {
       showToast('Export failed');
     }
@@ -70,7 +74,7 @@ export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize,
 
       {/* Resolution row */}
       <div className="flex items-center gap-2 mb-3 lg:mb-2.5">
-        <span className="text-[12px] lg:text-[10px] font-semibold uppercase tracking-widest text-[#9CA3AF] shrink-0">Size</span>
+        <span className="text-[12px] lg:text-[10px] font-semibold uppercase tracking-widest text-[#6B7280] shrink-0">Size</span>
         <LayoutGroup id="resolution">
           <div className="flex gap-1.5 lg:gap-1 flex-1">
             {RESOLUTIONS.map(({ label, value }) => {
@@ -80,13 +84,13 @@ export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize,
                   key={value}
                   onClick={() => onSize(value, value)}
                   className={`relative flex-1 py-2 lg:py-1 text-[13px] lg:text-[11px] rounded-md font-medium transition-colors z-10 ${
-                    active ? 'text-[#5E6AD2]' : 'bg-[#F3F4F6] text-[#6B7280] hover:text-[#374151]'
+                    active ? 'text-[var(--nsg-accent)]' : 'bg-[#F3F4F6] text-[#6B7280] hover:text-[#374151]'
                   }`}
                 >
                   {active && (
                     <motion.div
                       layoutId="res-active"
-                      className="absolute inset-0 rounded-md bg-[#EEF2FF] ring-1 ring-inset ring-[#C7D2FE] -z-10"
+                      className="absolute inset-0 rounded-md bg-[var(--nsg-accent-soft)] ring-1 ring-inset ring-[var(--nsg-accent-ring)] -z-10"
                       transition={{ type: 'spring', stiffness: 400, damping: 35 }}
                     />
                   )}
@@ -103,8 +107,9 @@ export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize,
         {/* Download button */}
         <button
           onClick={() => setOpen((v) => !v)}
-          disabled={loading !== null}
-          className="flex-1 py-2.5 lg:py-2 rounded-md text-[14px] lg:text-[12px] font-semibold bg-[#5E6AD2] hover:bg-[#4F5BBF] text-white transition-all disabled:opacity-40 shadow-sm flex items-center justify-center gap-1.5"
+          disabled={loading !== null || disabled}
+          title={disabled ? 'Add an image first' : undefined}
+          className="flex-1 py-2.5 lg:py-2 rounded-md text-[14px] lg:text-[12px] font-semibold bg-[var(--nsg-accent)] hover:bg-[var(--nsg-accent-strong)] text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[var(--nsg-accent)] shadow-sm flex items-center justify-center gap-1.5"
         >
           {loading ? (
             <span className="opacity-70">Downloading…</span>
@@ -123,7 +128,7 @@ export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize,
 
         {/* Share button */}
         <button
-          onClick={() => navigator.clipboard.writeText(window.location.href).then(() => showToast('URL copied to clipboard')).catch(() => showToast('Copy failed'))}
+          onClick={() => copyText(window.location.href).then((ok) => showToast(ok ? 'URL copied to clipboard' : 'Copy failed'))}
           title="Copy shareable link"
           className="px-2.5 py-2 rounded-md text-[#6B7280] bg-[#F3F4F6] hover:bg-[#E5E7EB] hover:text-[#374151] transition-all"
         >

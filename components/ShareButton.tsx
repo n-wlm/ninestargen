@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { copyText } from '@/lib/clipboard';
 
 export default function ShareButton() {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(window.location.href);
+    const ok = await copyText(window.location.href);
+    if (!ok) return;
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }

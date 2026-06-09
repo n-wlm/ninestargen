@@ -34,14 +34,18 @@ function layerSize(layer: ImageLayer): { w: number; h: number } {
 // Transform strings for every copy of a layer (count, or 2×count when mirrored).
 function placements(layer: ImageLayer): string[] {
   const step = 360 / layer.count;
+  // Per-copy tail: nudge the image off-centre in the sector frame, then spin it
+  // around its own (shifted) centre. offset 0,0 reproduces the centred placement.
+  const tail = `translate(${layer.offsetX},${layer.offsetY}) rotate(${layer.spin})`;
   const out: string[] = [];
   for (let k = 0; k < layer.count; k++) {
     const a = layer.angleOffset + k * step;
     const radial = `translate(${CX},${CY}) rotate(${a}) translate(0,${-layer.radius})`;
-    out.push(`${radial} rotate(${layer.spin})`);
+    out.push(`${radial} ${tail}`);
     if (layer.mirror) {
       // Reflect across the sector's radial axis → seamless kaleidoscope (Dₙ).
-      out.push(`${radial} scale(-1,1) rotate(${layer.spin})`);
+      // scale(-1,1) before the tail mirrors the offset too, keeping symmetry.
+      out.push(`${radial} scale(-1,1) ${tail}`);
     }
   }
   return out;

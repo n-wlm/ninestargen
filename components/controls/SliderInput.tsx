@@ -23,6 +23,8 @@ interface SliderInputProps {
   snap?: number[];
   onChange: (v: number) => void;
   disabled?: boolean;
+  /** Shown in place of the value when disabled, explaining why. */
+  disabledHint?: string;
   resetLabel?: string;
 }
 
@@ -39,6 +41,7 @@ export default function SliderInput({
   snap,
   onChange,
   disabled,
+  disabledHint = 'Not for this shape',
   resetLabel,
 }: SliderInputProps) {
   const [inputVal, setInputVal] = useState(String(value));
@@ -78,12 +81,10 @@ export default function SliderInput({
   }
 
   return (
-    <div
-      className={`group ${disabled ? "opacity-35 pointer-events-none select-none" : ""}`}
-    >
+    <div className="group">
       <div className="flex items-center justify-between mb-2 lg:mb-1.5">
         <div className="flex items-center gap-2 min-h-[22px]">
-          <span className="text-[13px] lg:text-[11px] font-medium text-[#6B7280] tracking-wide uppercase select-none flex items-center gap-1">
+          <span className={`text-[13px] lg:text-[11px] font-medium tracking-wide uppercase select-none flex items-center gap-1 ${disabled ? "text-[#9CA3AF]" : "text-[#6B7280]"}`}>
             {label}
             {tooltip && (
               <span
@@ -109,46 +110,54 @@ export default function SliderInput({
             </button>
           )}
         </div>
-        <div className="flex items-center gap-1.5 min-h-[22px]">
-          <input
-            type="text"
-            value={inputVal}
-            inputMode="numeric"
-            onChange={(e) => setInputVal(e.target.value)}
-            onBlur={(e) => commitInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter")
-                commitInput((e.target as HTMLInputElement).value);
-              if (e.key === "ArrowUp") {
-                e.preventDefault();
-                onChange(value + step);
-              }
-              if (e.key === "ArrowDown") {
-                e.preventDefault();
-                onChange(value - step);
-              }
-            }}
-            className="w-16 lg:w-14 text-right text-[13px] lg:text-[11px] font-mono text-[#111827] bg-transparent border-b border-transparent hover:border-[#E5E7EB] focus:border-[#5E6AD2] focus:outline-none py-0 leading-none transition-colors"
-          />
-          {isModified && !resetLabel && (
-            <button
-              onClick={() => onChange(defaultValue)}
-              title="Reset to default"
-              className="text-[#9CA3AF] hover:text-[#5E6AD2] transition-colors leading-none text-sm lg:text-xs ml-0.5"
-            >
-              ↺
-            </button>
-          )}
-        </div>
+        {disabled ? (
+          <span className="text-[11px] lg:text-[10px] text-[#9CA3AF] italic whitespace-nowrap min-h-[22px] flex items-center">
+            {disabledHint}
+          </span>
+        ) : (
+          <div className="flex items-center gap-1.5 min-h-[22px]">
+            <input
+              type="text"
+              value={inputVal}
+              inputMode="numeric"
+              onChange={(e) => setInputVal(e.target.value)}
+              onBlur={(e) => commitInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter")
+                  commitInput((e.target as HTMLInputElement).value);
+                if (e.key === "ArrowUp") {
+                  e.preventDefault();
+                  onChange(value + step);
+                }
+                if (e.key === "ArrowDown") {
+                  e.preventDefault();
+                  onChange(value - step);
+                }
+              }}
+              className="w-16 lg:w-14 text-right text-[13px] lg:text-[11px] font-mono text-[#111827] bg-transparent border-b border-transparent hover:border-[#E5E7EB] focus:border-[var(--nsg-accent)] focus:outline-none py-0 leading-none transition-colors"
+            />
+            {isModified && !resetLabel && (
+              <button
+                onClick={() => onChange(defaultValue)}
+                title="Reset to default"
+                className="text-[#9CA3AF] hover:text-[var(--nsg-accent)] transition-colors leading-none text-sm lg:text-xs ml-0.5"
+              >
+                ↺
+              </button>
+            )}
+          </div>
+        )}
       </div>
-      <Slider
-        min={min}
-        max={max}
-        step={step}
-        value={[Math.min(max, Math.max(min, value))]}
-        onValueChange={(v) => onChange(applySnap(Array.isArray(v) ? v[0] : v))}
-        className="w-full"
-      />
+      <div className={disabled ? "opacity-35 pointer-events-none select-none" : ""}>
+        <Slider
+          min={min}
+          max={max}
+          step={step}
+          value={[Math.min(max, Math.max(min, value))]}
+          onValueChange={(v) => onChange(applySnap(Array.isArray(v) ? v[0] : v))}
+          className="w-full"
+        />
+      </div>
     </div>
   );
 }

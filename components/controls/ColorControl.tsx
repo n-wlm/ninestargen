@@ -57,7 +57,7 @@ export function ColorControl({ label, value, onChange, showOpacity, opacity = 1,
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <span className="text-[12px] lg:text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">{label}</span>
+        <span className="text-[12px] lg:text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6B7280]">{label}</span>
       )}
       <div className="flex items-center gap-2.5 lg:gap-2">
         <label className="relative cursor-pointer group/swatch">
@@ -80,7 +80,7 @@ export function ColorControl({ label, value, onChange, showOpacity, opacity = 1,
         <HexInput
           value={value}
           onChange={onChange}
-          className="w-[72px] lg:w-[68px] text-[12px] lg:text-[11px] font-mono text-[#6B7280] uppercase tracking-wide bg-transparent border-b border-transparent hover:border-[#E5E7EB] focus:border-[#5E6AD2] focus:outline-none py-0.5 transition-colors"
+          className="w-[72px] lg:w-[68px] text-[12px] lg:text-[11px] font-mono text-[#6B7280] uppercase tracking-wide bg-transparent border-b border-transparent hover:border-[#E5E7EB] focus:border-[var(--nsg-accent)] focus:outline-none py-0.5 transition-colors"
         />
         {showOpacity && onOpacityChange && (
           <div className="flex items-center gap-1.5 ml-auto">
@@ -91,7 +91,7 @@ export function ColorControl({ label, value, onChange, showOpacity, opacity = 1,
               step={0.01}
               value={opacity}
               onChange={(e) => onOpacityChange(parseFloat(e.target.value))}
-              className="w-20 lg:w-16 h-1 accent-[#5E6AD2] cursor-pointer"
+              className="w-20 lg:w-16 h-1 accent-[var(--nsg-accent)] cursor-pointer"
             />
             <span className="text-[12px] lg:text-[11px] font-mono text-[#9CA3AF] w-9 lg:w-8 text-right">{Math.round(opacity * 100)}%</span>
           </div>
@@ -140,7 +140,7 @@ export function GradientBuilder({ colors, onChange, direction, onDirectionChange
                 title={d.ariaLabel}
                 className={`inline-flex w-9 h-9 lg:w-7 lg:h-7 items-center justify-center rounded-md transition-all ${
                 direction === d.value
-                  ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
+                  ? 'bg-[var(--nsg-accent-soft)] text-[var(--nsg-accent)] ring-1 ring-inset ring-[var(--nsg-accent-ring)]'
                   : 'bg-[#F3F4F6] text-[#6B7280] hover:text-[#374151]'
                 }`}
               >
@@ -181,7 +181,7 @@ export function GradientBuilder({ colors, onChange, direction, onDirectionChange
             <HexInput
               value={color}
               onChange={(v) => updateColor(i, v)}
-              className="flex-1 min-w-0 text-[12px] lg:text-[11px] font-mono text-[#6B7280] uppercase bg-transparent border-b border-transparent hover:border-[#E5E7EB] focus:border-[#5E6AD2] focus:outline-none py-0.5 transition-colors"
+              className="flex-1 min-w-0 text-[12px] lg:text-[11px] font-mono text-[#6B7280] uppercase bg-transparent border-b border-transparent hover:border-[#E5E7EB] focus:border-[var(--nsg-accent)] focus:outline-none py-0.5 transition-colors"
             />
             {colors.length > 2 && (
               <button
@@ -198,7 +198,7 @@ export function GradientBuilder({ colors, onChange, direction, onDirectionChange
       {colors.length < 5 && (
         <button
           onClick={() => onChange([...colors, '#ffffff'])}
-          className="text-[13px] lg:text-[11px] text-[#9CA3AF] hover:text-[#5E6AD2] font-medium transition-colors text-left py-0.5"
+          className="text-[13px] lg:text-[11px] text-[#9CA3AF] hover:text-[var(--nsg-accent)] font-medium transition-colors text-left py-0.5"
         >
           + Add stop
         </button>

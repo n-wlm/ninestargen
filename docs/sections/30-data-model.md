@@ -1,0 +1,104 @@
+---
+id: data-model
+title: Data model
+order: 30
+status: current
+last_updated: 2026-06-10
+owner: @naim
+linked_paths: types/star.ts, types/composition.ts, lib/history.ts, lib/url-params.ts
+summary: The three config shapes — StarConfig, CompositionConfig/ImageLayer, and HistoryEntry.
+---
+
+There is no database. The "data" is three in-memory/persisted config shapes.
+
+## Relationships
+
+```mermaid
+erDiagram
+  COMPOSITION ||--o{ IMAGE_LAYER : "stacks (≤15)"
+  HISTORY_ENTRY }o--|| STAR_CONFIG : "snapshots (geometry)"
+  HISTORY_ENTRY }o--|| COMPOSITION : "snapshots (images)"
+  STAR_CONFIG {
+    StarType starType
+    number outerRadius
+    number rotation
+    FillType fillType
+    string fillColor
+  }
+  IMAGE_LAYER {
+    string id
+    string src "data URL"
+    number scale
+    number radius
+    number count "9 or 3"
+    boolean mirror
+  }
+  COMPOSITION {
+    ImageLayer[] layers
+    string bgColor
+    OuterContainer outerContainer
+  }
+  HISTORY_ENTRY {
+    string id
+    number date
+    string mode
+    string format
+    string link "geometry only"
+  }
+```
+
+## StarConfig — geometry
+
+Defined in [types/star.ts](types/star.ts). ~30 fields covering shape
+(`starType`, `outerRadius`, `innerRadiusRatio`, `rotation`, `curveIntensity`,
+`cornerRounding`), fill/stroke/gradient, background, outer container, effects
+(glow/shadow), petal params, and export size. `DEFAULT_CONFIG` holds the
+defaults (e.g. `outerRadius: 250`). Serialised compactly to URL params via
+[lib/url-params.ts](lib/url-params.ts) (short key map).
+
+## CompositionConfig & ImageLayer — images
+
+Defined in [types/composition.ts](types/composition.ts).
+
+- **ImageLayer**: `src` (data URL), intrinsic `naturalWidth/Height`, `visible`,
+  and the controls `scale`, `radius`, `spin`, `angleOffset` (UI label "Angle"),
+  `offsetX`/`offsetY` (shift the image off-centre within each copy), `count`
+  (`9 | 3`), `mirror` (boolean), `opacity`. `LAYER_LIMITS` defines slider
+  bounds/defaults; `makeLayer()` builds a fresh layer.
+- **CompositionConfig**: `layers[]` (rendered bottom→top; the UI list is
+  reversed so top = front), plus `bgColor`, outer-container fields, and export
+  size. `MAX_LAYERS = 15`.
+
+> [!NOTE]
+> Layers are stored back-to-front (array index 0 = bottom). Reorder maps a
+> displayed "up" to `+1` in array order — see the **Workflows** section.
+
+## HistoryEntry — local history
+
+Defined in [lib/history.ts](lib/history.ts). One snapshot per download:
+`{ id, date, mode, format, config, link? }`. The `config` is the full
+`StarConfig` **or** `CompositionConfig` (images include their data URLs, which
+is what makes in-browser restore possible). Persisted to `localStorage` under
+`nsg:history`, newest first, capped at 12 and trimmed to fit the storage quota.
+`link` is only set for geometry (image designs are not URL-encodable).
+
+### Persistence & forward/backward compatibility
+
+History must keep working across future app updates — a stored snapshot should
+never be wiped or break just because the config shape changed. Two mechanisms
+guarantee this (see ADR-006):
+
+- **Versioned envelope.** Data is written as `{ version, entries }`
+  (`SCHEMA_VERSION`). `loadHistory()` also still reads the legacy bare-array
+  format, so existing users lose nothing.
+- **Normalize on load.** Every entry passes through `normalizeEntry()` (and each
+  image layer through [`normalizeLayer()`](types/composition.ts)): the config is
+  merged over the **current defaults** (`DEFAULT_CONFIG` / `DEFAULT_COMPOSITION`),
+  so fields **added** in newer versions are filled in and old snapshots render
+  correctly. A single malformed entry returns `null` and is dropped on its own —
+  it never invalidates the rest of the list.
+
+> [!NOTE]
+> Additive schema changes (new fields) need **no** version bump — normalization
+> handles them. Bump `SCHEMA_VERSION` and add an explicit migration only for a
+> breaking change (a renamed/retyped field that defaults can't repair).

@@ -30,7 +30,8 @@ export function useComposition(initial?: Partial<CompositionConfig>) {
     }));
   }, []);
 
-  // dir: -1 moves toward the front (later in array), +1 toward the back.
+  // dir is added to the array index: +1 moves toward the front (end of array,
+  // rendered on top), -1 toward the back. The UI list is shown reversed.
   const reorderLayer = useCallback((id: string, dir: -1 | 1) => {
     setConfig((prev) => {
       const idx = prev.layers.findIndex((l) => l.id === id);

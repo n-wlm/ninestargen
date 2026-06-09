@@ -34,7 +34,7 @@ export function Slider({
       onChange={(e) => onValueChange?.(parseFloat(e.target.value))}
       className={`nsg-slider ${className}`}
       style={{
-        background: `linear-gradient(to right, #5E6AD2 ${pct}%, #E5E7EB ${pct}%)`,
+        background: `linear-gradient(to right, var(--nsg-accent) ${pct}%, #E5E7EB ${pct}%)`,
       }}
     />
   );
