@@ -5,6 +5,7 @@ import { motion } from 'motion/react';
 import { History } from 'lucide-react';
 import StarPreview from '@/components/StarPreview';
 import ImagePreview from '@/components/ImagePreview';
+import PreviewErrorBoundary from '@/components/PreviewErrorBoundary';
 import ImageEmptyState from '@/components/ImageEmptyState';
 import ControlPanel from '@/components/controls/ControlPanel';
 import ImageControlPanel from '@/components/controls/ImageControlPanel';
@@ -51,7 +52,13 @@ function Generator() {
   // Download history (local to the browser).
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [savePrompt, setSavePrompt] = useState<{ open: boolean; mode: Mode; link?: string; format?: string }>({
+  const [savePrompt, setSavePrompt] = useState<{
+    open: boolean;
+    mode: Mode;
+    link?: string;
+    format?: string;
+    storageWarning?: boolean;
+  }>({
     open: false,
     mode: 'geometry',
   });
@@ -80,14 +87,19 @@ function Generator() {
   // Snapshot the design on every download, then offer to save the link.
   function handleDownloaded(format: 'svg' | 'png' | 'jpeg') {
     const link = !isImages && typeof window !== 'undefined' ? window.location.href : undefined;
-    setEntries(
-      addHistory(
-        isImages
-          ? { mode: 'images', format, config: comp.config }
-          : { mode: 'geometry', format, config, link },
-      ),
+    const { entries: nextEntries, trimmed } = addHistory(
+      isImages
+        ? { mode: 'images', format, config: comp.config }
+        : { mode: 'geometry', format, config, link },
     );
-    setSavePrompt({ open: true, mode, link, format: format === 'jpeg' ? 'jpg' : format });
+    setEntries(nextEntries);
+    setSavePrompt({
+      open: true,
+      mode,
+      link,
+      format: format === 'jpeg' ? 'jpg' : format,
+      storageWarning: trimmed,
+    });
   }
 
   function restore(entry: HistoryEntry) {
@@ -183,21 +195,23 @@ function Generator() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 350, damping: 28 }}
             >
-              {isImages ? (
-                <ImagePreview
-                  config={comp.config}
-                  svgRef={svgRef}
-                  className="w-full h-full"
-                  style={PREVIEW_SHADOW}
-                />
-              ) : (
-                <StarPreview
-                  config={config}
-                  svgRef={svgRef}
-                  className="w-full h-full"
-                  style={PREVIEW_SHADOW}
-                />
-              )}
+              <PreviewErrorBoundary>
+                {isImages ? (
+                  <ImagePreview
+                    config={comp.config}
+                    svgRef={svgRef}
+                    className="w-full h-full"
+                    style={PREVIEW_SHADOW}
+                  />
+                ) : (
+                  <StarPreview
+                    config={config}
+                    svgRef={svgRef}
+                    className="w-full h-full"
+                    style={PREVIEW_SHADOW}
+                  />
+                )}
+              </PreviewErrorBoundary>
             </motion.div>
           )}
         </div>
@@ -237,6 +251,7 @@ function Generator() {
         mode={savePrompt.mode}
         link={savePrompt.link}
         format={savePrompt.format}
+        storageWarning={savePrompt.storageWarning}
         onClose={() => setSavePrompt((s) => ({ ...s, open: false }))}
         onOpenHistory={() => setHistoryOpen(true)}
       />

@@ -42,12 +42,16 @@ Branch: `chore/system-check` (ein Commit pro Phase, PR am Ende — kein Auto-Mer
   Reset all → Inputs spiegeln Defaults zurück, Hex-Normalisierung (#FF0000), Images-Modus
   + Teal-Akzent ok, Konsole fehlerfrei
 
-### Phase 4 — History & Storage robust ⬜
-- [ ] `lib/history.ts`: QuotaExceeded abfangen → Nutzer-Feedback statt stillem History-Verlust
-- [ ] Dedup ohne Voll-`JSON.stringify` (Vergleich über billigere Signatur)
-- [ ] `lib/image-upload.ts`: Bild-Dimensionen validieren (NaN/0-Schutz für `layerSize`)
-- [ ] Error Boundary um StarPreview/ImagePreview
-- Akzeptanz: Quota-Fall manuell simuliert, Fehlerpfad sichtbar; Gates grün
+### Phase 4 — History & Storage robust ✅
+- [x] `addHistory` liefert jetzt `{ entries, trimmed }`; bei vollem Storage zeigt
+      `SaveDesignModal` eine Amber-Warnung statt History stillschweigend zu kürzen
+- [x] Dedup über `configSignature()` — lange Strings (Data-URLs) werden zu
+      Länge+Kopf+Ende gefaltet statt Multi-MB-Serialisierung im Main Thread
+- [x] Bild-Dimensionen: bereits abgesichert (Fallback 300 in `readDimensions`,
+      `|| 1` in `layerSize`) — Audit-Befund war schon gelöst, keine Änderung nötig
+- [x] `PreviewErrorBoundary` um beide Previews (defektes Design crasht nicht mehr die App)
+- Verifiziert im Browser: Quota-Fehler simuliert → Warnung erscheint; normaler
+  Download → keine Warnung, Eintrag persistiert; Dedup: 2 identische Downloads = 1 Eintrag
 
 ### Phase 2 — Styling-Konsistenz ⬜
 - [ ] Hartkodierte `indigo-*` → `var(--nsg-accent…)` in: `app/loading.tsx`, `app/gallery/page.tsx`,

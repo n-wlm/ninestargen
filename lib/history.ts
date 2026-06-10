@@ -93,19 +93,37 @@ function persist(entries: HistoryEntry[]): HistoryEntry[] {
   return [];
 }
 
+// Structural signature for the dedup check. Image layers carry multi-MB data-URL
+// strings — serializing those in full on every download blocks the main thread,
+// so long strings are folded to length + head + tail (collision-safe enough here).
+function configSignature(config: StarConfig | CompositionConfig): string {
+  return JSON.stringify(config, (_key, value) =>
+    typeof value === 'string' && value.length > 256
+      ? `${value.length}:${value.slice(0, 64)}…${value.slice(-64)}`
+      : value,
+  );
+}
+
+export interface AddHistoryResult {
+  entries: HistoryEntry[];
+  // True when entries had to be dropped because localStorage is full — the
+  // caller should tell the user instead of losing history silently.
+  trimmed: boolean;
+}
+
 export function addHistory(input: {
   mode: 'geometry' | 'images';
   format: string;
   config: StarConfig | CompositionConfig;
   link?: string;
-}): HistoryEntry[] {
+}): AddHistoryResult {
   const existing = loadHistory();
 
   // Skip if identical to the most recent entry (e.g. downloading several formats
   // of the same design) — just refresh its timestamp/format instead.
   const last = existing[0];
   const same =
-    last && last.mode === input.mode && JSON.stringify(last.config) === JSON.stringify(input.config);
+    last && last.mode === input.mode && configSignature(last.config) === configSignature(input.config);
 
   const stamp = typeof Date !== 'undefined' ? Date.now() : 0;
   const id =
@@ -115,7 +133,8 @@ export function addHistory(input: {
     ? [{ ...last, date: stamp, format: input.format, link: input.link }, ...existing.slice(1)]
     : [{ id, date: stamp, ...input }, ...existing];
 
-  return persist(next);
+  const entries = persist(next);
+  return { entries, trimmed: entries.length < Math.min(next.length, MAX) };
 }
 
 export function removeHistory(id: string): HistoryEntry[] {

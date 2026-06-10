@@ -10,11 +10,13 @@ interface Props {
   mode: 'geometry' | 'images';
   link?: string;
   format?: string;
+  /** Browser storage was full — older history entries had to be removed. */
+  storageWarning?: boolean;
   onClose: () => void;
   onOpenHistory: () => void;
 }
 
-export default function SaveDesignModal({ open, mode, link, format, onClose, onOpenHistory }: Props) {
+export default function SaveDesignModal({ open, mode, link, format, storageWarning, onClose, onOpenHistory }: Props) {
   const [copied, setCopied] = useState(false);
 
   async function copy() {
@@ -111,6 +113,13 @@ export default function SaveDesignModal({ open, mode, link, format, onClose, onO
                   View history
                 </button>
               </>
+            )}
+
+            {storageWarning && (
+              <p className="mt-3 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-[11.5px] text-amber-800 leading-relaxed">
+                Your browser storage is full — older history entries were removed to make room
+                for this design.
+              </p>
             )}
 
             <p className="mt-3 text-[10.5px] text-[#9CA3AF] leading-relaxed">
