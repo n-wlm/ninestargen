@@ -37,6 +37,9 @@ const IMAGES_ACCENT = {
   '--nsg-accent-border': '#5EEAD4',
 } as React.CSSProperties;
 
+// Stable reference — an inline literal here would defeat memo() on the previews.
+const PREVIEW_SHADOW: React.CSSProperties = { filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.10))' };
+
 function Generator() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [mode, setMode] = useState<Mode>('geometry');
@@ -185,14 +188,14 @@ function Generator() {
                   config={comp.config}
                   svgRef={svgRef}
                   className="w-full h-full"
-                  style={{ filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.10))' }}
+                  style={PREVIEW_SHADOW}
                 />
               ) : (
                 <StarPreview
                   config={config}
                   svgRef={svgRef}
                   className="w-full h-full"
-                  style={{ filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.10))' }}
+                  style={PREVIEW_SHADOW}
                 />
               )}
             </motion.div>

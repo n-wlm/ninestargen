@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { memo, useId, useMemo } from 'react';
 import type { StarConfig } from '@/types/star';
 import { buildStarPaths, buildInnerPolygonPath } from '@/lib/star-geometry';
 
@@ -30,14 +30,25 @@ function ngon9Path(cx: number, cy: number, r: number, rot: number): string {
   return `M ${pts.join(' L ')} Z`;
 }
 
-export default function StarPreview({ config, className, style, svgRef }: StarPreviewProps) {
+const GRADIENT_COORDS: Record<string, { x1: string; y1: string; x2: string; y2: string }> = {
+  'to-bottom':       { x1: '0%', y1: '0%',   x2: '0%',   y2: '100%' },
+  'to-right':        { x1: '0%', y1: '50%',  x2: '100%', y2: '50%' },
+  'to-bottom-right': { x1: '0%', y1: '0%',   x2: '100%', y2: '100%' },
+  'to-top-right':    { x1: '0%', y1: '100%', x2: '100%', y2: '0%' },
+};
+const GRADIENT_COORDS_FALLBACK = GRADIENT_COORDS['to-bottom-right'];
+
+function StarPreview({ config, className, style, svgRef }: StarPreviewProps) {
   const id = useId().replace(/:/g, '_');
   const gradId = `grad_${id}`;
   const filterId = `filter_${id}`;
   const hasFilter = config.glowRadius > 0 || config.shadowBlur > 0;
 
-  const paths = buildStarPaths(CX, CY, config);
-  const innerPath = config.showInnerPolygon ? buildInnerPolygonPath(CX, CY, config) : null;
+  const paths = useMemo(() => buildStarPaths(CX, CY, config), [config]);
+  const innerPath = useMemo(
+    () => (config.showInnerPolygon ? buildInnerPolygonPath(CX, CY, config) : null),
+    [config],
+  );
 
   function getFill(): string {
     if (config.fillType === 'none') return 'none';
@@ -45,14 +56,7 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
     return `url(#${gradId})`;
   }
 
-  function gradientCoords() {
-    const dir = config.gradientDirection;
-    if (dir === 'to-bottom') return { x1: '0%', y1: '0%', x2: '0%', y2: '100%' };
-    if (dir === 'to-right') return { x1: '0%', y1: '50%', x2: '100%', y2: '50%' };
-    if (dir === 'to-bottom-right') return { x1: '0%', y1: '0%', x2: '100%', y2: '100%' };
-    if (dir === 'to-top-right') return { x1: '0%', y1: '100%', x2: '100%', y2: '0%' };
-    return { x1: '0%', y1: '0%', x2: '100%', y2: '100%' };
-  }
+  const gradientCoords = GRADIENT_COORDS[config.gradientDirection] ?? GRADIENT_COORDS_FALLBACK;
 
   const strokeProps = {
     stroke: config.strokeWidth > 0 ? config.strokeColor : 'none',
@@ -81,7 +85,7 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
     >
       <defs>
         {config.fillType === 'linear-gradient' && (
-          <linearGradient id={gradId} {...gradientCoords()} gradientUnits="objectBoundingBox">
+          <linearGradient id={gradId} {...gradientCoords} gradientUnits="objectBoundingBox">
             {config.gradientColors.map((color, i) => (
               <stop key={i} offset={`${(i / (config.gradientColors.length - 1)) * 100}%`} stopColor={color} />
             ))}
@@ -160,3 +164,7 @@ export default function StarPreview({ config, className, style, svgRef }: StarPr
     </svg>
   );
 }
+
+// Memoized: the generator page re-renders on unrelated state (history panel,
+// modals, toasts) — without memo every such render rebuilds all star paths.
+export default memo(StarPreview);

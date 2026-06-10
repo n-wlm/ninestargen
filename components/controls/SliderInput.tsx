@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 
 // Strips non-numeric characters and returns the typed number as-is (1:1 units).
@@ -44,16 +44,20 @@ export default function SliderInput({
   disabledHint = 'Not for this shape',
   resetLabel,
 }: SliderInputProps) {
-  const [inputVal, setInputVal] = useState(String(value));
-  const isModified = Math.abs(value - defaultValue) > step * 0.01;
+  const formatted = format
+    ? format(value)
+    : String(step < 1 ? value.toFixed(2) : Math.round(value));
 
-  useEffect(() => {
-    setInputVal(
-      format
-        ? format(value)
-        : String(step < 1 ? value.toFixed(2) : Math.round(value)),
-    );
-  }, [value, format, step]);
+  // Local text state mirrors the model value; reset it during render when the
+  // model changes (React's documented alternative to setState-in-effect).
+  const [inputVal, setInputVal] = useState(formatted);
+  const [prevFormatted, setPrevFormatted] = useState(formatted);
+  if (formatted !== prevFormatted) {
+    setPrevFormatted(formatted);
+    setInputVal(formatted);
+  }
+
+  const isModified = Math.abs(value - defaultValue) > step * 0.01;
 
   function commitInput(raw: string) {
     const num = parse ? parse(raw) : stripNumber(raw);

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useMemo } from 'react';
 import type { CompositionConfig, ImageLayer } from '@/types/composition';
 
 const VIEWBOX_SIZE = 600;
@@ -51,13 +52,20 @@ function placements(layer: ImageLayer): string[] {
   return out;
 }
 
-export default function ImagePreview({ config, className, style, svgRef }: ImagePreviewProps) {
-  const visible = config.layers.filter((l) => l.visible && l.src);
+function ImagePreview({ config, className, style, svgRef }: ImagePreviewProps) {
+  // Sizes and transform strings per visible layer, recomputed only when the
+  // layer list actually changes.
+  const visible = useMemo(
+    () =>
+      config.layers
+        .filter((l) => l.visible && l.src)
+        .map((layer) => ({ layer, size: layerSize(layer), transforms: placements(layer) })),
+    [config.layers],
+  );
 
   // Container hugs the outermost reach of the visible layers.
-  const maxReach = visible.reduce((m, l) => {
-    const { w, h } = layerSize(l);
-    return Math.max(m, l.radius + Math.max(w, h) / 2);
+  const maxReach = visible.reduce((m, { layer, size }) => {
+    return Math.max(m, layer.radius + Math.max(size.w, size.h) / 2);
   }, 0);
   const baseR = maxReach > 0 ? maxReach : 200;
   const containerR = Math.min(295, baseR + config.outerContainerPadding);
@@ -101,25 +109,26 @@ export default function ImagePreview({ config, className, style, svgRef }: Image
       )}
 
       {/* Layers — array order is bottom→top */}
-      {visible.map((layer) => {
-        const { w, h } = layerSize(layer);
-        return (
-          <g key={layer.id} opacity={layer.opacity}>
-            {placements(layer).map((t, i) => (
-              <image
-                key={i}
-                href={layer.src}
-                x={-w / 2}
-                y={-h / 2}
-                width={w}
-                height={h}
-                transform={t}
-                preserveAspectRatio="xMidYMid meet"
-              />
-            ))}
-          </g>
-        );
-      })}
+      {visible.map(({ layer, size, transforms }) => (
+        <g key={layer.id} opacity={layer.opacity}>
+          {transforms.map((t, i) => (
+            <image
+              key={i}
+              href={layer.src}
+              x={-size.w / 2}
+              y={-size.h / 2}
+              width={size.w}
+              height={size.h}
+              transform={t}
+              preserveAspectRatio="xMidYMid meet"
+            />
+          ))}
+        </g>
+      ))}
     </svg>
   );
 }
+
+// Memoized for the same reason as StarPreview — layers carry large data-URL
+// hrefs, so skipping unrelated re-renders keeps the images mode responsive.
+export default memo(ImagePreview);

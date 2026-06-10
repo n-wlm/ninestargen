@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ArrowDown, ArrowDownRight, ArrowRight, ArrowUpRight, type LucideIcon } from 'lucide-react';
 
 import type { StarConfig } from '@/types/star';
@@ -15,8 +15,14 @@ function normalizeHex(raw: string): string | null {
 
 // Editable hex field — type or paste a code, committed on Enter/blur.
 function HexInput({ value, onChange, className }: { value: string; onChange: (v: string) => void; className?: string }) {
+  // Local text state mirrors the committed color; reset it during render when
+  // the model changes (React's documented alternative to setState-in-effect).
   const [text, setText] = useState(value);
-  useEffect(() => setText(value), [value]);
+  const [prevValue, setPrevValue] = useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
+    setText(value);
+  }
 
   function commit() {
     const next = normalizeHex(text);

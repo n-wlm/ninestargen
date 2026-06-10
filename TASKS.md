@@ -30,12 +30,17 @@ Branch: `chore/system-check` (ein Commit pro Phase, PR am Ende — kein Auto-Mer
       `globals.css`; `class-variance-authority` → ui/tabs|badge|button. Nichts entfernt.
 - Verifiziert: tsc ✓, Build ✓, Lint nur noch 2 Fehler (setState-in-Effect → Phase 3)
 
-### Phase 3 — Render-Performance ⬜ (vorgezogen vor Phase 2)
-- [ ] `StarPreview`: `buildStarPaths`/`buildInnerPolygonPath`/`gradientCoords`/`strokeProps` memoizen
-- [ ] `ImagePreview`: `placements()` memoizen
-- [ ] `GeneratorClient`: `exportProps`/Callbacks stabilisieren (`useCallback`), dann `memo()` auf Previews
-- [ ] SliderInput/ColorControl: setState-in-Effect beheben (fixt die 2 restlichen Lint-Fehler)
-- Akzeptanz: Lint 0 Fehler; Preview verifiziert (Slider ziehen flüssig, kein visueller Regress)
+### Phase 3 — Render-Performance ✅ (vorgezogen vor Phase 2)
+- [x] `StarPreview`: Pfad-Berechnung in `useMemo`, `gradientCoords` als Modul-Konstante, `memo()`
+- [x] `ImagePreview`: Layer-Größen + Transforms in einem `useMemo`, `memo()`
+- [x] `GeneratorClient`: Preview-`style` als Modul-Konstante (`PREVIEW_SHADOW`) — inline-Literal
+      hätte `memo()` ausgehebelt. `exportProps` bewusst NICHT memoized: geht nur an die leichten
+      Export-Panels (nicht memoized), Stabilisierung brächte dort nichts.
+- [x] SliderInput + ColorControl/HexInput: setState-in-Effect → „derived state during render"
+      (offizielles React-Pattern mit prev-Tracking) — Lint jetzt 0 Findings
+- Verifiziert: tsc ✓, Lint 0 ✓, Build ✓; Browser: Wert tippen → Geometrie aktualisiert,
+  Reset all → Inputs spiegeln Defaults zurück, Hex-Normalisierung (#FF0000), Images-Modus
+  + Teal-Akzent ok, Konsole fehlerfrei
 
 ### Phase 4 — History & Storage robust ⬜
 - [ ] `lib/history.ts`: QuotaExceeded abfangen → Nutzer-Feedback statt stillem History-Verlust
