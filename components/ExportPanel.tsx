@@ -33,6 +33,7 @@ export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize,
   const [toast, setToast] = useState<{ msg: string; key: number } | null>(null);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const toastCounter = useRef(0);
 
   useEffect(() => {
     if (!open) return;
@@ -46,7 +47,7 @@ export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize,
   }, [open]);
 
   function showToast(msg: string) {
-    setToast({ msg, key: Date.now() });
+    setToast({ msg, key: ++toastCounter.current });
     setTimeout(() => setToast(null), 2500);
   }
 

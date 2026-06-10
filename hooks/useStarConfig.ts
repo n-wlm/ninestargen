@@ -11,13 +11,9 @@ export function useStarConfig(initial?: Partial<StarConfig>) {
     setConfig((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const updateMany = useCallback((partial: Partial<StarConfig>) => {
-    setConfig((prev) => ({ ...prev, ...partial }));
-  }, []);
-
   const reset = useCallback(() => {
     setConfig({ ...DEFAULT_CONFIG });
   }, []);
 
-  return { config, update, updateMany, reset, setConfig };
+  return { config, update, reset, setConfig };
 }

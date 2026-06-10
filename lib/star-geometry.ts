@@ -174,33 +174,6 @@ function buildKite(cx: number, cy: number, cfg: StarConfig): string[] {
   return [parts.join(' ')];
 }
 
-// ── Stellated 9-gon ───────────────────────────────────────────────────────────
-function buildStellated(cx: number, cy: number, cfg: StarConfig): string[] {
-  const ngonR = cfg.outerRadius * cfg.innerRadiusRatio;
-  const stellH = cfg.outerRadius * (1 - cfg.innerRadiusRatio);
-  const baseRot = toRad(cfg.rotation);
-
-  const base: [number, number][] = Array.from({ length: N }, (_, i) =>
-    pt(cx, cy, ngonR, baseRot + (TWO_PI * i) / N),
-  );
-
-  const verts: [number, number][] = [];
-  for (let i = 0; i < N; i++) {
-    const a = base[i];
-    const b = base[(i + 1) % N];
-    const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
-    const dx = mx - cx, dy = my - cy;
-    const len = Math.sqrt(dx * dx + dy * dy) || 1;
-    verts.push(a, [mx + (dx / len) * stellH, my + (dy / len) * stellH]);
-  }
-  return [buildPolygonPath(verts, cfg.cornerRounding, cfg.outerRadius, 0)];
-}
-
-// ── Explosion ─────────────────────────────────────────────────────────────────
-function buildExplosion(cx: number, cy: number, cfg: StarConfig): string[] {
-  return buildSpike(cx, cy, { ...cfg, innerRadiusRatio: Math.min(cfg.innerRadiusRatio, 0.2) });
-}
-
 // ── Petal Rose ────────────────────────────────────────────────────────────────
 function buildPetal(cx: number, cy: number, cfg: StarConfig): string[] {
   const R = cfg.outerRadius;

@@ -20,13 +20,15 @@ Branch: `chore/system-check` (ein Commit pro Phase, PR am Ende — kein Auto-Mer
 - [x] ESLint: `docs/**` ignorieren, damit Lint als Gate brauchbar ist
 - Akzeptanz: Lint zeigt nur noch echte App-Findings (≤ 5 statt 9.017)
 
-### Phase 1 — Dead Code & Quick Wins ⬜
-- [ ] `updateMany()` aus `hooks/useStarConfig.ts` entfernen (nirgends genutzt)
-- [ ] `buildStellated`/`buildExplosion` aus `lib/star-geometry.ts` entfernen (nicht im Dispatcher)
-- [ ] `ExportPanel.tsx:49`: Toast-Key ohne `Date.now()` (Counter/Ref) — fixt Lint-Fehler
-- [ ] Dependencies entfernen (Owner-Sign-off ✓): `@base-ui/react` (0 Imports), `shadcn` (CLI, gehört
-      nicht in deps); `tw-animate-css` + `class-variance-authority` vorher auf Nutzung prüfen
-- Akzeptanz: Gates grün, `npm run build` unverändert erfolgreich, keine toten Exporte mehr
+### Phase 1 — Dead Code & Quick Wins ✅
+- [x] `updateMany()` aus `hooks/useStarConfig.ts` entfernt (nirgends genutzt)
+- [x] `buildStellated`/`buildExplosion` aus `lib/star-geometry.ts` entfernt (nicht im Dispatcher)
+- [x] `ExportPanel.tsx`: Toast-Key über Ref-Counter statt `Date.now()` — Lint-Fehler behoben
+- [x] Dependencies geprüft — **Audit-Befund korrigiert: ALLE Dependencies sind in Gebrauch.**
+      `@base-ui/react` → 5 Dateien in `components/ui/`; `shadcn` → CSS-Import
+      `shadcn/tailwind.css` in `app/globals.css` (Build bricht ohne!); `tw-animate-css` →
+      `globals.css`; `class-variance-authority` → ui/tabs|badge|button. Nichts entfernt.
+- Verifiziert: tsc ✓, Build ✓, Lint nur noch 2 Fehler (setState-in-Effect → Phase 3)
 
 ### Phase 3 — Render-Performance ⬜ (vorgezogen vor Phase 2)
 - [ ] `StarPreview`: `buildStarPaths`/`buildInnerPolygonPath`/`gradientCoords`/`strokeProps` memoizen
