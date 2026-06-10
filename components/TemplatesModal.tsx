@@ -143,7 +143,7 @@ export default function TemplatesModal({
                 <div className="relative flex items-start justify-between gap-4">
                   <div>
                     <motion.p
-                      className="text-indigo-500 text-[11px] font-semibold uppercase tracking-widest mb-1.5 sm:mb-2"
+                      className="text-[var(--nsg-accent)] text-[11px] font-semibold uppercase tracking-widest mb-1.5 sm:mb-2"
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.05, duration: 0.3 }}
@@ -190,7 +190,7 @@ export default function TemplatesModal({
                               transition: { duration: 0.25, ease: "easeOut" },
                             },
                           }}
-                          className="px-2.5 py-1 rounded-full border border-indigo-200 bg-white text-indigo-600 text-[11px] font-medium"
+                          className="px-2.5 py-1 rounded-full border border-[var(--nsg-accent-ring)] bg-white text-[var(--nsg-accent-strong)] text-[11px] font-medium"
                         >
                           {pill}
                         </motion.span>

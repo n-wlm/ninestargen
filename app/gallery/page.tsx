@@ -50,7 +50,7 @@ export default function GalleryPage() {
         <p className="text-sm text-gray-500 mb-3">Want to start from scratch?</p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--nsg-accent)] hover:bg-[var(--nsg-accent-strong)] text-white text-sm font-medium transition-colors shadow-sm"
         >
           Open Generator
         </Link>

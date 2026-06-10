@@ -53,11 +53,13 @@ Branch: `chore/system-check` (ein Commit pro Phase, PR am Ende — kein Auto-Mer
 - Verifiziert im Browser: Quota-Fehler simuliert → Warnung erscheint; normaler
   Download → keine Warnung, Eintrag persistiert; Dedup: 2 identische Downloads = 1 Eintrag
 
-### Phase 2 — Styling-Konsistenz ⬜
-- [ ] Hartkodierte `indigo-*` → `var(--nsg-accent…)` in: `app/loading.tsx`, `app/gallery/page.tsx`,
-      `app/about/page.tsx`, `components/TemplatesModal.tsx`, `components/gallery/PresetCard.tsx`
-- [ ] Defaults-Definitionen prüfen/bündeln (`DEFAULT_CONFIG`, `DEFAULT_COMPOSITION`)
-- Akzeptanz: `grep indigo-` nur noch in CSS-Variablen-Definitionen; visuell identisch (Preview)
+### Phase 2 — Styling-Konsistenz ✅
+- [x] Alle hartkodierten `indigo-*` → `var(--nsg-accent…)` ersetzt (loading, gallery, about,
+      TemplatesModal, PresetCard). Mapping: 500→accent, 600→strong, 300→border (exakt),
+      200→ring (exakt), 100→soft. `grep indigo-|teal-` in app/components: 0 Treffer.
+- [x] Defaults: bewusst NICHT zentralisiert — `DEFAULT_CONFIG`/`DEFAULT_COMPOSITION` liegen
+      jeweils neben ihrem Typ (konsistentes Muster); zentrale Datei wäre reine Indirektion.
+- Verifiziert: Gates grün; Browser: gallery-CTA & about-Links rendern rgb(94,106,210) = accent
 
 ### Phase 5 — Export-Deduplikation ⬜
 - [ ] Gemeinsame Export-Logik aus `ExportPanel` + `MobileExportFab` in Hook (`useExport`) extrahieren

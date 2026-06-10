@@ -49,7 +49,7 @@ export default function AboutPage() {
             share what you’ve created, please feel free to reach out to me at{" "}
             <a
               href="mailto:naim@woellmer.io"
-              className="text-indigo-500 hover:text-indigo-600 transition-colors"
+              className="text-[var(--nsg-accent)] hover:text-[var(--nsg-accent-strong)] transition-colors"
             >
               naim@woellmer.io
             </a>
@@ -63,7 +63,7 @@ export default function AboutPage() {
 
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[var(--nsg-accent)] hover:bg-[var(--nsg-accent-strong)] text-white text-sm font-medium transition-colors shadow-sm"
           >
             Start Creating →
           </Link>

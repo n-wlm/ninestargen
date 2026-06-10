@@ -12,11 +12,11 @@ export default function Loading() {
       <div className="relative w-full max-w-sm rounded-2xl border border-white/80 bg-white/85 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.14)] backdrop-blur-sm">
         <div className="flex items-center gap-4">
           <div className="relative h-11 w-11">
-            <div className="absolute inset-0 rounded-full border-2 border-indigo-100" />
-            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-indigo-500 border-r-indigo-300 animate-spin" />
+            <div className="absolute inset-0 rounded-full border-2 border-[var(--nsg-accent-soft)]" />
+            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-[var(--nsg-accent)] border-r-[var(--nsg-accent-border)] animate-spin" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-500">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--nsg-accent)]">
               ninestar.app
             </p>
             <p className="mt-1 text-sm font-medium text-slate-700">

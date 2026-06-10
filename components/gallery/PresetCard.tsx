@@ -18,7 +18,7 @@ export default function PresetCard({ preset }: PresetCardProps) {
   return (
     <Link
       href={href}
-      className="group flex flex-col rounded-2xl border border-gray-100 bg-white hover:border-indigo-200 hover:shadow-md transition-all duration-200 overflow-hidden"
+      className="group flex flex-col rounded-2xl border border-gray-100 bg-white hover:border-[var(--nsg-accent-ring)] hover:shadow-md transition-all duration-200 overflow-hidden"
     >
       {/* Star preview */}
       <div className="aspect-square bg-white p-4 flex items-center justify-center">
