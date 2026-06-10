@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated documentation site (keystonedoc) incl. vendored mermaid.min.js —
+    // not app code; was producing ~9k phantom lint findings.
+    "docs/**",
   ]),
 ]);
 
