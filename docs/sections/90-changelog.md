@@ -14,6 +14,15 @@ the sections touched, and a one-line summary.
 
 ## 2026-06-10
 
+- System-wide performance & consistency pass (branch `chore/system-check`):
+  previews memoized (`memo()` + `useMemo` for geometry/placements); export
+  logic unified into `useExport` + `ExportToast` (shared by `ExportPanel` and
+  `MobileExportFab`); new `PreviewErrorBoundary`; `addHistory` returns
+  `{ entries, trimmed }` with a storage warning in `SaveDesignModal` and a
+  cheap `configSignature()` dedup; dead code removed (`updateMany`,
+  `buildStellated`, `buildExplosion`); all hardcoded `indigo-*` accents
+  replaced with `var(--nsg-accent…)`; ESLint now ignores `docs/**` (lint gate
+  is clean at 0 findings). Updated architecture + data-model sections.
 - Made history **durable across app updates**: stored as a versioned envelope and
   normalized on load (configs merged over current defaults; bad entries dropped
   individually) so future schema changes don't wipe or break saved designs. Added

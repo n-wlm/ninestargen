@@ -61,16 +61,22 @@ Branch: `chore/system-check` (ein Commit pro Phase, PR am Ende — kein Auto-Mer
       jeweils neben ihrem Typ (konsistentes Muster); zentrale Datei wäre reine Indirektion.
 - Verifiziert: Gates grün; Browser: gallery-CTA & about-Links rendern rgb(94,106,210) = accent
 
-### Phase 5 — Export-Deduplikation ⬜
-- [ ] Gemeinsame Export-Logik aus `ExportPanel` + `MobileExportFab` in Hook (`useExport`) extrahieren
-- [ ] Eine Toast-Implementierung statt zwei
-- [ ] ControlPanels bewusst NICHT vereinheitlichen (Entscheidung: Domänen zu verschieden,
-      erzwungene Abstraktion wäre schlechter als die Duplikation)
-- Akzeptanz: Export in beiden UIs (Desktop/Mobile) für PNG/SVG/JPG in beiden Modi verifiziert
+### Phase 5 — Export-Deduplikation ✅
+- [x] `hooks/useExport.ts`: gemeinsame Download/Toast-Logik + kanonische `RESOLUTIONS`
+- [x] `components/ExportToast.tsx`: eine Toast-Implementierung (vorher 2× identisches JSX);
+      Toast-Timer wird jetzt korrekt ge-cleart statt zu überlappen
+- [x] Bonus: hartkodierter Indigo-Gradient im Mobile-Download-Button (inline-`style`,
+      von Phase 2s Klassen-grep nicht erfasst) → `var(--nsg-accent…)`
+- [x] ControlPanels bewusst NICHT vereinheitlicht (Domänen zu verschieden)
+- Verifiziert im Browser: Desktop PNG (Canvas-Pfad) + SVG ✓, Mobile-Sheet JPG ✓,
+  Toast + SaveDesignModal in beiden UIs, Gradient rendert Akzentfarbe ✓; Gates grün
 
-### Abschluss ⬜
-- [ ] `documentation.html` via keystonedoc aktuell (läuft pro Phase mit)
-- [ ] PR öffnen (`chore/system-check` → `main`), Phasen-Commits als Audit-Trail
+### Abschluss ✅
+- [x] `documentation.html` via keystonedoc aktualisiert (Architektur, Datenmodell,
+      Changelog; Build: 8 Sektionen, 100 % Health)
+- [x] PR öffnen (`chore/system-check` → `main`), Phasen-Commits als Audit-Trail
 
-## Nächster Schritt
-Phase 0 committen, dann Phase 1 (Dead Code + Dependencies).
+## Status: Plan vollständig umgesetzt (2026-06-10)
+Alle 6 Phasen abgeschlossen. Endstand der Gates: tsc ✓ · Lint 0 Findings ✓ · Build ✓.
+Hinweis für Verifikation im Preview-Browser: Bei leerem `main` zuerst Viewport prüfen
+(`preview_resize` auf feste Maße) — 0×0-Fenster lässt motion-Animationen nie starten.

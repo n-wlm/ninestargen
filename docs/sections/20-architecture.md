@@ -31,9 +31,10 @@ which preview to render.
 ```mermaid
 flowchart TD
   GC[GeneratorClient] --> MT[Mode switch]
-  GC -->|geometry| CP[ControlPanel] --> SP[StarPreview svg]
-  GC -->|images| ICP[ImageControlPanel] --> IP[ImagePreview svg]
+  GC -->|geometry| CP[ControlPanel] --> EB[PreviewErrorBoundary] --> SP[StarPreview svg]
+  GC -->|images| ICP[ImageControlPanel] --> EB --> IP[ImagePreview svg]
   GC --> EP[ExportPanel / MobileExportFab]
+  EP -.shared logic.-> UE[useExport + ExportToast]
   GC --> SM[SaveDesignModal]
   GC --> HP[HistoryPanel]
   CP -.uses.-> SI[SliderInput / ColorControl / primitives]
@@ -43,7 +44,15 @@ flowchart TD
 ```
 
 Both previews render into the **same `svgRef`**, which is all the export
-pipeline needs — so PNG/SVG/JPG export is identical for both modes.
+pipeline needs — so PNG/SVG/JPG export is identical for both modes. They are
+wrapped in [PreviewErrorBoundary](components/PreviewErrorBoundary.tsx) so a
+corrupted design (e.g. restored from history) can't take down the editor.
+
+The two export UIs — desktop [ExportPanel](components/ExportPanel.tsx) and the
+mobile sheet [MobileExportFab](components/MobileExportFab.tsx) — share their
+download/toast logic via the [useExport](hooks/useExport.ts) hook (which also
+owns the canonical `RESOLUTIONS` list) and render the same
+[ExportToast](components/ExportToast.tsx); only the surrounding UI differs.
 
 ## Rendering & export pipeline
 
@@ -55,6 +64,11 @@ Everything is **SVG**, on a fixed `600×600` viewBox centred at `(300,300)`.
 - **Images**: [ImagePreview](components/ImagePreview.tsx) places each visible
   layer `count` (or `2×count` when mirrored) times via SVG `transform`, each an
   `<image href="data:…">`.
+- **Render cost**: both previews are `memo()`-wrapped and compute their
+  geometry/placements in `useMemo`, so unrelated editor state (modals, history
+  panel, toasts) re-renders neither the trigonometry nor the data-URL-heavy
+  `<image>` trees. `GeneratorClient` keeps the preview `style` prop a module
+  constant for the same reason.
 - **Export**: [lib/export.ts](lib/export.ts) serialises the `<svg>` behind
   `svgRef`. SVG is downloaded directly (self-contained, images inlined); PNG/JPG
   are drawn onto a canvas at the chosen resolution. Because uploaded images are

@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
-import { exportSVG, exportRaster } from '@/lib/export';
+import { useExport, RESOLUTIONS, type ExportFormat } from '@/hooks/useExport';
+import ExportToast from '@/components/ExportToast';
 import { copyText } from '@/lib/clipboard';
 
 interface ExportPanelProps {
@@ -11,29 +12,20 @@ interface ExportPanelProps {
   exportHeight: number;
   onSize: (width: number, height: number) => void;
   filename?: string;
-  onDownloaded?: (format: 'svg' | 'png' | 'jpeg') => void;
+  onDownloaded?: (format: ExportFormat) => void;
   disabled?: boolean; // nothing to export (e.g. images mode with no layers)
 }
 
-const RESOLUTIONS = [
-  { label: '512', value: 512 },
-  { label: '1K', value: 1024 },
-  { label: '2K', value: 2048 },
-  { label: '4K', value: 4096 },
-];
-
-const FORMATS: { id: 'png' | 'svg' | 'jpeg'; label: string; desc: string; recommended?: boolean }[] = [
+const FORMATS: { id: ExportFormat; label: string; desc: string; recommended?: boolean }[] = [
   { id: 'png',  label: 'PNG', desc: 'Lossless, transparent bg', recommended: true },
   { id: 'svg',  label: 'SVG', desc: 'Vector — infinite scale' },
   { id: 'jpeg', label: 'JPG', desc: 'Compressed, white bg' },
 ];
 
 export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize, filename = 'star', onDownloaded, disabled }: ExportPanelProps) {
-  const [loading, setLoading] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ msg: string; key: number } | null>(null);
+  const { loading, toast, showToast, download } = useExport({ svgRef, exportWidth, exportHeight, filename, onDownloaded });
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const toastCounter = useRef(0);
 
   useEffect(() => {
     if (!open) return;
@@ -46,28 +38,9 @@ export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize,
     return () => document.removeEventListener('mousedown', handleClick);
   }, [open]);
 
-  function showToast(msg: string) {
-    setToast({ msg, key: ++toastCounter.current });
-    setTimeout(() => setToast(null), 2500);
-  }
-
-  async function handleDownload(format: 'svg' | 'png' | 'jpeg') {
-    if (!svgRef.current) return;
+  function handleDownload(format: ExportFormat) {
     setOpen(false);
-    setLoading(format);
-    try {
-      if (format === 'svg') {
-        exportSVG(svgRef.current, `${filename}.svg`);
-        showToast('Downloaded as SVG');
-      } else {
-        await exportRaster(svgRef.current, format, exportWidth, exportHeight, `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`);
-        showToast(`Downloaded as ${format.toUpperCase()}`);
-      }
-      onDownloaded?.(format);
-    } catch {
-      showToast('Export failed');
-    }
-    setLoading(null);
+    void download(format);
   }
 
   return (
@@ -172,24 +145,7 @@ export default function ExportPanel({ svgRef, exportWidth, exportHeight, onSize,
       </div>
 
       {/* Toast — fixed bottom-center, outside flow */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            key={toast.key}
-            className="fixed bottom-6 left-1/2 z-100 flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#111827] shadow-lg pointer-events-none"
-            style={{ x: '-50%' }}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 6 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-          >
-            <svg className="w-3.5 h-3.5 text-[#34D399] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            <span className="text-[12px] font-medium text-white whitespace-nowrap">{toast.msg}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ExportToast toast={toast} />
 
     </div>
   );

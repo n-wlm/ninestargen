@@ -82,6 +82,12 @@ is what makes in-browser restore possible). Persisted to `localStorage` under
 `nsg:history`, newest first, capped at 12 and trimmed to fit the storage quota.
 `link` is only set for geometry (image designs are not URL-encodable).
 
+`addHistory()` returns `{ entries, trimmed }`: `trimmed` is `true` when the
+quota forced entries to be dropped, and `SaveDesignModal` then shows a storage
+warning instead of losing history silently. Consecutive downloads of the same
+design are deduped via `configSignature()`, which folds long strings (data
+URLs) to length+head+tail rather than serialising multi-MB payloads.
+
 ### Persistence & forward/backward compatibility
 
 History must keep working across future app updates — a stored snapshot should

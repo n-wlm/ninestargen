@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { exportSVG, exportRaster } from '@/lib/export';
+import { useExport, RESOLUTIONS, type ExportFormat } from '@/hooks/useExport';
+import ExportToast from '@/components/ExportToast';
 
 interface Props {
   svgRef: React.RefObject<SVGSVGElement | null>;
@@ -10,50 +11,23 @@ interface Props {
   exportHeight: number;
   onSize: (width: number, height: number) => void;
   filename?: string;
-  onDownloaded?: (format: 'svg' | 'png' | 'jpeg') => void;
+  onDownloaded?: (format: ExportFormat) => void;
   disabled?: boolean; // nothing to export (e.g. images mode with no layers)
 }
 
-const RESOLUTIONS = [
-  { label: '512', value: 512 },
-  { label: '1K',  value: 1024 },
-  { label: '2K',  value: 2048 },
-  { label: '4K',  value: 4096 },
-];
-
-const FORMATS = [
-  { id: 'png'  as const, label: 'PNG' },
-  { id: 'svg'  as const, label: 'SVG' },
-  { id: 'jpeg' as const, label: 'JPG' },
+const FORMATS: { id: ExportFormat; label: string }[] = [
+  { id: 'png',  label: 'PNG' },
+  { id: 'svg',  label: 'SVG' },
+  { id: 'jpeg', label: 'JPG' },
 ];
 
 export default function MobileExportFab({ svgRef, exportWidth, exportHeight, onSize, filename = 'star', onDownloaded, disabled }: Props) {
+  const { loading, toast, download } = useExport({ svgRef, exportWidth, exportHeight, filename, onDownloaded });
   const [open, setOpen]     = useState(false);
-  const [format, setFormat] = useState<'png' | 'svg' | 'jpeg'>('png');
-  const [loading, setLoading] = useState(false);
-  const [toast, setToast]   = useState<string | null>(null);
-
-  function showToast(msg: string) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 2500);
-  }
+  const [format, setFormat] = useState<ExportFormat>('png');
 
   async function handleDownload() {
-    if (!svgRef.current || loading) return;
-    setLoading(true);
-    try {
-      if (format === 'svg') {
-        exportSVG(svgRef.current, `${filename}.svg`);
-        showToast('Downloaded as SVG');
-      } else {
-        await exportRaster(svgRef.current, format, exportWidth, exportHeight, `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`);
-        showToast(`Downloaded as ${format.toUpperCase()}`);
-      }
-      onDownloaded?.(format);
-    } catch {
-      showToast('Export failed');
-    }
-    setLoading(false);
+    await download(format);
     setOpen(false);
   }
 
@@ -142,11 +116,11 @@ export default function MobileExportFab({ svgRef, exportWidth, exportHeight, onS
               {/* Download button */}
               <button
                 onClick={handleDownload}
-                disabled={loading}
+                disabled={loading !== null}
                 className="w-full py-3 rounded-xl text-[15px] font-semibold text-white disabled:opacity-50"
-                style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }}
+                style={{ background: 'linear-gradient(135deg, var(--nsg-accent), var(--nsg-accent-strong))' }}
               >
-                {loading ? 'Downloading…' : `Download ${format.toUpperCase()}`}
+                {loading ? 'Downloading…' : `Download ${format === 'jpeg' ? 'JPG' : format.toUpperCase()}`}
               </button>
 
             </motion.div>
@@ -154,23 +128,7 @@ export default function MobileExportFab({ svgRef, exportWidth, exportHeight, onS
         )}
       </AnimatePresence>
       {/* Toast — fixed bottom-center */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            className="fixed bottom-6 left-1/2 z-100 flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#111827] shadow-lg pointer-events-none"
-            style={{ x: '-50%' }}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 6 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-          >
-            <svg className="w-3.5 h-3.5 text-[#34D399] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            <span className="text-[12px] font-medium text-white whitespace-nowrap">{toast}</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ExportToast toast={toast} />
     </>
   );
 }
