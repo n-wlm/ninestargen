@@ -1,0 +1,138 @@
+// TEMPORARY — candidate presets for the 2026-07 template curation.
+// The owner picks from these; the chosen ones move into lib/presets.ts and
+// this file plus app/dev-candidates/ are deleted before the PR is finalized.
+import type { StarConfig } from '@/types/star';
+import { DEFAULT_CONFIG } from '@/types/star';
+import type { Preset } from '@/lib/presets';
+
+function candidate(id: string, name: string, category: Preset['category'], overrides: Partial<StarConfig>): Preset {
+  return { id, name, category, config: { ...DEFAULT_CONFIG, ...overrides } };
+}
+
+export const PRESET_CANDIDATES: Preset[] = [
+  candidate('porcelain', 'Porcelain', 'modern', {
+    starType: '9-4',
+    fillType: 'solid',
+    fillColor: '#FFFFFF',
+    strokeColor: '#C8C4BF',
+    strokeWidth: 1,
+    bgColor: '#EBE9E6',
+    innerRadiusRatio: 0.42,
+    shadowBlur: 18,
+    shadowColor: '#00000033',
+    cornerRounding: 0.05,
+  }),
+  candidate('midnight-ink', 'Midnight Ink', 'modern', {
+    starType: '9-4',
+    fillType: 'solid',
+    fillColor: '#1E293B',
+    strokeWidth: 0,
+    innerRadiusRatio: 0.42,
+    curveIntensity: -20,
+    cornerRounding: 0.04,
+  }),
+  candidate('dawn', 'Dawn', 'modern', {
+    starType: 'spike',
+    fillType: 'linear-gradient',
+    gradientColors: ['#FDE68A', '#F9A8D4', '#C4B5FD'],
+    gradientDirection: 'to-top-right',
+    strokeWidth: 0,
+    innerRadiusRatio: 0.45,
+    cornerRounding: 0.12,
+  }),
+  candidate('ocean-mist', 'Ocean Mist', 'artistic', {
+    starType: '9-4',
+    fillType: 'linear-gradient',
+    gradientColors: ['#BAE6FD', '#3B82F6'],
+    gradientDirection: 'to-bottom',
+    fillOpacity: 0.9,
+    strokeWidth: 0,
+    innerRadiusRatio: 0.42,
+  }),
+  candidate('sage-circle', 'Sage Circle', 'decorative', {
+    starType: 'petal',
+    fillType: 'solid',
+    fillColor: '#87A987',
+    fillOpacity: 0.85,
+    strokeColor: '#5F7A61',
+    strokeWidth: 1,
+    petalWidth: 0.45,
+    petalCurve: 0.65,
+    outerContainer: 'circle',
+    outerContainerPadding: 24,
+    outerContainerColor: '#5F7A61',
+    bgColor: '#F7F8F5',
+  }),
+  candidate('terracotta', 'Terracotta', 'classic', {
+    starType: '3-triangles',
+    fillType: 'solid',
+    fillColor: '#C2593C',
+    fillOpacity: 0.9,
+    strokeColor: '#8C3F2C',
+    strokeWidth: 1.5,
+    innerRadiusRatio: 0.45,
+    bgColor: '#FAF1E7',
+  }),
+  candidate('blush-rose', 'Blush Rose', 'decorative', {
+    starType: 'petal',
+    fillType: 'radial-gradient',
+    gradientColors: ['#FDF2F8', '#F472B6'],
+    strokeWidth: 0,
+    petalWidth: 0.55,
+    petalCurve: 0.75,
+  }),
+  candidate('amethyst-line', 'Amethyst Line', 'geometric', {
+    starType: '9-4',
+    fillType: 'none',
+    strokeColor: '#7C3AED',
+    strokeWidth: 2,
+    curveIntensity: -60,
+    innerRadiusRatio: 0.45,
+  }),
+  candidate('copper-thread', 'Copper Thread', 'geometric', {
+    starType: '9-2',
+    fillType: 'none',
+    strokeColor: '#B45309',
+    strokeWidth: 1.5,
+    outerContainer: 'circle',
+    outerContainerPadding: 16,
+    outerContainerColor: '#D4A574',
+    bgColor: '#FDFBF7',
+  }),
+  candidate('slate-facet', 'Slate Facet', 'geometric', {
+    starType: 'spike',
+    fillType: 'linear-gradient',
+    gradientColors: ['#64748B', '#CBD5E1'],
+    gradientDirection: 'to-top-right',
+    strokeWidth: 0,
+    innerRadiusRatio: 0.5,
+  }),
+  candidate('honey-petal', 'Honey Petal', 'decorative', {
+    starType: 'petal',
+    fillType: 'solid',
+    fillColor: '#EAB308',
+    fillOpacity: 0.8,
+    strokeColor: '#A16207',
+    strokeWidth: 1,
+    petalWidth: 0.5,
+    petalCurve: 0.6,
+  }),
+  candidate('sky-weave', 'Sky Weave', 'geometric', {
+    starType: 'kite',
+    fillType: 'solid',
+    fillColor: '#7DD3FC',
+    fillOpacity: 0.65,
+    strokeColor: '#0284C7',
+    strokeWidth: 1,
+    innerRadiusRatio: 0.82,
+    cornerRounding: 0.1,
+  }),
+  candidate('graphite-bloom', 'Graphite Bloom', 'artistic', {
+    starType: 'petal',
+    fillType: 'solid',
+    fillColor: '#374151',
+    strokeWidth: 0,
+    petalWidth: 0.35,
+    petalCurve: 0.8,
+  }),
+];

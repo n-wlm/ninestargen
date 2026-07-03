@@ -47,13 +47,21 @@ Template-Kuration (5 schwache Presets ersetzen, Owner wählt aus Kandidaten), �
   (ui-design, data-model +localStorage-Tabelle, requirements FR-13/14, architecture).
 - PR-bereit — Merge-Reihenfolge: nach Phase 1 (gestackt).
 
-### Phase 3 — `feature/template-curation` (M)
-- [ ] ~12–15 Preset-Kandidaten entwerfen (ruhige, harmonische Paletten; alle 6 Sterntypen)
-- [ ] Vorschau-Galerie (Screenshots aus echtem Preview) für Owner erstellen
-- [ ] **STOPP: Owner wählt aus** → finaler Satz committen
-- Behalten: Classic Bahá'í, Watercolor Petal, Outline Enneagram, Earth Tones, Linked Petals,
-  Leafburst, Golden Kite. Ersetzen: Modern Minimal, Crystalline, Diamond Grid,
-  Sunset Gradient, Neon Glow.
+### Phase 3 — `feature/template-curation` (M) ⏸ WARTET AUF OWNER-AUSWAHL
+- [x] 13 Kandidaten entworfen (`lib/preset-candidates.ts`): Porcelain, Midnight Ink, Dawn,
+      Ocean Mist, Sage Circle, Terracotta, Blush Rose, Amethyst Line, Copper Thread,
+      Slate Facet, Honey Petal, Sky Weave, Graphite Bloom — alle 6 Sterntypen,
+      ruhige Paletten, im echten Preview iteriert (Porcelain/Dawn/Ocean Mist/Sky Weave
+      nachjustiert). Kategorien: 3 modern, 4 geometric, 3 decorative, 1 classic, 2 artistic.
+- [x] Temporäre Vorschau-Galerie unter `/dev-candidates` (Kandidaten + Bestand;
+      Seite + candidates-Datei werden nach der Auswahl gelöscht)
+- [ ] **STOPP: Owner wählt aus** → gewählte in `lib/presets.ts`, 5 schwache raus
+      (Modern Minimal, Crystalline, Diamond Grid, Sunset Gradient, Neon Glow),
+      Galerie-Seite löschen, Doku, Commit
+- Behalten (fix): Classic Bahá'í, Watercolor Petal, Outline Enneagram, Earth Tones,
+  Linked Petals, Leafburst, Golden Kite.
+- Hinweis: `curveIntensity`-Kommentar in types/star.ts sagt „-1–1", real ist der
+  Slider -250–250 — Kommentar bei Gelegenheit fixen (Phase 4a).
 
 ### Phase 4 — `feature/geometry-layers` (L, 3 Zyklen sequenziell)
 - [ ] 4a Modell + Rendering: `types/geometry.ts`, `hooks/useStarComposition.ts`,
