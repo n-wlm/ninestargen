@@ -19,7 +19,7 @@ export interface StarConfig {
   rotation: number;           // -180–180
 
   // --- Shape modifiers ---
-  curveIntensity: number;     // -1–1
+  curveIntensity: number;     // -250–250 (slider range; typed values may exceed)
   cornerRounding: number;     // 0–1 (rounds sharp tips)
 
   // --- Fill ---

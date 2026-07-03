@@ -8,6 +8,7 @@ import { ConfirmButton } from '@/components/controls/primitives';
 import type { HistoryEntry } from '@/lib/history';
 import type { StarConfig } from '@/types/star';
 import type { CompositionConfig } from '@/types/composition';
+import { asComposition, type GeometryComposition } from '@/types/geometry';
 
 interface Props {
   open: boolean;
@@ -35,7 +36,10 @@ function Thumb({ entry }: { entry: HistoryEntry }) {
   return (
     <div className="w-12 h-12 rounded-lg bg-[#F7F8FA] border border-[#EAECF0] overflow-hidden flex items-center justify-center shrink-0">
       {entry.mode === 'geometry' ? (
-        <StarPreview config={entry.config as StarConfig} className="w-full h-full" />
+        <StarPreview
+          composition={asComposition(entry.config as StarConfig | GeometryComposition)}
+          className="w-full h-full"
+        />
       ) : (
         <ImagePreview config={entry.config as CompositionConfig} className="w-full h-full" />
       )}

@@ -24,9 +24,12 @@ flowchart TD
 
 ## Components
 
-`GeneratorClient` is the shell. It holds the active **mode**, both config
-hooks, the history state, and the modals, and decides which control panel and
-which preview to render.
+`GeneratorClient` is the shell. It holds the active **mode**, both config hooks
+(`useStarComposition` for geometry layers, `useComposition` for images), the
+history state, and the modals, and decides which control panel and which preview
+to render. The geometry control panel and single-config URL sync still speak a
+flat `StarConfig`, derived from the selected layer via `configFromLayer`; the
+multi-layer URL scheme and layer UI are follow-up cycles.
 
 ```mermaid
 flowchart TD

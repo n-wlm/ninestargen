@@ -5,7 +5,7 @@ order: 30
 status: current
 last_updated: 2026-07-03
 owner: @naim
-linked_paths: types/star.ts, types/composition.ts, lib/history.ts, lib/url-params.ts, lib/recent-colors.ts, lib/changelog.ts
+linked_paths: types/star.ts, types/geometry.ts, types/composition.ts, hooks/useStarComposition.ts, lib/history.ts, lib/url-params.ts, lib/recent-colors.ts, lib/changelog.ts
 summary: The three config shapes — StarConfig, CompositionConfig/ImageLayer, and HistoryEntry.
 ---
 
@@ -54,7 +54,39 @@ Defined in [types/star.ts](types/star.ts). ~30 fields covering shape
 `cornerRounding`), fill/stroke/gradient, background, outer container, effects
 (glow/shadow), petal params, and export size. `DEFAULT_CONFIG` holds the
 defaults (e.g. `outerRadius: 250`). Serialised compactly to URL params via
-[lib/url-params.ts](lib/url-params.ts) (short key map).
+[lib/url-params.ts](lib/url-params.ts) (short key map). `StarConfig` remains the
+legacy single-star vocabulary (presets, old URLs, old history); the live
+geometry state is now a **GeometryComposition** (below).
+
+## GeometryComposition & GeometryLayer — geometry layers
+
+Defined in [types/geometry.ts](types/geometry.ts). Geometry mode stacks several
+generated stars, mirroring the images layer model.
+
+- **GeometryLayer**: the per-star subset of `StarConfig` (`StarShapeProps` —
+  shape, fill/stroke/gradient, effects, petal params) **plus** `id`, `name`,
+  `visible`, `opacity`, and `offsetX`/`offsetY` (move the star's centre off the
+  viewBox centre). There is **no `scale`**: `outerRadius` already is the size of
+  a generated star.
+- **GeometryComposition**: `layers[]` (rendered bottom→top, list reversed in the
+  UI) plus the canvas-level fields `bgColor`, outer-container fields, and export
+  size. `MAX_GEOMETRY_LAYERS = 5`.
+- **`compositionFromConfig(StarConfig)`** is the single backward-compat seam:
+  legacy single-star URLs, presets, and history entries load as a one-layer
+  composition. `asComposition()` accepts either shape; `configFromLayer()`
+  projects the selected layer + canvas back to a flat `StarConfig` for the parts
+  of the UI that still speak it. `useStarComposition` (twin of `useComposition`)
+  owns layer ops + the selected-layer id.
+- The outer container wraps the **largest visible** layer's radius (with one
+  layer this is identical to the pre-layer behaviour). Each rendered layer gets
+  **its own gradient/filter ids** (via `useId`) so stacked gradients/effects
+  never cross-bleed. Hidden layers skip rendering (and their defs) entirely.
+
+> [!NOTE]
+> URL sharing still uses the single-config short-key scheme (it encodes the
+> currently-selected layer + canvas). Multi-layer URL encoding is the next
+> cycle; until then a shared link reproduces a single star, while full
+> multi-layer designs round-trip through local history.
 
 ## CompositionConfig & ImageLayer — images
 
@@ -76,9 +108,10 @@ Defined in [types/composition.ts](types/composition.ts).
 ## HistoryEntry — local history
 
 Defined in [lib/history.ts](lib/history.ts). One snapshot per download:
-`{ id, date, mode, format, config, link? }`. The `config` is the full
-`StarConfig` **or** `CompositionConfig` (images include their data URLs, which
-is what makes in-browser restore possible). Persisted to `localStorage` under
+`{ id, date, mode, format, config, link? }`. The `config` is a geometry design
+(`StarConfig` for pre-layer entries, `GeometryComposition` for newer ones —
+`normalizeEntry` accepts both) **or** a `CompositionConfig` (images include
+their data URLs, which is what makes in-browser restore possible). Persisted to `localStorage` under
 `nsg:history`, newest first, capped at 12 and trimmed to fit the storage quota.
 `link` is only set for geometry (image designs are not URL-encodable).
 

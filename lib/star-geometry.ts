@@ -1,4 +1,4 @@
-import type { StarConfig } from '@/types/star';
+import type { StarShapeProps } from '@/types/geometry';
 
 const TWO_PI = Math.PI * 2;
 const N = 9;
@@ -100,7 +100,7 @@ function buildPolygonPath(pts: [number, number][], rounding: number, R: number, 
 }
 
 // ── {9/2} ─────────────────────────────────────────────────────────────────────
-function build9_2(cx: number, cy: number, cfg: StarConfig): string[] {
+function build9_2(cx: number, cy: number, cfg: StarShapeProps): string[] {
   const R = cfg.outerRadius;
   const baseRot = toRad(cfg.rotation);
   const pts: [number, number][] = Array.from({ length: N }, (_, i) =>
@@ -113,7 +113,7 @@ function build9_2(cx: number, cy: number, cfg: StarConfig): string[] {
 }
 
 // ── {9/4} ─────────────────────────────────────────────────────────────────────
-function build9_4(cx: number, cy: number, cfg: StarConfig): string[] {
+function build9_4(cx: number, cy: number, cfg: StarShapeProps): string[] {
   const R = cfg.outerRadius;
   const baseRot = toRad(cfg.rotation);
   const pts: [number, number][] = Array.from({ length: N }, (_, i) =>
@@ -126,7 +126,7 @@ function build9_4(cx: number, cy: number, cfg: StarConfig): string[] {
 }
 
 // ── Triple Triangle ───────────────────────────────────────────────────────────
-function build3Triangles(cx: number, cy: number, cfg: StarConfig): string[] {
+function build3Triangles(cx: number, cy: number, cfg: StarShapeProps): string[] {
   const R = cfg.outerRadius;
   const baseRot = toRad(cfg.rotation);
   return Array.from({ length: 3 }, (_, t) => {
@@ -140,7 +140,7 @@ function build3Triangles(cx: number, cy: number, cfg: StarConfig): string[] {
 }
 
 // ── Spike Star ────────────────────────────────────────────────────────────────
-function buildSpike(cx: number, cy: number, cfg: StarConfig): string[] {
+function buildSpike(cx: number, cy: number, cfg: StarShapeProps): string[] {
   const R = cfg.outerRadius;
   const r = R * cfg.innerRadiusRatio;
   const baseRot = toRad(cfg.rotation);
@@ -157,7 +157,7 @@ function buildSpike(cx: number, cy: number, cfg: StarConfig): string[] {
 // ── Kite Star ─────────────────────────────────────────────────────────────────
 // Each petal spans from one inter-petal midpoint to the next, meeting at the tip.
 // Adjacent petals share their side points — fully connected, no gaps or inner star.
-function buildKite(cx: number, cy: number, cfg: StarConfig): string[] {
+function buildKite(cx: number, cy: number, cfg: StarShapeProps): string[] {
   const R = cfg.outerRadius;
   const inner = R * cfg.innerRadiusRatio;
   const baseRot = toRad(cfg.rotation);
@@ -175,7 +175,7 @@ function buildKite(cx: number, cy: number, cfg: StarConfig): string[] {
 }
 
 // ── Petal Rose ────────────────────────────────────────────────────────────────
-function buildPetal(cx: number, cy: number, cfg: StarConfig): string[] {
+function buildPetal(cx: number, cy: number, cfg: StarShapeProps): string[] {
   const R = cfg.outerRadius;
   const baseRot = toRad(cfg.rotation);
   const pw = cfg.petalWidth * R * 0.6;
@@ -204,7 +204,7 @@ function buildPetal(cx: number, cy: number, cfg: StarConfig): string[] {
 }
 
 // ── Inner polygon ─────────────────────────────────────────────────────────────
-export function buildInnerPolygonPath(cx: number, cy: number, cfg: StarConfig): string {
+export function buildInnerPolygonPath(cx: number, cy: number, cfg: StarShapeProps): string {
   const r = cfg.outerRadius * cfg.innerRadiusRatio * 0.95;
   const baseRot = toRad(cfg.rotation);
   const pts = Array.from({ length: N }, (_, i) => pt(cx, cy, r, baseRot + (TWO_PI * i) / N));
@@ -212,7 +212,7 @@ export function buildInnerPolygonPath(cx: number, cy: number, cfg: StarConfig): 
 }
 
 // ── Main dispatcher ───────────────────────────────────────────────────────────
-export function buildStarPaths(cx: number, cy: number, cfg: StarConfig): string[] {
+export function buildStarPaths(cx: number, cy: number, cfg: StarShapeProps): string[] {
   switch (cfg.starType) {
     case '9-2':            return build9_2(cx, cy, cfg);
     case '9-4':            return build9_4(cx, cy, cfg);

@@ -14,6 +14,14 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-03
 
+- Geometry layers — cycle 4a (branch `feature/geometry-layers`): geometry state
+  is now a `GeometryComposition` of stacked `GeometryLayer`s (new
+  `types/geometry.ts`, `hooks/useStarComposition.ts`). `StarPreview` renders any
+  number of layers with per-layer gradient/filter ids (extracted
+  `StarLayerGroup`) and a `config` convenience prop for thumbnails; history
+  normalizes both the legacy flat `StarConfig` and the new composition shape.
+  UI still single-layer (URL scheme + layer list follow in 4b/4c). Removed the
+  now-unused `useStarConfig`. Updated data-model + architecture.
 - "What's new" indicator (branch `feature/whats-new`): `lib/changelog.ts` with
   `APP_VERSION` + typed `CHANGELOG` entries, header item with accent dot for
   returning visitors (`nsg:version-seen`), `WhatsNewDialog`; true first visits

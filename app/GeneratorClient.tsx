@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, Suspense } from 'react';
+import { useRef, useEffect, useState, useMemo, useCallback, Suspense } from 'react';
 import { motion } from 'motion/react';
 import { History } from 'lucide-react';
 import StarPreview from '@/components/StarPreview';
@@ -15,12 +15,20 @@ import MobileExportFab from '@/components/MobileExportFab';
 import ShareButton from '@/components/ShareButton';
 import SaveDesignModal from '@/components/SaveDesignModal';
 import HistoryPanel from '@/components/HistoryPanel';
-import { useStarConfig } from '@/hooks/useStarConfig';
+import { useStarComposition } from '@/hooks/useStarComposition';
 import { useComposition } from '@/hooks/useComposition';
 import { useUrlSync } from '@/hooks/useUrlSync';
 import { addHistory, loadHistory, removeHistory, clearHistory, type HistoryEntry } from '@/lib/history';
 import type { StarConfig } from '@/types/star';
 import type { CompositionConfig } from '@/types/composition';
+import {
+  asComposition,
+  compositionFromConfig,
+  configFromLayer,
+  isGeometryCanvasKey,
+  type GeometryComposition,
+  type GeometryLayer,
+} from '@/types/geometry';
 
 type Mode = 'geometry' | 'images';
 
@@ -45,8 +53,32 @@ function Generator() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [mode, setMode] = useState<Mode>('geometry');
 
-  const { config, update, reset, setConfig } = useStarConfig();
+  const star = useStarComposition();
   const comp = useComposition();
+
+  // Legacy flat view of the selected layer + canvas. The control panel (and
+  // the single-config URL sync) still speak StarConfig; the layer UI and the
+  // multi-layer URL scheme land in follow-up cycles.
+  const config = useMemo(
+    () => configFromLayer(star.selectedLayer, star.config),
+    [star.selectedLayer, star.config],
+  );
+
+  const { updateLayer, selectedLayerId, update: updateCanvas, setConfig: setStarComposition } = star;
+  const update = useCallback(
+    <K extends keyof StarConfig>(key: K, value: StarConfig[K]) => {
+      if (isGeometryCanvasKey(key)) {
+        updateCanvas(key, value as GeometryComposition[typeof key]);
+      } else {
+        updateLayer(selectedLayerId, { [key]: value } as Partial<GeometryLayer>);
+      }
+    },
+    [updateCanvas, updateLayer, selectedLayerId],
+  );
+  const setConfig = useCallback(
+    (c: StarConfig) => setStarComposition(compositionFromConfig(c)),
+    [setStarComposition],
+  );
   const [snapKey, setSnapKey] = useState(0);
 
   // Download history (local to the browser).
@@ -90,7 +122,7 @@ function Generator() {
     const { entries: nextEntries, trimmed } = addHistory(
       isImages
         ? { mode: 'images', format, config: comp.config }
-        : { mode: 'geometry', format, config, link },
+        : { mode: 'geometry', format, config: star.config, link },
     );
     setEntries(nextEntries);
     setSavePrompt({
@@ -104,7 +136,7 @@ function Generator() {
 
   function restore(entry: HistoryEntry) {
     if (entry.mode === 'geometry') {
-      setConfig(entry.config as StarConfig);
+      setStarComposition(asComposition(entry.config as StarConfig | GeometryComposition));
       setMode('geometry');
     } else {
       comp.setConfig(entry.config as CompositionConfig);
@@ -126,9 +158,9 @@ function Generator() {
       }
     : {
         svgRef,
-        exportWidth: config.exportWidth,
-        exportHeight: config.exportHeight,
-        onSize: (w: number, h: number) => { update('exportWidth', w); update('exportHeight', h); },
+        exportWidth: star.config.exportWidth,
+        exportHeight: star.config.exportHeight,
+        onSize: (w: number, h: number) => { updateCanvas('exportWidth', w); updateCanvas('exportHeight', h); },
         filename: 'star',
         onDownloaded: handleDownloaded,
       };
@@ -159,7 +191,7 @@ function Generator() {
               onReset={comp.reset}
             />
           ) : (
-            <ControlPanel config={config} update={update} onReset={reset} />
+            <ControlPanel config={config} update={update} onReset={star.reset} />
           )}
         </div>
         {/* Export panel: desktop only */}
@@ -205,7 +237,7 @@ function Generator() {
                   />
                 ) : (
                   <StarPreview
-                    config={config}
+                    composition={star.config}
                     svgRef={svgRef}
                     className="w-full h-full"
                     style={PREVIEW_SHADOW}

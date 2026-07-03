@@ -2,6 +2,8 @@
 
 import { memo, useId, useMemo } from 'react';
 import type { StarConfig } from '@/types/star';
+import type { GeometryComposition, GeometryLayer } from '@/types/geometry';
+import { compositionFromConfig, DEFAULT_GEOMETRY_COMPOSITION } from '@/types/geometry';
 import { buildStarPaths, buildInnerPolygonPath } from '@/lib/star-geometry';
 
 const VIEWBOX_SIZE = 600;
@@ -10,7 +12,10 @@ const CY = VIEWBOX_SIZE / 2;
 const TWO_PI = Math.PI * 2;
 
 interface StarPreviewProps {
-  config: StarConfig;
+  /** Full multi-layer composition (the generator passes this). */
+  composition?: GeometryComposition;
+  /** Legacy single-star convenience — thumbnails (presets, history, corner previews). */
+  config?: StarConfig;
   className?: string;
   style?: React.CSSProperties;
   svgRef?: React.RefObject<SVGSVGElement | null>;
@@ -38,40 +43,106 @@ const GRADIENT_COORDS: Record<string, { x1: string; y1: string; x2: string; y2: 
 };
 const GRADIENT_COORDS_FALLBACK = GRADIENT_COORDS['to-bottom-right'];
 
-function StarPreview({ config, className, style, svgRef }: StarPreviewProps) {
-  const id = useId().replace(/:/g, '_');
-  const gradId = `grad_${id}`;
-  const filterId = `filter_${id}`;
-  const hasFilter = config.glowRadius > 0 || config.shadowBlur > 0;
+// One star layer: its own defs (gradient/filter ids are unique per component
+// instance via useId, so stacked layers never cross-bleed), its paths, and the
+// optional inner polygon. `opacity` wraps everything; `fillOpacity` keeps its
+// legacy scope (star paths only, not the inner polygon).
+const StarLayerGroup = memo(function StarLayerGroup({ layer }: { layer: GeometryLayer }) {
+  const uid = useId().replace(/:/g, '_');
+  const gradId = `grad_${uid}`;
+  const filterId = `filter_${uid}`;
+  const hasFilter = layer.glowRadius > 0 || layer.shadowBlur > 0;
 
-  const paths = useMemo(() => buildStarPaths(CX, CY, config), [config]);
+  const cx = CX + layer.offsetX;
+  const cy = CY + layer.offsetY;
+  const paths = useMemo(() => buildStarPaths(cx, cy, layer), [cx, cy, layer]);
   const innerPath = useMemo(
-    () => (config.showInnerPolygon ? buildInnerPolygonPath(CX, CY, config) : null),
-    [config],
+    () => (layer.showInnerPolygon ? buildInnerPolygonPath(cx, cy, layer) : null),
+    [cx, cy, layer],
   );
 
-  function getFill(): string {
-    if (config.fillType === 'none') return 'none';
-    if (config.fillType === 'solid') return config.fillColor;
-    return `url(#${gradId})`;
-  }
-
-  const gradientCoords = GRADIENT_COORDS[config.gradientDirection] ?? GRADIENT_COORDS_FALLBACK;
+  const fill =
+    layer.fillType === 'none' ? 'none' : layer.fillType === 'solid' ? layer.fillColor : `url(#${gradId})`;
+  const gradientCoords = GRADIENT_COORDS[layer.gradientDirection] ?? GRADIENT_COORDS_FALLBACK;
 
   const strokeProps = {
-    stroke: config.strokeWidth > 0 ? config.strokeColor : 'none',
-    strokeWidth: config.strokeWidth,
-    strokeDasharray: dashArray(config.strokeDash),
+    stroke: layer.strokeWidth > 0 ? layer.strokeColor : 'none',
+    strokeWidth: layer.strokeWidth,
+    strokeDasharray: dashArray(layer.strokeDash),
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
   };
 
-  // Outer container
-  const containerR = config.outerRadius + config.outerContainerPadding;
-  const containerFill = config.outerContainerFill === 'none' ? 'none' : config.outerContainerFill;
-  const containerStroke = config.outerContainerColor;
-  const containerStrokeW = 1.5;
-  const baseRot = (config.rotation * Math.PI) / 180;
+  return (
+    <g opacity={layer.opacity}>
+      <defs>
+        {layer.fillType === 'linear-gradient' && (
+          <linearGradient id={gradId} {...gradientCoords} gradientUnits="objectBoundingBox">
+            {layer.gradientColors.map((color, i) => (
+              <stop key={i} offset={`${(i / (layer.gradientColors.length - 1)) * 100}%`} stopColor={color} />
+            ))}
+          </linearGradient>
+        )}
+        {layer.fillType === 'radial-gradient' && (
+          <radialGradient id={gradId} cx="50%" cy="50%" r="50%" gradientUnits="objectBoundingBox">
+            {layer.gradientColors.map((color, i) => (
+              <stop key={i} offset={`${(i / (layer.gradientColors.length - 1)) * 100}%`} stopColor={color} />
+            ))}
+          </radialGradient>
+        )}
+
+        {hasFilter && (
+          <filter id={filterId} x="-60%" y="-60%" width="220%" height="220%" colorInterpolationFilters="sRGB">
+            {layer.shadowBlur > 0 && (
+              <>
+                <feGaussianBlur in="SourceAlpha" stdDeviation={layer.shadowBlur} result="shadowBlur" />
+                <feFlood floodColor={layer.shadowColor} result="shadowColor" />
+                <feComposite in="shadowColor" in2="shadowBlur" operator="in" result="shadow" />
+              </>
+            )}
+            {layer.glowRadius > 0 && (
+              <>
+                <feGaussianBlur in="SourceGraphic" stdDeviation={layer.glowRadius} result="glowBlur" />
+                <feFlood floodColor={layer.glowColor} result="glowColor" />
+                <feComposite in="glowColor" in2="glowBlur" operator="in" result="glow" />
+              </>
+            )}
+            <feMerge>
+              {layer.shadowBlur > 0 && <feMergeNode in="shadow" />}
+              {layer.glowRadius > 0 && <feMergeNode in="glow" />}
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        )}
+      </defs>
+
+      <g opacity={layer.fillOpacity} filter={hasFilter ? `url(#${filterId})` : undefined}>
+        {paths.map((d, i) => (
+          <path key={i} d={d} fill={fill} {...strokeProps} />
+        ))}
+      </g>
+
+      {innerPath && <path d={innerPath} fill={layer.innerPolygonColor} stroke="none" />}
+    </g>
+  );
+});
+
+function StarPreview({ composition, config, className, style, svgRef }: StarPreviewProps) {
+  const comp = useMemo(
+    () => composition ?? (config ? compositionFromConfig(config) : DEFAULT_GEOMETRY_COMPOSITION),
+    [composition, config],
+  );
+
+  const visible = comp.layers.filter((l) => l.visible);
+  // The outer container wraps the largest visible star; with one layer this
+  // degrades exactly to the pre-layer behavior.
+  const anchor = visible.reduce<GeometryLayer | undefined>(
+    (a, b) => (!a || b.outerRadius > a.outerRadius ? b : a),
+    undefined,
+  ) ?? comp.layers[comp.layers.length - 1];
+  const containerR = anchor.outerRadius + comp.outerContainerPadding;
+  const containerFill = comp.outerContainerFill === 'none' ? 'none' : comp.outerContainerFill;
+  const baseRot = (anchor.rotation * Math.PI) / 180;
 
   return (
     <svg
@@ -83,84 +154,37 @@ function StarPreview({ config, className, style, svgRef }: StarPreviewProps) {
       aria-label="Nine-pointed star preview"
       role="img"
     >
-      <defs>
-        {config.fillType === 'linear-gradient' && (
-          <linearGradient id={gradId} {...gradientCoords} gradientUnits="objectBoundingBox">
-            {config.gradientColors.map((color, i) => (
-              <stop key={i} offset={`${(i / (config.gradientColors.length - 1)) * 100}%`} stopColor={color} />
-            ))}
-          </linearGradient>
-        )}
-        {config.fillType === 'radial-gradient' && (
-          <radialGradient id={gradId} cx="50%" cy="50%" r="50%" gradientUnits="objectBoundingBox">
-            {config.gradientColors.map((color, i) => (
-              <stop key={i} offset={`${(i / (config.gradientColors.length - 1)) * 100}%`} stopColor={color} />
-            ))}
-          </radialGradient>
-        )}
-
-        {hasFilter && (
-          <filter id={filterId} x="-60%" y="-60%" width="220%" height="220%" colorInterpolationFilters="sRGB">
-            {config.shadowBlur > 0 && (
-              <>
-                <feGaussianBlur in="SourceAlpha" stdDeviation={config.shadowBlur} result="shadowBlur" />
-                <feFlood floodColor={config.shadowColor} result="shadowColor" />
-                <feComposite in="shadowColor" in2="shadowBlur" operator="in" result="shadow" />
-              </>
-            )}
-            {config.glowRadius > 0 && (
-              <>
-                <feGaussianBlur in="SourceGraphic" stdDeviation={config.glowRadius} result="glowBlur" />
-                <feFlood floodColor={config.glowColor} result="glowColor" />
-                <feComposite in="glowColor" in2="glowBlur" operator="in" result="glow" />
-              </>
-            )}
-            <feMerge>
-              {config.shadowBlur > 0 && <feMergeNode in="shadow" />}
-              {config.glowRadius > 0 && <feMergeNode in="glow" />}
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        )}
-      </defs>
-
-      {config.bgColor !== 'transparent' && (
-        <rect width={VIEWBOX_SIZE} height={VIEWBOX_SIZE} fill={config.bgColor} />
+      {comp.bgColor !== 'transparent' && (
+        <rect width={VIEWBOX_SIZE} height={VIEWBOX_SIZE} fill={comp.bgColor} />
       )}
 
-      {/* Outer container (behind star) */}
-      {config.outerContainer !== 'none' && (
+      {/* Outer container (behind all stars) */}
+      {comp.outerContainer !== 'none' && (
         <>
-          {config.outerContainer === 'circle' && (
-            <circle cx={CX} cy={CY} r={containerR} fill={containerFill} stroke={containerStroke} strokeWidth={containerStrokeW} />
+          {comp.outerContainer === 'circle' && (
+            <circle cx={CX} cy={CY} r={containerR} fill={containerFill} stroke={comp.outerContainerColor} strokeWidth={1.5} />
           )}
-          {config.outerContainer === '9-gon' && (
-            <path d={ngon9Path(CX, CY, containerR, baseRot)} fill={containerFill} stroke={containerStroke} strokeWidth={containerStrokeW} />
+          {comp.outerContainer === '9-gon' && (
+            <path d={ngon9Path(CX, CY, containerR, baseRot)} fill={containerFill} stroke={comp.outerContainerColor} strokeWidth={1.5} />
           )}
-          {config.outerContainer === 'square' && (
+          {comp.outerContainer === 'square' && (
             <rect
               x={CX - containerR}
               y={CY - containerR}
               width={containerR * 2}
               height={containerR * 2}
               fill={containerFill}
-              stroke={containerStroke}
-              strokeWidth={containerStrokeW}
+              stroke={comp.outerContainerColor}
+              strokeWidth={1.5}
             />
           )}
         </>
       )}
 
-      {/* Star paths */}
-      <g opacity={config.fillOpacity} filter={hasFilter ? `url(#${filterId})` : undefined}>
-        {paths.map((d, i) => (
-          <path key={i} d={d} fill={getFill()} {...strokeProps} />
-        ))}
-      </g>
-
-      {innerPath && (
-        <path d={innerPath} fill={config.innerPolygonColor} stroke="none" />
-      )}
+      {/* Star layers, bottom → top; hidden layers skip rendering (and defs) entirely */}
+      {visible.map((layer) => (
+        <StarLayerGroup key={layer.id} layer={layer} />
+      ))}
     </svg>
   );
 }

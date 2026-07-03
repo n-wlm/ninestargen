@@ -1,14 +1,21 @@
 import { DEFAULT_CONFIG, type StarConfig } from '@/types/star';
 import { DEFAULT_COMPOSITION, normalizeLayer, type CompositionConfig } from '@/types/composition';
+import {
+  DEFAULT_GEOMETRY_COMPOSITION,
+  normalizeGeometryLayer,
+  type GeometryComposition,
+} from '@/types/geometry';
 
 // A snapshot of a design the user downloaded. Stored only in the browser
 // (localStorage) — never uploaded. Cleared when the user clears browser data.
+// Geometry configs come in two shapes: pre-layer entries store a flat
+// StarConfig, newer ones a GeometryComposition — both restore.
 export interface HistoryEntry {
   id: string;
   date: number; // epoch ms
   mode: 'geometry' | 'images';
   format: string; // png | svg | jpg
-  config: StarConfig | CompositionConfig;
+  config: StarConfig | GeometryComposition | CompositionConfig;
   link?: string; // shareable URL — geometry only (image designs don't fit in a URL)
 }
 
@@ -40,9 +47,18 @@ function normalizeEntry(raw: unknown): HistoryEntry | null {
   const format = typeof e.format === 'string' ? e.format : 'png';
   const link = typeof e.link === 'string' ? e.link : undefined;
 
-  let config: StarConfig | CompositionConfig;
+  let config: HistoryEntry['config'];
   if (e.mode === 'geometry') {
-    config = { ...DEFAULT_CONFIG, ...(e.config as Partial<StarConfig>) };
+    if ('layers' in (e.config as object)) {
+      const c = e.config as Partial<GeometryComposition> & { layers?: unknown };
+      const layers = Array.isArray(c.layers)
+        ? (c.layers.map(normalizeGeometryLayer).filter(Boolean) as GeometryComposition['layers'])
+        : [];
+      if (layers.length === 0) return null; // a geometry composition needs ≥1 layer
+      config = { ...DEFAULT_GEOMETRY_COMPOSITION, ...c, layers };
+    } else {
+      config = { ...DEFAULT_CONFIG, ...(e.config as Partial<StarConfig>) };
+    }
   } else {
     const c = e.config as Partial<CompositionConfig> & { layers?: unknown };
     const layers = Array.isArray(c.layers)
@@ -96,7 +112,7 @@ function persist(entries: HistoryEntry[]): HistoryEntry[] {
 // Structural signature for the dedup check. Image layers carry multi-MB data-URL
 // strings — serializing those in full on every download blocks the main thread,
 // so long strings are folded to length + head + tail (collision-safe enough here).
-function configSignature(config: StarConfig | CompositionConfig): string {
+function configSignature(config: HistoryEntry['config']): string {
   return JSON.stringify(config, (_key, value) =>
     typeof value === 'string' && value.length > 256
       ? `${value.length}:${value.slice(0, 64)}…${value.slice(-64)}`
@@ -114,7 +130,7 @@ export interface AddHistoryResult {
 export function addHistory(input: {
   mode: 'geometry' | 'images';
   format: string;
-  config: StarConfig | CompositionConfig;
+  config: HistoryEntry['config'];
   link?: string;
 }): AddHistoryResult {
   const existing = loadHistory();

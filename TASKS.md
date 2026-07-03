@@ -63,10 +63,21 @@ Template-Kuration (5 schwache Presets ersetzen, Owner wählt aus Kandidaten), �
 - Hinweis: `curveIntensity`-Kommentar in types/star.ts sagt „-1–1", real ist der
   Slider -250–250 — Kommentar bei Gelegenheit fixen (Phase 4a).
 
-### Phase 4 — `feature/geometry-layers` (L, 3 Zyklen sequenziell)
-- [ ] 4a Modell + Rendering: `types/geometry.ts`, `hooks/useStarComposition.ts`,
-      StarPreview multi-layer (eindeutige Grad/Filter-IDs, `config`-Convenience-Prop),
-      GeneratorClient-Umbau, history.ts Dual-Shape-Normalize. UI noch single-layer.
+### Phase 4 — `feature/geometry-layers` (L, 3 Zyklen sequenziell) ⏳ 4a fertig
+- [x] 4a Modell + Rendering: `types/geometry.ts` (GeometryLayer/Composition,
+      compositionFromConfig/asComposition/configFromLayer/normalize, MAX 5),
+      `hooks/useStarComposition.ts` (add/duplicate/remove/update/reorder +
+      selectedLayer), StarPreview multi-layer (interne `StarLayerGroup`,
+      eindeutige Grad/Filter-IDs pro Layer, `config`-Convenience-Prop,
+      unsichtbare Layer übersprungen, Container = größter sichtbarer Layer),
+      GeneratorClient auf Komposition umgebaut, history.ts Dual-Shape-Normalize,
+      `useStarConfig` gelöscht. UI noch single-layer (bearbeitet selektierten Layer).
+      Verifiziert: tsc ✓ Lint 0 ✓ Build ✓; SSR-Check (react-dom/server): 1-Layer
+      rendert, 2-Layer → Circle-Container + 2 eindeutige Gradient-IDs (kein
+      Cross-Bleed) + opacity 0.6, normalize repariert/verwirft korrekt,
+      asComposition passthrough/wrap; live: Radius-Edit → Pfad + URL `?r=…`,
+      Legacy-URL-Parse round-trip. (Preview-Tab war backgrounded → motion/Effekte
+      gedrosselt; daher SSR statt Klick-Verifikation für Multi-Layer.)
 - [ ] 4b URL v2: `lib/url-params.ts` Präfix-Schema (+`v,o,x,y,n`), `useUrlSync.ts`
 - [ ] 4c Layer-UI: `LayerList.tsx` (generisch), GroupLabel-Primitive, ControlPanel
       Selected-Layer-Verdrahtung, Opacity (nur >1 Layer) + Offset X/Y in Shape
