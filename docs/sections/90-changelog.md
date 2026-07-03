@@ -14,6 +14,11 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-03
 
+- "What's new" indicator (branch `feature/whats-new`): `lib/changelog.ts` with
+  `APP_VERSION` + typed `CHANGELOG` entries, header item with accent dot for
+  returning visitors (`nsg:version-seen`), `WhatsNewDialog`; true first visits
+  are marked seen silently so only the templates modal greets them. Updated
+  UI-design + data-model (localStorage key table).
 - Color picker v2 (branch `feature/color-picker-v2`): every color swatch in both
   modes now opens a popover with a curated 20-color preset grid, a persistent
   Recent row (`nsg:recent-colors`), and the native picker + hex field. New

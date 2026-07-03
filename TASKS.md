@@ -33,11 +33,19 @@ Template-Kuration (5 schwache Presets ersetzen, Owner wählt aus Kandidaten), �
   Doku: 60-ui-design + Changelog aktualisiert, Build 100 % Health.
 - PR-bereit — Naim pusht & öffnet PR.
 
-### Phase 2 — `feature/whats-new` (S)
-- [ ] `lib/changelog.ts` (APP_VERSION, CHANGELOG[], hasUnseenChanges/markChangesSeen,
-      localStorage `nsg:version-seen`)
-- [ ] `AppHeader.tsx`: „What's new"-Eintrag + Akzent-Punkt + kleiner Dialog
-- [ ] Erstbesucher-Unterdrückung (kein Punkt, wenn auch `templates_seen` fehlt)
+### Phase 2 — `feature/whats-new` (S) ✅ (Branch gestackt auf Phase 1)
+- [x] `lib/changelog.ts` (APP_VERSION 1.1.0, typisierte CHANGELOG-Einträge,
+      hasUnseenChanges/markChangesSeen, localStorage `nsg:version-seen`)
+- [x] `AppHeader.tsx`: „What's new"-Button neben About + 5-px-Akzent-Punkt;
+      `WhatsNewDialog.tsx` (HistoryPanel-Modal-Muster)
+- [x] Erstbesucher-Unterdrückung: ohne `templates_seen` + `version-seen` wird still
+      markiert — nur das Templates-Modal begrüßt Neubesucher
+- Verifiziert im Preview: Wiederkehrer → Punkt (Akzentfarbe), Klick → Dialog mit beiden
+  Einträgen, Punkt weg, `nsg:version-seen`=1.1.0 persistiert; Erstbesuch → kein Punkt,
+  still markiert, Templates-Modal öffnet; Mobile-Header (375 px) ohne Overflow;
+  Konsole fehlerfrei. Gates: tsc ✓ Lint 0 ✓ Build ✓. Doku 100 % Health
+  (ui-design, data-model +localStorage-Tabelle, requirements FR-13/14, architecture).
+- PR-bereit — Merge-Reihenfolge: nach Phase 1 (gestackt).
 
 ### Phase 3 — `feature/template-curation` (M)
 - [ ] ~12–15 Preset-Kandidaten entwerfen (ruhige, harmonische Paletten; alle 6 Sterntypen)

@@ -3,7 +3,7 @@ id: architecture
 title: Architecture
 order: 20
 status: current
-last_updated: 2026-06-10
+last_updated: 2026-07-03
 owner: @naim
 linked_paths: app/GeneratorClient.tsx, components/, hooks/, lib/export.ts, components/ui/slider.tsx
 summary: How the editor shell, the two render paths, state, and the shared export pipeline fit together.
@@ -42,6 +42,13 @@ flowchart TD
   SP -.svgRef.-> EP
   IP -.svgRef.-> EP
 ```
+
+Outside the shell, `AppHeader` owns the app-level chrome: the templates modal
+(auto-opened on first visit), the About link, and the "What's new" dialog
+([WhatsNewDialog](components/WhatsNewDialog.tsx) fed by
+[lib/changelog.ts](lib/changelog.ts)). Control panels draw color input from the
+shared `ColorControl`, whose swatch popover is built on
+[ui/popover.tsx](components/ui/popover.tsx) (Base UI).
 
 Both previews render into the **same `svgRef`**, which is all the export
 pipeline needs — so PNG/SVG/JPG export is identical for both modes. They are

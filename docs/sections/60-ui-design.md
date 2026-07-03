@@ -78,6 +78,13 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
 - **Clipboard**: Share / copy-link actions go through [lib/clipboard.ts](lib/clipboard.ts)
   (`copyText`), which falls back to `document.execCommand('copy')` when the async
   Clipboard API is unavailable (insecure/sandboxed contexts).
+- **What's new**: header item next to About; a 5px accent dot appears while
+  [lib/changelog.ts](lib/changelog.ts)'s `APP_VERSION` is newer than the
+  visitor's `nsg:version-seen`. Clicking opens `WhatsNewDialog` (HistoryPanel
+  modal pattern) and marks the version seen. True first visits are silently
+  marked seen — the auto-opened templates modal is the only attention-grabber
+  a new visitor gets. Bump `APP_VERSION` + add a `CHANGELOG` entry with each
+  user-visible release.
 
 ## Accessibility notes
 

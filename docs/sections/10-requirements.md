@@ -3,7 +3,7 @@ id: requirements
 title: Requirements
 order: 10
 status: current
-last_updated: 2026-06-10
+last_updated: 2026-07-03
 owner: @naim
 linked_paths: app/GeneratorClient.tsx, components/controls/, lib/export.ts
 summary: What the two modes must do, plus the technical constraints they operate under.
@@ -37,6 +37,8 @@ summary: What the two modes must do, plus the technical constraints they operate
 | FR-10 | Disable the download action when there is nothing to export (images mode, no layers) | should |
 | FR-11 | Numeric fields accept typed values, including beyond slider ranges (exotic shapes) | should |
 | FR-12 | Hex colour fields accept typed/pasted hex codes (`#abc`, `aabbcc`, …) | should |
+| FR-13 | Every colour swatch offers curated presets and recently used colours alongside the native picker | should |
+| FR-14 | Returning visitors see an unobtrusive "What's new" indicator for unseen releases | could |
 
 ## Technical requirements
 

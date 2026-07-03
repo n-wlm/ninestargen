@@ -5,6 +5,8 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import LogoStar from "@/components/LogoStar";
+import WhatsNewDialog from "@/components/WhatsNewDialog";
+import { hasUnseenChanges, markChangesSeen } from "@/lib/changelog";
 import { configToParams } from "@/lib/url-params";
 import { normalizePresetConfig } from "@/lib/preset-normalization";
 import type { Preset } from "@/lib/presets";
@@ -15,6 +17,8 @@ const TemplatesModal = dynamic(() => import("@/components/TemplatesModal"), {
 
 export default function AppHeader() {
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showWhatsNew, setShowWhatsNew] = useState(false);
+  const [unseenChanges, setUnseenChanges] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -29,6 +33,32 @@ export default function AppHeader() {
     });
     return () => window.cancelAnimationFrame(rafId);
   }, [pathname]);
+
+  useEffect(() => {
+    const rafId = window.requestAnimationFrame(() => {
+      try {
+        // A true first visit has nothing "new" — and the templates modal
+        // already opens; two attention-grabbers at once is one too many.
+        if (
+          !localStorage.getItem("nsg:version-seen") &&
+          !localStorage.getItem("templates_seen")
+        ) {
+          markChangesSeen();
+        } else {
+          setUnseenChanges(hasUnseenChanges());
+        }
+      } catch {
+        /* localStorage unavailable */
+      }
+    });
+    return () => window.cancelAnimationFrame(rafId);
+  }, []);
+
+  const openWhatsNew = useCallback(() => {
+    markChangesSeen();
+    setUnseenChanges(false);
+    setShowWhatsNew(true);
+  }, []);
 
   const closeModal = useCallback(() => {
     try {
@@ -89,6 +119,18 @@ export default function AppHeader() {
           >
             About
           </Link>
+          <button
+            onClick={openWhatsNew}
+            className="relative px-2.5 py-1 text-[12px] text-[#6B7280] hover:text-[#111827] transition-colors font-medium rounded-md hover:bg-[#F3F4F6] cursor-pointer"
+          >
+            What&apos;s new
+            {unseenChanges && (
+              <span
+                aria-hidden="true"
+                className="absolute top-0.5 right-1 w-[5px] h-[5px] rounded-full bg-[var(--nsg-accent)]"
+              />
+            )}
+          </button>
         </nav>
 
         <div className="ml-auto hidden sm:block">
@@ -104,6 +146,8 @@ export default function AppHeader() {
         onSelectPreset={selectPreset}
         onStartFromScratch={startFromScratch}
       />
+
+      <WhatsNewDialog open={showWhatsNew} onClose={() => setShowWhatsNew(false)} />
     </>
   );
 }

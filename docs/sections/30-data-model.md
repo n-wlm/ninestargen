@@ -3,9 +3,9 @@ id: data-model
 title: Data model
 order: 30
 status: current
-last_updated: 2026-06-10
+last_updated: 2026-07-03
 owner: @naim
-linked_paths: types/star.ts, types/composition.ts, lib/history.ts, lib/url-params.ts
+linked_paths: types/star.ts, types/composition.ts, lib/history.ts, lib/url-params.ts, lib/recent-colors.ts, lib/changelog.ts
 summary: The three config shapes — StarConfig, CompositionConfig/ImageLayer, and HistoryEntry.
 ---
 
@@ -108,3 +108,17 @@ guarantee this (see ADR-006):
 > Additive schema changes (new fields) need **no** version bump — normalization
 > handles them. Bump `SCHEMA_VERSION` and add an explicit migration only for a
 > breaking change (a renamed/retyped field that defaults can't repair).
+
+## localStorage keys (complete list)
+
+All persistence is client-side. Every key the app writes:
+
+| Key | Owner | Content |
+| --- | --- | --- |
+| `nsg:history` | [lib/history.ts](lib/history.ts) | versioned envelope of download snapshots (above) |
+| `nsg:recent-colors` | [lib/recent-colors.ts](lib/recent-colors.ts) | JSON array of up to 8 hex colors, newest first, deduped |
+| `nsg:version-seen` | [lib/changelog.ts](lib/changelog.ts) | last `APP_VERSION` whose changelog the visitor saw |
+| `templates_seen` | `AppHeader` | `"1"` once the auto-opened templates modal was closed |
+
+All reads/writes are wrapped in `try/catch` — a full or unavailable storage
+degrades features (no recents, dot shows again) but never breaks the app.
