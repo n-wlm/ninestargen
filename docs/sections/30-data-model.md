@@ -76,17 +76,22 @@ generated stars, mirroring the images layer model.
   composition. `asComposition()` accepts either shape; `configFromLayer()`
   projects the selected layer + canvas back to a flat `StarConfig` for the parts
   of the UI that still speak it. `useStarComposition` (twin of `useComposition`)
-  owns layer ops + the selected-layer id.
+  owns layer ops + the selected-layer id. Full multi-layer designs are shareable
+  via the URL (scheme below) and restore from local history.
 - The outer container wraps the **largest visible** layer's radius (with one
   layer this is identical to the pre-layer behaviour). Each rendered layer gets
   **its own gradient/filter ids** (via `useId`) so stacked gradients/effects
   never cross-bleed. Hidden layers skip rendering (and their defs) entirely.
 
 > [!NOTE]
-> URL sharing still uses the single-config short-key scheme (it encodes the
-> currently-selected layer + canvas). Multi-layer URL encoding is the next
-> cycle; until then a shared link reproduces a single star, while full
-> multi-layer designs round-trip through local history.
+> **URL scheme (multi-layer).** Canvas fields use bare short keys (`bg`, `oc`,
+> …). Layer 0 also uses bare per-star keys, so a single-star design encodes
+> **byte-identically to the pre-layer scheme** — every old shared link still
+> parses. Layers 1+ prefix their keys with the layer index (`1t`, `1rot`, `2x`),
+> and `n=<count>` marks multi-layer compositions (so an all-default extra layer
+> still round-trips). Five fully-tweaked layers stay ~1.2k chars, well under the
+> ~2k URL budget. See [lib/url-params.ts](lib/url-params.ts)
+> (`compositionToParams`/`paramsToComposition`).
 
 ## CompositionConfig & ImageLayer — images
 

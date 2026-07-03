@@ -3,7 +3,7 @@ id: workflows
 title: Workflows
 order: 40
 status: current
-last_updated: 2026-06-10
+last_updated: 2026-07-03
 owner: @naim
 linked_paths: lib/image-upload.ts, lib/export.ts, lib/history.ts, components/ImagePreview.tsx, hooks/useComposition.ts
 summary: The key end-to-end flows — image upload to mandala, export, save & restore.
@@ -65,11 +65,14 @@ sequenceDiagram
   Note over H: newest-first, dedupe vs last, cap 12, quota-trim
   HP->>H: loadHistory() on open
   HP->>GC: onRestore(entry)
-  GC->>GC: geometry → setConfig; images → comp.setConfig + setMode('images')
+  GC->>GC: geometry → setStarComposition(asComposition); images → comp.setConfig + setMode('images')
 ```
 
 Because image snapshots store their data URLs, restoring an image design brings
 the actual layers back — the user can keep editing it in the same browser.
+Geometry snapshots may be either shape (a legacy flat `StarConfig` or a
+`GeometryComposition`); `asComposition()` normalizes both back into the live
+layer state on restore.
 
 ## Reorder layers
 

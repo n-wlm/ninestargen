@@ -14,6 +14,12 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-03
 
+- Geometry layers — cycle 4b (branch `feature/geometry-layers`): multi-layer URL
+  scheme in `lib/url-params.ts` (`compositionToParams`/`paramsToComposition`) —
+  canvas + layer-0 keys stay bare (old links parse unchanged), layers 1+ are
+  index-prefixed, `n=<count>` marks multi-layer; `useUrlSync` now syncs the whole
+  composition. Round-trip verified deterministically incl. legacy links and a
+  5-layer worst case (~1.2k chars). Updated data-model.
 - Geometry layers — cycle 4a (branch `feature/geometry-layers`): geometry state
   is now a `GeometryComposition` of stacked `GeometryLayer`s (new
   `types/geometry.ts`, `hooks/useStarComposition.ts`). `StarPreview` renders any

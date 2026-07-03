@@ -2,47 +2,39 @@
 
 import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import type { StarConfig } from '@/types/star';
-import { configToParams, paramsToConfig } from '@/lib/url-params';
-import { DEFAULT_CONFIG } from '@/types/star';
+import type { GeometryComposition } from '@/types/geometry';
+import { compositionToParams, paramsToComposition } from '@/lib/url-params';
 
 export function useUrlSync(
-  config: StarConfig,
-  setConfig: (c: StarConfig) => void,
+  config: GeometryComposition,
+  setConfig: (c: GeometryComposition) => void,
 ) {
   const searchParams = useSearchParams();
   const isMounting = useRef(true);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // On mount: read config from URL if params exist
+  // On mount: read the composition from the URL if params exist. Legacy
+  // single-star URLs (bare keys, no `n`) parse to a one-layer composition.
   useEffect(() => {
     if (searchParams.size > 0) {
-      const parsed = paramsToConfig(searchParams);
-      setConfig(parsed);
+      setConfig(paramsToComposition(searchParams));
     }
     isMounting.current = false;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // On config change: write to URL (debounced)
+  // On change: write to the URL (debounced)
   useEffect(() => {
     if (isMounting.current) return;
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      const params = configToParams(config);
-      const query = params.toString();
-      const url = query ? `/?${query}` : '/';
-      window.history.replaceState(null, '', url);
+      const query = compositionToParams(config).toString();
+      window.history.replaceState(null, '', query ? `/?${query}` : '/');
     }, 300);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, [config]);
-}
-
-export function getConfigFromSearchParams(searchParams: URLSearchParams): StarConfig {
-  if (searchParams.size === 0) return DEFAULT_CONFIG;
-  return paramsToConfig(searchParams);
 }

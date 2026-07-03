@@ -3,13 +3,39 @@ id: adrs
 title: Architecture decisions
 order: 50
 status: current
-last_updated: 2026-06-10
+last_updated: 2026-07-03
 owner: @naim
 linked_paths: lib/export.ts, lib/image-upload.ts, lib/history.ts, app/globals.css, app/GeneratorClient.tsx
 summary: The significant decisions behind the app and why they were made.
 ---
 
 Newest first.
+
+## ADR-007: Geometry becomes a layer composition (mirroring images)
+
+**Status:** accepted
+
+> [!DECISION] Geometry mode edits a `GeometryComposition` of stacked star layers, mirroring the proven images layer model; `StarConfig` stays as the legacy single-star vocabulary behind a `compositionFromConfig` seam.
+
+**Context** — users want to stack several generated stars (scale/rotate/offset
+each) to invent compound shapes. The images mode already has a solid layer model
+(`useComposition`, per-layer cards). Geometry state was a single flat
+`StarConfig` woven into URLs, presets, and history.
+
+**Decision** — introduce `GeometryLayer` (the per-star subset of `StarConfig` +
+`opacity`/`offsetX`/`offsetY`) and `GeometryComposition` (`layers[]` + canvas
+fields), capped at `MAX_GEOMETRY_LAYERS = 5`. Keep `StarConfig` untouched as the
+vocabulary that presets, old URLs, and old history speak; **all three load
+through `compositionFromConfig()`** as a one-layer composition. No `scale` field —
+`outerRadius` already is a generated star's size. Each rendered layer gets unique
+gradient/filter ids so stacks don't cross-bleed. The URL keeps layer-0 keys bare
+(byte-identical to old links) and prefixes layers 1+.
+
+**Consequences** — every existing shared link and saved design keeps working; the
+control panel and single-config paths can migrate incrementally (they still read
+a flat `StarConfig` derived from the selected layer via `configFromLayer`). Cost:
+two parallel layer models (geometry + images) until a later unification, and a
+5-layer ceiling to keep the URL and sidebar bounded.
 
 ## ADR-006: History survives app updates (versioned + normalized on load)
 

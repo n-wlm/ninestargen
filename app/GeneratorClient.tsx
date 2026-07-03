@@ -95,7 +95,7 @@ function Generator() {
     mode: 'geometry',
   });
 
-  useUrlSync(config, setConfig);
+  useUrlSync(star.config, setStarComposition);
 
   // Load after mount (not during render) so server and client first paint match —
   // localStorage only exists in the browser.
