@@ -191,7 +191,18 @@ function Generator() {
               onReset={comp.reset}
             />
           ) : (
-            <ControlPanel config={config} update={update} onReset={star.reset} />
+            <ControlPanel
+              config={config}
+              update={update}
+              onReset={star.reset}
+              layers={star.config.layers}
+              selectedLayer={star.selectedLayer}
+              selectLayer={star.selectLayer}
+              duplicateLayer={star.duplicateLayer}
+              removeLayer={star.removeLayer}
+              reorderLayer={star.reorderLayer}
+              updateLayer={star.updateLayer}
+            />
           )}
         </div>
         {/* Export panel: desktop only */}

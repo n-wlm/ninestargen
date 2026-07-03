@@ -152,6 +152,18 @@ export function ConfirmButton({
   );
 }
 
+// A stronger divider that introduces a group of sections (e.g. "Canvas" — the
+// composition-level controls below the per-layer ones). Heavier top border than
+// a Section header so the shift from "the selected star" to "the whole canvas"
+// reads at a glance, without the weight of tabs.
+export function GroupLabel({ label }: { label: string }) {
+  return (
+    <div className="px-4 pt-4 pb-1 bg-white border-t-4 border-[#EEF0F3]">
+      <p className="text-[11px] lg:text-[10px] font-bold uppercase tracking-[0.14em] text-[#9CA3AF]">{label}</p>
+    </div>
+  );
+}
+
 export function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="border-b border-[#F3F4F6]">

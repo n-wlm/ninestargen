@@ -14,6 +14,14 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-03
 
+- Geometry layers — cycle 4c (branch `feature/geometry-layers`): the layer UI.
+  New shared `components/controls/LayerList.tsx` (compact selected-layer list —
+  thumbnail, visibility, reorder, duplicate, delete on hover) and a `GroupLabel`
+  primitive. `ControlPanel` now edits the **selected** layer; with one layer the
+  list is hidden (just a "+ Layer" ghost button), per-layer Opacity/Offset show
+  only at >1 layer, and Background + Outer Container sit under a "Canvas" group.
+  Verified via gates + SSR structural render (single vs multi-layer); a live
+  click-through is pending (the preview tab was backgrounded). Updated ui-design.
 - Geometry layers — cycle 4b (branch `feature/geometry-layers`): multi-layer URL
   scheme in `lib/url-params.ts` (`compositionToParams`/`paramsToComposition`) —
   canvas + layer-0 keys stay bare (old links parse unchanged), layers 1+ are

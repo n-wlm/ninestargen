@@ -78,10 +78,20 @@ Template-Kuration (5 schwache Presets ersetzen, Owner wählt aus Kandidaten), �
       asComposition passthrough/wrap; live: Radius-Edit → Pfad + URL `?r=…`,
       Legacy-URL-Parse round-trip. (Preview-Tab war backgrounded → motion/Effekte
       gedrosselt; daher SSR statt Klick-Verifikation für Multi-Layer.)
-- [ ] 4b URL v2: `lib/url-params.ts` Präfix-Schema (+`v,o,x,y,n`), `useUrlSync.ts`
-- [ ] 4c Layer-UI: `LayerList.tsx` (generisch), GroupLabel-Primitive, ControlPanel
-      Selected-Layer-Verdrahtung, Opacity (nur >1 Layer) + Offset X/Y in Shape
-- Kritisch: 4c nie ohne 4b shippen (Share-Links würden Layer verlieren)
+- [x] 4b URL v2: `lib/url-params.ts` CANVAS/LAYER-Key-Split, Präfix-Schema
+      (Layer 0 bare = byte-identisch zu alt, Layer 1+ `${i}`-Präfix, `n=count`),
+      `useUrlSync` synct die ganze Komposition. Verifiziert (tsx round-trip):
+      Legacy-URL byte-identisch, 3-Layer round-trip, `n`-Marker, 5-Layer = 1162 Z.
+- [x] 4c Layer-UI: `LayerList.tsx` (generisch, Selected-Layer-Liste), `GroupLabel`,
+      ControlPanel edit-selektierter-Layer, „+ Layer"-Ghost bei 1 Layer (dupliziert),
+      Opacity/Offset X/Y nur bei >1 Layer, „Canvas"-Gruppe (Background + Outer
+      Container), Effects bleibt per-Layer. Verifiziert: tsc/lint/build ✓ + SSR
+      (single vs multi-layer Struktur korrekt: Liste-Gating, Ghost, Slider,
+      Sektions-Reihenfolge Effects→Canvas→Background, reversed Namen).
+      **Offen: Live-Klick-Durchlauf** (Preview-Tab war backgrounded → Effekte/
+      Renders gedrosselt; Naim sollte im echten Browser durchklicken: + Layer,
+      Select, Reorder, Auge, Duplizieren, Löschen, Export, History-Restore, Share).
+- Kritisch erfüllt: 4c auf 4b aufgesetzt (Share-Links tragen Layer).
 
 ### Phase 5 — `feature/images-layer-ui` (M, nach Phase 4)
 - [ ] ImageControlPanel auf gemeinsame LayerList + Selected-Layer-Sektionen migrieren

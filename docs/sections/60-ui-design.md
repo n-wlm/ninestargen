@@ -5,7 +5,7 @@ order: 60
 status: current
 last_updated: 2026-07-03
 owner: @naim
-linked_paths: components/controls/, components/ui/popover.tsx, app/globals.css, components/SaveDesignModal.tsx, components/HistoryPanel.tsx, components/ImageEmptyState.tsx, components/ShareButton.tsx, lib/clipboard.ts, lib/color-palettes.ts, lib/recent-colors.ts
+linked_paths: components/controls/, components/ui/popover.tsx, app/globals.css, components/SaveDesignModal.tsx, components/HistoryPanel.tsx, components/ImageEmptyState.tsx, components/ShareButton.tsx, components/WhatsNewDialog.tsx, lib/clipboard.ts, lib/color-palettes.ts, lib/recent-colors.ts
 summary: Design language, the accent-variable system, control conventions, and accessibility notes.
 ---
 
@@ -50,18 +50,33 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   between popover open and close), and the native OS picker + hex as the custom
   fallback. Gradient stops in `GradientBuilder` use the same popover; the
   at-rest layout is unchanged, so the picker stays invisible until clicked.
-  Shared `primitives`: `Section`,
+  Shared `primitives`: `Section`, `GroupLabel` (a heavier divider that
+  introduces a group of sections — used for the geometry **Canvas** group),
   `SegmentedControl`, `Toggle`, and `ConfirmButton` (inline confirm popover;
   `destructive` = red confirm; `placement` top/bottom; `align` right or center —
   the centered variant is **portaled to `<body>`** with fixed positioning so it
   isn't clipped by the sidebar's `overflow`; the in-flow right variant is used
   inside modals).
+- **Geometry layer UI** (selected-layer pattern): `LayerList`
+  ([controls/LayerList.tsx](components/controls/LayerList.tsx)) is a compact
+  list shown front→back; clicking a row selects it and **all the sections below
+  edit that layer** (so the sidebar keeps the same shape as a single star). The
+  action cluster (visibility, reorder ▲▼, duplicate, delete) only appears on
+  hover/selection, keeping the list calm. With **one** layer the list is hidden
+  entirely — only a quiet "+ Layer" ghost button in the Controls header — so a
+  first-time visitor never meets the concept. "+ Layer" duplicates the current
+  star; per-layer **Layer Opacity / Offset X / Offset Y** appear in Shape only
+  when >1 layer. `MAX_GEOMETRY_LAYERS = 5`. Background + Outer Container sit under
+  a **Canvas** `GroupLabel` (composition-level), separated from the per-layer
+  sections by a divider rather than tabs. *(Future: the images panel will adopt
+  this same `LayerList`, replacing its expandable cards.)*
 - **Image layer controls**: per layer — count (9/3), Mirror toggle, Size, Radius,
   Spin, Angle (rotates the whole arrangement; snaps to half-sectors), **Offset X /
   Offset Y** (nudge the image off-centre within each copy), Opacity.
-- **Panels**: `ControlPanel` (geometry) and `ImageControlPanel` (images, with
-  the layer cards: thumbnail, expand chevron, reorder arrows, visibility,
-  separated delete; dropzone demotes to a slim button once a layer exists).
+- **Panels**: `ControlPanel` (geometry, with the `LayerList` above) and
+  `ImageControlPanel` (images, still with expandable layer cards: thumbnail,
+  expand chevron, reorder arrows, visibility, separated delete; dropzone demotes
+  to a slim button once a layer exists).
 - **Canvas**: square preview via container-query units
   (`w-[min(100cqw,100cqh)] aspect-square`); `ImageEmptyState` explains the mode
   when no image is loaded (compact on mobile — smaller glyph/text and a shorter
