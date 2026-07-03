@@ -1,8 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ArrowDown, ArrowDownRight, ArrowRight, ArrowUpRight, type LucideIcon } from 'lucide-react';
 
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { SWATCH_COLORS } from '@/lib/color-palettes';
+import { loadRecentColors, pushRecentColor } from '@/lib/recent-colors';
 import type { StarConfig } from '@/types/star';
 
 // Accepts "#abc", "abc", "#aabbcc", "aabbcc" → "#AABBCC"; null if invalid.
@@ -50,6 +53,96 @@ function HexInput({ value, onChange, className }: { value: string; onChange: (v:
   );
 }
 
+function MiniSwatch({ color, current, onPick }: { color: string; current: string; onPick: (c: string) => void }) {
+  const selected = color.toUpperCase() === current.toUpperCase();
+
+  return (
+    <button
+      type="button"
+      title={color}
+      aria-label={`Color ${color}`}
+      onClick={() => onPick(color)}
+      className={`h-7 w-7 lg:h-6 lg:w-6 rounded-md border border-black/10 transition-transform hover:scale-110 ${
+        selected ? 'ring-2 ring-[var(--nsg-accent)] ring-offset-1' : ''
+      }`}
+      style={{ background: color }}
+    />
+  );
+}
+
+// Swatch that opens the shared color popover: curated presets, recent colors
+// (localStorage), and the native picker + hex field as the custom fallback.
+function ColorSwatchButton({ value, onChange, swatchClass, iconSize }: {
+  value: string;
+  onChange: (v: string) => void;
+  swatchClass: string;
+  iconSize: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const [recent, setRecent] = useState<string[]>([]);
+  // Only colors the user actually changed count as "recent".
+  const openedWith = useRef(value);
+
+  function handleOpenChange(next: boolean) {
+    if (next) {
+      openedWith.current = value;
+      setRecent(loadRecentColors());
+    } else if (value !== openedWith.current) {
+      pushRecentColor(value);
+    }
+    setOpen(next);
+  }
+
+  return (
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger aria-label={`Choose color (current ${value})`} className="relative block cursor-pointer group/swatch">
+        <span className={`block ${swatchClass} rounded-md border border-black/10 shadow-sm`} style={{ background: value }} />
+        <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/swatch:opacity-100 transition-opacity">
+          <svg width={iconSize} height={iconSize} viewBox="0 0 10 10" fill="none" className="drop-shadow-sm">
+            <path d="M6.5 1.5l2 2-5 5H1.5v-2l5-5z" stroke="white" strokeWidth="1.2" strokeLinejoin="round"/>
+          </svg>
+        </span>
+      </PopoverTrigger>
+      <PopoverContent className="p-2.5 flex flex-col gap-2.5">
+        <div className="grid grid-cols-5 gap-1.5">
+          {SWATCH_COLORS.map((c) => (
+            <MiniSwatch key={c} color={c} current={value} onPick={onChange} />
+          ))}
+        </div>
+        {recent.length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#9CA3AF]">Recent</span>
+            <div className="flex flex-wrap gap-1.5">
+              {recent.map((c) => (
+                <MiniSwatch key={c} color={c} current={value} onPick={onChange} />
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="flex items-center gap-2 pt-2 border-t border-[#F3F4F6]">
+          <label className="relative shrink-0 cursor-pointer" title="Custom color">
+            <span
+              className="block h-7 w-7 lg:h-6 lg:w-6 rounded-md border border-black/10 shadow-sm"
+              style={{ background: 'conic-gradient(from 180deg, #EF4444, #F59E0B, #10B981, #0EA5E9, #8B5CF6, #EC4899, #EF4444)' }}
+            />
+            <input
+              type="color"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+          </label>
+          <HexInput
+            value={value}
+            onChange={onChange}
+            className="flex-1 min-w-0 text-[12px] lg:text-[11px] font-mono text-[#6B7280] uppercase tracking-wide bg-transparent border-b border-transparent hover:border-[#E5E7EB] focus:border-[var(--nsg-accent)] focus:outline-none py-0.5 transition-colors"
+          />
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 interface ColorControlProps {
   label: string;
   value: string;
@@ -66,23 +159,7 @@ export function ColorControl({ label, value, onChange, showOpacity, opacity = 1,
         <span className="text-[12px] lg:text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6B7280]">{label}</span>
       )}
       <div className="flex items-center gap-2.5 lg:gap-2">
-        <label className="relative cursor-pointer group/swatch">
-          <span
-            className="block w-9 h-9 lg:w-7 lg:h-7 rounded-md border border-black/10 shadow-sm"
-            style={{ background: value }}
-          />
-          <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/swatch:opacity-100 transition-opacity">
-            <svg width="11" height="11" viewBox="0 0 10 10" fill="none" className="drop-shadow-sm">
-              <path d="M6.5 1.5l2 2-5 5H1.5v-2l5-5z" stroke="white" strokeWidth="1.2" strokeLinejoin="round"/>
-            </svg>
-          </span>
-          <input
-            type="color"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-          />
-        </label>
+        <ColorSwatchButton value={value} onChange={onChange} swatchClass="w-9 h-9 lg:w-7 lg:h-7" iconSize={11} />
         <HexInput
           value={value}
           onChange={onChange}
@@ -167,23 +244,12 @@ export function GradientBuilder({ colors, onChange, direction, onDirectionChange
       <div className="flex flex-col gap-2 lg:gap-1.5">
         {colors.map((color, i) => (
           <div key={i} className="flex items-center gap-2.5 lg:gap-2">
-            <label className="relative cursor-pointer group/swatch">
-              <span
-                className="block w-8 h-8 lg:w-6 lg:h-6 rounded border border-black/10 shadow-sm"
-                style={{ background: color }}
-              />
-              <span className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/swatch:opacity-100 transition-opacity">
-                <svg width="9" height="9" viewBox="0 0 10 10" fill="none" className="drop-shadow-sm">
-                  <path d="M6.5 1.5l2 2-5 5H1.5v-2l5-5z" stroke="white" strokeWidth="1.2" strokeLinejoin="round"/>
-                </svg>
-              </span>
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => updateColor(i, e.target.value)}
-                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-              />
-            </label>
+            <ColorSwatchButton
+              value={color}
+              onChange={(v) => updateColor(i, v)}
+              swatchClass="w-8 h-8 lg:w-6 lg:h-6"
+              iconSize={9}
+            />
             <HexInput
               value={color}
               onChange={(v) => updateColor(i, v)}

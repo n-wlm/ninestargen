@@ -12,6 +12,16 @@ summary: A running log of documentation updates, newest first.
 Append one entry per documentation update, newest first. Each records the date,
 the sections touched, and a one-line summary.
 
+## 2026-07-03
+
+- Color picker v2 (branch `feature/color-picker-v2`): every color swatch in both
+  modes now opens a popover with a curated 20-color preset grid, a persistent
+  Recent row (`nsg:recent-colors`), and the native picker + hex field. New
+  `components/ui/popover.tsx` (wraps the already-installed `@base-ui/react`
+  Popover — no new dependency), new `lib/recent-colors.ts`, `SWATCH_COLORS` in
+  `lib/color-palettes.ts`. `ColorControl`'s public API unchanged; all usage
+  sites inherit the upgrade. Updated the UI-design section.
+
 ## 2026-06-10
 
 - System-wide performance & consistency pass (branch `chore/system-check`):

@@ -3,9 +3,9 @@ id: ui-design
 title: UI design
 order: 60
 status: current
-last_updated: 2026-06-10
+last_updated: 2026-07-03
 owner: @naim
-linked_paths: components/controls/, app/globals.css, components/SaveDesignModal.tsx, components/HistoryPanel.tsx, components/ImageEmptyState.tsx, components/ShareButton.tsx, lib/clipboard.ts
+linked_paths: components/controls/, components/ui/popover.tsx, app/globals.css, components/SaveDesignModal.tsx, components/HistoryPanel.tsx, components/ImageEmptyState.tsx, components/ShareButton.tsx, lib/clipboard.ts, lib/color-palettes.ts, lib/recent-colors.ts
 summary: Design language, the accent-variable system, control conventions, and accessibility notes.
 ---
 
@@ -39,8 +39,18 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
 - **Controls** ([controls/](components/controls/)): `SliderInput` (slider +
   typed numeric field; supports `parse` for percent fields, `snap` targets, a
   `disabledHint` shown when a control doesn't apply to the current shape, and an
-  optional amber "Set to default" pill). `ColorControl` includes an editable hex
-  field accepting `#abc`/`aabbcc`. Shared `primitives`: `Section`,
+  optional amber "Set to default" pill). `ColorControl` pairs an editable hex
+  field (accepting `#abc`/`aabbcc`) with a swatch that opens a **color popover**
+  ([ui/popover.tsx](components/ui/popover.tsx), a Base UI Popover in house
+  style): a curated 20-color grid (`SWATCH_COLORS` in
+  [lib/color-palettes.ts](lib/color-palettes.ts) — neutrals, warm, pink/purple,
+  cool; includes every fill-palette anchor), a Recent row
+  ([lib/recent-colors.ts](lib/recent-colors.ts), localStorage
+  `nsg:recent-colors`, max 8, deduped, only pushed when a color actually changed
+  between popover open and close), and the native OS picker + hex as the custom
+  fallback. Gradient stops in `GradientBuilder` use the same popover; the
+  at-rest layout is unchanged, so the picker stays invisible until clicked.
+  Shared `primitives`: `Section`,
   `SegmentedControl`, `Toggle`, and `ConfirmButton` (inline confirm popover;
   `destructive` = red confirm; `placement` top/bottom; `align` right or center —
   the centered variant is **portaled to `<body>`** with fixed positioning so it

@@ -9,6 +9,15 @@ export interface ColorPalette {
   gradientColors: string[];
 }
 
+// Curated single colors for the picker popover — one row each of neutrals,
+// warm, pink/purple, and cool tones; includes every palette anchor below.
+export const SWATCH_COLORS: string[] = [
+  '#FFFFFF', '#E5E7EB', '#9CA3AF', '#374151', '#111827',
+  '#C5961E', '#F59E0B', '#F97316', '#EF4444', '#B45309',
+  '#EC4899', '#BE185D', '#A78BFA', '#8B5CF6', '#5E6AD2',
+  '#0EA5E9', '#22D3EE', '#14B8A6', '#10B981', '#059669',
+];
+
 export const PALETTES: ColorPalette[] = [
   { id: 'indigo',  name: 'Indigo',   swatch: '#5E6AD2', fillType: 'solid',           fillColor: '#5E6AD2', gradientColors: ['#5E6AD2', '#818CF8'] },
   { id: 'sunset',  name: 'Sunset',   swatch: '#F97316', fillType: 'linear-gradient', fillColor: '#F97316', gradientColors: ['#F97316', '#EC4899', '#8B5CF6'] },
