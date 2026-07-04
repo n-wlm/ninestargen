@@ -14,6 +14,13 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Narrow-phone top bar (branch `chore/perf-audit`): on small screens the header
+  was cramped and the Download button got pushed past the edge. The `ModeSwitch`
+  now collapses to icons below `sm` (`Shapes` / `Images`, ~40px tap targets,
+  `aria-label`), mobile bar gaps/padding tightened, and below ~360px the Download
+  label drops to icon + caret so the accent button stays fully visible. Verified
+  by measuring header overflow at 320/360px (fits, no clip) and that desktop
+  keeps the text labels. Updated ui-design (responsive).
 - App versioning + "What's new" rework (branch `chore/perf-audit`): adopted a
   `MAJOR.FEATURE.PATCH` scheme, reconstructed the release history from git
   (geometry launch = **1.0.0**, Images mode = **1.1.0**, this layers/layout/perf

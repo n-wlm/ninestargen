@@ -3,7 +3,7 @@
 // Taller on desktop so the primary actions have room to breathe.
 export default function TopBar({ children }: { children: React.ReactNode }) {
   return (
-    <header className="h-12 lg:h-14 flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 lg:px-5 border-b border-[#EAECF0] bg-white shrink-0">
+    <header className="h-12 lg:h-14 flex items-center gap-1.5 sm:gap-3 px-2 sm:px-4 lg:px-5 border-b border-[#EAECF0] bg-white shrink-0">
       {children}
     </header>
   );

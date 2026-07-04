@@ -125,6 +125,12 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   it stacks (canvas on top, controls below). On mobile the header nav collapses
   into a `⋯` overflow menu, the wordmark drops to just the logo, and the sidebar
   gains the Controls/Layers toggle (the desktop floating layers panel is hidden).
+  To keep the top bar from squeezing the Download action out on narrow phones,
+  the **`ModeSwitch` collapses to icons below `sm`** (`Shapes` for geometry,
+  `Images` for images — with a ~40px tap target and `aria-label`), the History /
+  Share segments are already icon-only there, and below ~360px the **Download
+  label** itself drops to just the icon + caret (accent button stays fully
+  visible rather than being clipped); mobile bar gaps/padding are a touch tighter.
   The centered confirm popover is clamped to the viewport so it never runs
   off-screen on narrow widths.
 - **Modals**: `SaveDesignModal` (post-download) and `HistoryPanel` — white

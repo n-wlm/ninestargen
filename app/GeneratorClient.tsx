@@ -248,7 +248,7 @@ function Generator() {
       <TopBar>
         <Wordmark mode={mode} />
         <ModeSwitch mode={mode} onChange={setMode} />
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-3">
           <HeaderNav />
           <ActionsCluster
             entriesCount={entries.length}
