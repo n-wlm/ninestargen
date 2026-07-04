@@ -126,15 +126,26 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   into a `⋯` overflow menu, the wordmark drops to just the logo, and the sidebar
   gains the Controls/Layers toggle (the desktop floating layers panel is hidden).
   To keep the top bar from squeezing the Download action out on narrow phones,
-  the **`ModeSwitch` collapses to icons below `sm`** (`Shapes` for geometry,
-  `Images` for images — with a ~40px tap target and `aria-label`), the History /
-  Share segments are already icon-only there, and below ~360px the **Download
-  label** itself drops to just the icon + caret (accent button stays fully
-  visible rather than being clipped); mobile bar gaps/padding are a touch tighter.
+  the **`ModeSwitch` collapses to icons below `sm`** (`Spline` — a flowing curve —
+  for geometry, `Images` for images — with a ~40px tap target and `aria-label`),
+  the History / Share segments are already icon-only there, and below ~360px the
+  **Download label** itself drops to just the icon + caret (accent button stays
+  fully visible rather than being clipped); mobile bar gaps/padding are a touch
+  tighter.
+- **Mobile Controls/Layers toggle**: in images mode with no image yet, the
+  property controls are inert, so the toggle **locks to Layers** (the only place
+  to add an image) — the Controls segment is `disabled` in `SegmentedControl`
+  and an `effectiveMobileTab` derives to `layers` until the first layer exists.
+  Desktop is unaffected (it always shows the controls next to the floating panel).
   The centered confirm popover is clamped to the viewport so it never runs
   off-screen on narrow widths.
 - **Modals**: `SaveDesignModal` (post-download) and `HistoryPanel` — white
   rounded cards over a blurred backdrop, matching the export dropdown style.
+  A rounded `overflow-hidden` card that also fills a corner with colour (e.g.
+  `TemplatesModal`'s gradient header) must use a **`ring-1` outline, not a
+  `border`** — a hairline `border` on such a card leaves a faint light seam at
+  the rounded corners (the white card bg showing through the clipped fill),
+  whereas a ring is a box-shadow that follows the radius crisply.
   `SaveDesignModal` leads with a green check + "{FORMAT} downloaded" so it's
   clear the file already saved; the link/history is framed as an optional
   "keep editing later" step.

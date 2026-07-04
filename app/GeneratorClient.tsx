@@ -48,10 +48,6 @@ const IMAGES_ACCENT = {
 const PREVIEW_SHADOW: React.CSSProperties = { filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.10))' };
 
 type MobileTab = 'controls' | 'layers';
-const MOBILE_TABS: { value: MobileTab; label: string }[] = [
-  { value: 'controls', label: 'Controls' },
-  { value: 'layers', label: 'Layers' },
-];
 
 function Generator() {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -126,6 +122,16 @@ function Generator() {
   }, [setStarComposition]);
 
   const isImages = mode === 'images';
+  // On mobile the sidebar toggles between Controls and Layers. In images mode
+  // with no image yet, the property controls are inert — so lock the toggle to
+  // Layers (the only place to add an image) until the first layer exists. This
+  // only affects the mobile toggle; desktop always shows the controls.
+  const imagesEmpty = isImages && comp.config.layers.length === 0;
+  const effectiveMobileTab: MobileTab = imagesEmpty ? 'layers' : mobileTab;
+  const mobileTabs: { value: MobileTab; label: string; disabled?: boolean }[] = [
+    { value: 'controls', label: 'Controls', disabled: imagesEmpty },
+    { value: 'layers', label: 'Layers' },
+  ];
   useEffect(() => { modeRef.current = mode; }, [mode]);
 
   // Snapshot the design on every download, then offer to save the link.
@@ -269,16 +275,16 @@ function Generator() {
         >
           {/* Mobile-only Controls/Layers toggle (desktop uses the floating panel) */}
           <div className="lg:hidden px-4 py-2.5 border-b border-[#EAECF0] shrink-0">
-            <SegmentedControl options={MOBILE_TABS} value={mobileTab} onChange={setMobileTab} />
+            <SegmentedControl options={mobileTabs} value={effectiveMobileTab} onChange={setMobileTab} />
           </div>
 
           {/* Layers view — mobile only, when its tab is active */}
-          <div className={`flex-1 overflow-y-auto min-h-0 p-3 ${mobileTab === 'layers' ? 'lg:hidden' : 'hidden'}`}>
+          <div className={`flex-1 overflow-y-auto min-h-0 p-3 ${effectiveMobileTab === 'layers' ? 'lg:hidden' : 'hidden'}`}>
             <LayerList {...layerProps} />
           </div>
 
           {/* Controls view — always on desktop; on mobile when its tab is active */}
-          <div className={`flex-1 overflow-y-auto min-h-0 ${mobileTab === 'layers' ? 'hidden lg:block' : ''}`}>
+          <div className={`flex-1 overflow-y-auto min-h-0 ${effectiveMobileTab === 'layers' ? 'hidden lg:block' : ''}`}>
             {isImages ? (
               <ImageControlPanel
                 config={comp.config}

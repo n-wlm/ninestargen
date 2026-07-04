@@ -180,20 +180,23 @@ export function SegmentedControl<T extends string>({
   value,
   onChange,
 }: {
-  options: { value: T; label: string }[];
+  options: { value: T; label: string; disabled?: boolean }[];
   value: T;
   onChange: (v: T) => void;
 }) {
   return (
     <div className="flex rounded-md bg-[#F3F4F6] p-0.5 gap-0.5">
-      {options.map(({ value: v, label }) => (
+      {options.map(({ value: v, label, disabled }) => (
         <button
           key={v}
-          onClick={() => onChange(v)}
+          onClick={() => { if (!disabled) onChange(v); }}
+          disabled={disabled}
           className={`flex-1 py-2 lg:py-1 text-[13px] lg:text-[11px] rounded font-medium transition-all ${
             value === v
               ? 'bg-white text-[#111827] shadow-sm'
-              : 'text-[#6B7280] hover:text-[#374151]'
+              : disabled
+                ? 'text-[#C4C7CC] cursor-not-allowed'
+                : 'text-[#6B7280] hover:text-[#374151]'
           }`}
         >
           {label}

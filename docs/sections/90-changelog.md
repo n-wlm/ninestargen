@@ -14,6 +14,17 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Mobile polish trio (branch `chore/perf-audit`): (1) on mobile in images mode
+  with no image, the Controls/Layers toggle now **locks to Layers** (Controls
+  segment `disabled`, `effectiveMobileTab` derives to `layers`) so you can't land
+  on the inert controls before adding an image — `SegmentedControl` gained
+  optional per-option `disabled`. (2) The collapsed geometry mode icon changed
+  from `Shapes` to **`Spline`** (a flowing curve, subtler). (3) Fixed a faint
+  light seam at the rounded corners of `TemplatesModal` — a hairline `border` on
+  a rounded `overflow-hidden` card with a colour-filled header leaks the white
+  card bg at the corners; swapped to a `ring-1` outline (box-shadow follows the
+  radius cleanly). Verified by zooming the corner 6× (before/after) and the
+  mobile toggle state. Updated ui-design.
 - Narrow-phone top bar (branch `chore/perf-audit`): on small screens the header
   was cramped and the Download button got pushed past the edge. The `ModeSwitch`
   now collapses to icons below `sm` (`Shapes` / `Images`, ~40px tap targets,

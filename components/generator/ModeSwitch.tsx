@@ -2,12 +2,14 @@
 
 import { memo } from 'react';
 import { motion, LayoutGroup } from 'motion/react';
-import { Shapes, Images, type LucideIcon } from 'lucide-react';
+import { Spline, Images, type LucideIcon } from 'lucide-react';
 
 export type Mode = 'geometry' | 'images';
 
 const OPTIONS: { value: Mode; label: string; Icon: LucideIcon }[] = [
-  { value: 'geometry', label: 'Geometry', Icon: Shapes },
+  // Geometry: a flowing curve (just a hint of "drawn by formula"); Images: a
+  // stack of pictures. Text labels return at ≥ sm.
+  { value: 'geometry', label: 'Geometry', Icon: Spline },
   { value: 'images', label: 'Images', Icon: Images },
 ];
 

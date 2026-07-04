@@ -122,7 +122,7 @@ export default function TemplatesModal({
             transition={{ duration: 0.18 }}
           >
             <motion.div
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92dvh] sm:max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto border border-[#E5E7EB]"
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92dvh] sm:max-h-[90vh] flex flex-col overflow-hidden pointer-events-auto ring-1 ring-[#E5E7EB]"
               initial={{ y: 28, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 16, opacity: 0 }}
