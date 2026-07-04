@@ -14,6 +14,14 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Template curation finalized + multi-layer presets (branch
+  `feature/layout-redesign`): dropped Modern Minimal, Crystalline, Diamond Grid,
+  Sunset Gradient, Neon Glow; added the owner's picks (Porcelain, Sage Circle,
+  Copper Thread, Honey Petal) and a **multi-layer showcase** *Emerald Weave*.
+  `Preset` gained an optional `composition`; `presetToComposition()` now resolves
+  every preset (single or multi-layer) for both preview and apply, so cards match
+  results. Removed the temporary `/dev-candidates` gallery + `preset-candidates`.
+  Updated data-model (Presets) + ui-design (chrome-placement principles).
 - Layout redesign R2/R3 — floating layers panel + mobile (branch
   `feature/layout-redesign`): the layer stack moved out of the controls into a
   floating, collapsible `LayersPanel` over the canvas (desktop) and a

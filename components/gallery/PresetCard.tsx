@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import StarPreview from '@/components/StarPreview';
-import { configToParams } from '@/lib/url-params';
-import { normalizePresetConfig } from '@/lib/preset-normalization';
+import { compositionToParams } from '@/lib/url-params';
+import { presetToComposition } from '@/lib/preset-normalization';
 import type { Preset } from '@/lib/presets';
 
 interface PresetCardProps {
@@ -11,8 +11,8 @@ interface PresetCardProps {
 }
 
 export default function PresetCard({ preset }: PresetCardProps) {
-  const previewConfig = normalizePresetConfig(preset.config);
-  const params = configToParams(previewConfig).toString();
+  const previewComposition = presetToComposition(preset);
+  const params = compositionToParams(previewComposition).toString();
   const href = params ? `/?${params}` : '/';
 
   return (
@@ -23,7 +23,7 @@ export default function PresetCard({ preset }: PresetCardProps) {
       {/* Star preview */}
       <div className="aspect-square bg-white p-4 flex items-center justify-center">
         <StarPreview
-          config={previewConfig}
+          composition={previewComposition}
           className="w-full h-full"
         />
       </div>

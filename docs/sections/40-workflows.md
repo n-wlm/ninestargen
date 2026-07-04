@@ -3,7 +3,7 @@ id: workflows
 title: Workflows
 order: 40
 status: current
-last_updated: 2026-07-03
+last_updated: 2026-07-04
 owner: @naim
 linked_paths: lib/image-upload.ts, lib/export.ts, lib/history.ts, components/ImagePreview.tsx, hooks/useComposition.ts
 summary: The key end-to-end flows — image upload to mandala, export, save & restore.
@@ -74,9 +74,16 @@ Geometry snapshots may be either shape (a legacy flat `StarConfig` or a
 `GeometryComposition`); `asComposition()` normalizes both back into the live
 layer state on restore.
 
-## Reorder layers
+## Layers (both modes, same surface)
 
-The list is shown reversed (top = front = end of array). The **up** button
-moves a layer toward the front (`reorderLayer(id, +1)`), **down** toward the
-back (`-1`); `useComposition.reorderLayer` swaps array neighbours and ignores
-out-of-bounds moves.
+The layer stack renders through one shared `LayerList` — a floating `LayersPanel`
+over the canvas on desktop, a Controls/Layers sidebar toggle on mobile.
+`GeneratorClient` builds one `layerProps` set per mode (geometry from
+`useStarComposition`, images from `useComposition` — both now expose a selected
+layer + `duplicateLayer`). Selecting a row makes the property sections edit that
+layer.
+
+The list is shown reversed (top = front = end of array). The **up** button moves
+a layer toward the front (`reorderLayer(id, +1)`), **down** toward the back
+(`-1`); the reorder swaps array neighbours and ignores out-of-bounds moves.
+Delete is disabled below `minLayers` (geometry needs ≥1; images may reach 0).

@@ -1,16 +1,47 @@
 import type { StarConfig } from '@/types/star';
 import { DEFAULT_CONFIG } from '@/types/star';
+import {
+  DEFAULT_GEOMETRY_COMPOSITION,
+  configFromLayer,
+  makeGeometryLayer,
+  type GeometryComposition,
+} from '@/types/geometry';
 
 export interface Preset {
   id: string;
   name: string;
   category: 'classic' | 'modern' | 'decorative' | 'geometric' | 'artistic';
   config: StarConfig;
+  // Multi-layer showcases carry a full composition; `config` is then just the
+  // top layer, kept for any single-config fallback path.
+  composition?: GeometryComposition;
 }
 
 function preset(id: string, name: string, category: Preset['category'], overrides: Partial<StarConfig>): Preset {
   return { id, name, category, config: { ...DEFAULT_CONFIG, ...overrides } };
 }
+
+function multiPreset(id: string, name: string, category: Preset['category'], composition: GeometryComposition): Preset {
+  const top = composition.layers[composition.layers.length - 1];
+  return { id, name, category, config: configFromLayer(top, composition), composition };
+}
+
+// Emerald Weave — an outline enneagram curved sharply inward, overlaid with a
+// triple triangle; the owner's own two-layer combo, kept as a showcase of what
+// stacking generated stars can do.
+const EMERALD_WEAVE: GeometryComposition = {
+  ...DEFAULT_GEOMETRY_COMPOSITION,
+  layers: [
+    makeGeometryLayer('l0', 'Star 1', {
+      starType: '9-2', outerRadius: 180, fillType: 'none',
+      fillColor: '#10B981', gradientColors: ['#10B981', '#059669'],
+      strokeColor: '#059669', curveIntensity: -141,
+    }),
+    makeGeometryLayer('l1', 'Star 2', {
+      starType: '3-triangles', outerRadius: 180, fillType: 'none', strokeColor: '#059669',
+    }),
+  ],
+};
 
 export const PRESETS: Preset[] = [
   preset('classic-bahai', "Classic Bahá'í", 'classic', {
@@ -22,14 +53,17 @@ export const PRESETS: Preset[] = [
     outerRadius: 210,
     innerRadiusRatio: 0.45,
   }),
-  preset('modern-minimal', 'Modern Minimal', 'modern', {
-    starType: '9-2',
+  preset('porcelain', 'Porcelain', 'modern', {
+    starType: '9-4',
     fillType: 'solid',
-    fillColor: '#0F172A',
-    strokeWidth: 0,
-    innerRadiusRatio: 0.35,
-    curveIntensity: 29,
-    cornerRounding: 0.03,
+    fillColor: '#FFFFFF',
+    strokeColor: '#C8C4BF',
+    strokeWidth: 1,
+    bgColor: '#EBE9E6',
+    innerRadiusRatio: 0.42,
+    shadowBlur: 18,
+    shadowColor: '#00000033',
+    cornerRounding: 0.05,
   }),
   preset('watercolor-petal', 'Watercolor Petal', 'decorative', {
     starType: 'petal',
@@ -52,14 +86,19 @@ export const PRESETS: Preset[] = [
     curveIntensity: -100,
     innerRadiusRatio: 0.45,
   }),
-  preset('crystalline', 'Crystalline', 'geometric', {
-    starType: 'spike',
-    fillType: 'linear-gradient',
-    gradientColors: ['#BAE6FD', '#E0E7FF'],
-    strokeColor: '#1E40AF',
-    strokeWidth: 1.5,
-    bgColor: '#0F172A',
-    innerRadiusRatio: 0.5,
+  preset('sage-circle', 'Sage Circle', 'decorative', {
+    starType: 'petal',
+    fillType: 'solid',
+    fillColor: '#87A987',
+    fillOpacity: 0.85,
+    strokeColor: '#5F7A61',
+    strokeWidth: 1,
+    petalWidth: 0.45,
+    petalCurve: 0.65,
+    outerContainer: 'circle',
+    outerContainerPadding: 24,
+    outerContainerColor: '#5F7A61',
+    bgColor: '#F7F8F5',
   }),
   preset('earth-tones', 'Earth Tones', 'classic', {
     starType: '3-triangles',
@@ -78,15 +117,15 @@ export const PRESETS: Preset[] = [
     strokeWidth: 0,
     bgColor: '#FFFFFF',
   }),
-  preset('diamond-grid', 'Diamond Grid', 'geometric', {
-    starType: 'kite',
-    fillType: 'solid',
-    fillColor: '#3B82F6',
-    fillOpacity: 0.8,
-    strokeColor: '#1D4ED8',
+  preset('copper-thread', 'Copper Thread', 'geometric', {
+    starType: '9-2',
+    fillType: 'none',
+    strokeColor: '#B45309',
     strokeWidth: 1.5,
-    bgColor: '#EFF6FF',
-    innerRadiusRatio: 0.38,
+    outerContainer: 'circle',
+    outerContainerPadding: 16,
+    outerContainerColor: '#D4A574',
+    bgColor: '#FDFBF7',
   }),
   preset('indigo-solid', 'Leafburst', 'modern', {
     starType: 'spike',
@@ -106,24 +145,17 @@ export const PRESETS: Preset[] = [
     strokeWidth: 0,
     cornerRounding: 1,
   }),
-  preset('sunset-gradient', 'Sunset Gradient', 'modern', {
-    starType: '9-2',
-    fillType: 'radial-gradient',
-    gradientColors: ['#F97316', '#EC4899', '#8B5CF6'],
-    strokeWidth: 0,
-    bgColor: '#0F172A',
-    innerRadiusRatio: 0.38,
+  preset('honey-petal', 'Honey Petal', 'decorative', {
+    starType: 'petal',
+    fillType: 'solid',
+    fillColor: '#EAB308',
+    fillOpacity: 0.8,
+    strokeColor: '#A16207',
+    strokeWidth: 1,
+    petalWidth: 0.5,
+    petalCurve: 0.6,
   }),
-  preset('neon-glow', 'Neon Glow', 'modern', {
-    starType: '9-4',
-    fillType: 'none',
-    strokeColor: '#22D3EE',
-    strokeWidth: 2.5,
-    bgColor: '#030712',
-    glowColor: '#22D3EE',
-    glowRadius: 12,
-    innerRadiusRatio: 0.42,
-  }),
+  multiPreset('emerald-weave', 'Emerald Weave', 'artistic', EMERALD_WEAVE),
 ];
 
 export const PRESET_CATEGORIES = ['classic', 'modern', 'decorative', 'geometric', 'artistic'] as const;

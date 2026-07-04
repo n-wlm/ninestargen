@@ -17,6 +17,20 @@ summary: Design language, the accent-variable system, control conventions, and a
 - Destructive actions ask for confirmation; risky-but-valid values are allowed
   but signposted.
 
+**Chrome placement (post-redesign) — keep new features in their lane:**
+
+- **Header = app + document-level actions**: identity, mode switch, Templates /
+  About / What's new, and the History · Share · Download cluster.
+- **Sidebar = properties**: the controls for the selected layer, plus the
+  canvas-level group. No mode switch, no export panel.
+- **Layers = their own surface**: a floating panel (desktop) / Controls-Layers
+  toggle (mobile), the same in both modes — never buried in the property list.
+- **Canvas = the artwork only**: no overlays.
+
+When adding chrome, place it by which lane it belongs to; if the header cluster
+or a corner fills up, consolidate (e.g. the mobile `⋯` menu) before adding a new
+region.
+
 ## Accent system (design tokens)
 
 The accent is a set of CSS variables in [globals.css](app/globals.css),

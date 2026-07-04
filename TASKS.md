@@ -19,7 +19,7 @@
 | R1 | Unified Header | `feature/layout-redesign` | ✅ committet |
 | R2 | Schwebendes Layer-Fenster (beide Modi) | `feature/layout-redesign` | ✅ committet |
 | R3 | Mobile-Layout (Controls/Layers-Toggle, ⋯-Menü) | `feature/layout-redesign` | ✅ committet |
-| R4 | Doku-Kapitel + Template-Finalisierung | `feature/layout-redesign` | ⬜ **nächster Schritt** |
+| R4 | Doku-Kapitel + Template-Finalisierung | `feature/layout-redesign` | ✅ committet (Owner justiert Templates nach) |
 
 Branches stacken in dieser Reihenfolge (jeder baut auf dem vorigen auf); Naim pusht + öffnet PRs.
 
@@ -134,41 +134,38 @@ Owner-Entscheidungen (Mockup + Rückfragen bestätigt):
 - Mobile: Modus-Switch in den Header; der frei werdende Slot wird zum **Controls/Layers-Umschalter**;
   Layer-Panel darf mobil bleiben wo es ist (bzw. über den Umschalter).
 - Farbauswahl: mehr Farben + Pastelltöne (✅ erledigt, siehe R0).
-- Templates: Owner-Picks (Porcelain, Sage Circle, Copper Thread, Honey Petal) + Multi-Layer-
-  Showcases folgen — Template-Finalisierung wartet noch auf weitere Owner-Vorschläge.
+- Templates: Owner-Picks (Porcelain, Sage Circle, Copper Thread, Honey Petal) übernommen
+  + Multi-Layer-Showcase „Emerald Weave" (Owner-Combo). Owner justiert am Ende nach.
 
 ### R0 — Farbauswahl erweitern (S) ✅
 - [x] `SWATCH_COLORS` 20 → 30 (5×6-Grid inkl. voller Pastellreihe, jede Hue-Reihe hell zuerst)
-- Verifiziert: 30 gültige/eindeutige Hex, tsc/build ✓ (Popover-Live-Klick: Tab backgrounded → Naim testet)
 
-### R1 — Unified Header (Modus-Switch + Aktionen) (L) — NÄCHSTER SCHRITT
-- [ ] Home-Route: `GeneratorClient` rendert eigene volle Kopfleiste (Logo + farbiger
-      Modus-Switch + Templates/What's-new + Aktions-Container History·Share·Download);
-      globaler `AppHeader` auf `/` unterdrückt (Client-Wrapper via `usePathname`),
-      bleibt für /about, /gallery. Gemeinsame Header-Teile extrahieren (Wordmark,
-      Templates/What's-new) → kein Duplikat.
-- [ ] Modus-Switch aus der Sidebar entfernen; History/Share-Overlays + Export-Panel/FAB
-      in den Header-Aktions-Container zusammenführen. Fläche wird leer.
-- Verifikation: SSR-Struktur + tsc/lint/build; **Naim testet live** (Switch schaltet + färbt,
-  Aktionen funktionieren, andere Routen unversehrt).
+### R1 — Unified Header (Modus-Switch + Aktionen) (L) ✅
+- [x] Home-Bar in `GeneratorClient` (Wordmark + farbiger `ModeSwitch` + `HeaderNav` +
+      `ActionsCluster` History·Share·Download); `SiteHeader` unterdrückt `AppHeader` auf `/`;
+      Wordmark/HeaderNav als geteilte Bausteine.
+- [x] Modus-Switch + Export-Panel aus Sidebar raus, Canvas-Overlays weg; `ExportPanel`/
+      `MobileExportFab`/`ShareButton` gelöscht (ein Export-Pfad via `useExport`).
+- Verifiziert: SSR (Switch farbig, Aktions-Container) + tsc/lint/build + Desktop-Screenshot.
 
-### R2 — Schwebendes Layer-Panel, beide Modi (L)
-- [ ] `components/controls/LayersPanel.tsx` (schwebende, einklappbare Karte oben links auf
-      der Fläche) auf Basis der bestehenden `LayerList`.
-- [ ] Geometry: LayerList aus `ControlPanel` raus → ins schwebende Panel; ControlPanel = nur
-      noch Eigenschaften des selektierten Layers + Canvas-Gruppe.
-- [ ] Images: `useComposition` + `selectedLayerId`/`duplicateLayer`; `ImageControlPanel` auf
-      Selected-Layer-Muster (aufklappbare Karten weg); dasselbe schwebende Panel nutzen.
-      (Ersetzt Alt-Phase 5.)
+### R2 — Schwebendes Layer-Panel, beide Modi (L) ✅
+- [x] `LayersPanel` (schwebend/einklappbar) auf Basis `LayerList`; ein `layerProps` je Modus.
+- [x] Geometry: Liste raus aus `ControlPanel`; Images: `useComposition` +selected/`duplicateLayer`,
+      `ImageControlPanel` auf Selected-Layer-Muster (Arrangement/Transform), Karten weg.
+- [x] `LayerList` `minLayers` (Images bis 0, Geometry ≥1). Verifiziert: SSR + Screenshot.
 
-### R3 — Mobile-Layout (M)
-- [ ] Modus-Switch mobil in den Header; freigewordener Sidebar-Slot → Controls/Layers-Toggle
-      (Segmented). Aktionen kompakt im Header.
+### R3 — Mobile-Layout (M) ✅
+- [x] Mobile: Controls/Layers-Segmented-Toggle im Sidebar-Kopf; `HeaderNav` → ⋯-Overflow-Menü;
+      Wordmark nur Logo, kompakte Aktions-Icons; Header passt in 375 px (Verifiziert: Screenshot).
 
-### R4 — Doku-Kapitel UX + Template-Finalisierung (S)
-- [ ] User Stories, Chrome-Prinzipien (aktualisiert!), Layer-Modell in documentation.html
-- [ ] Nach Owner-Auswahl: `lib/presets.ts` finalisieren (Picks + Multi-Layer-Showcases),
-      `/dev-candidates` + `lib/preset-candidates.ts` löschen
+### R4 — Doku-Kapitel + Template-Finalisierung (S) ✅
+- [x] Presets finalisiert: 5 schwache raus, 4 Picks + Multi-Layer-Showcase „Emerald Weave";
+      `Preset.composition` + `presetToComposition` (ein Pfad für Preview & Apply);
+      `/dev-candidates` + `preset-candidates.ts` gelöscht. Verifiziert: SSR (12 Presets,
+      Emerald Weave = 2 Layer, exakte Owner-URL), Gates grün.
+- [x] Doku: Chrome-Prinzipien (ui-design), Presets (data-model), ADR-008, Workflows, Changelog.
+- **Owner-Input offen (Ende):** weitere Multi-Layer-Combos + finale Template-Abnahme;
+      Live-Klick-Durchlauf im echten Browser (Preview-Tab hier backgrounded).
 
 ## Erledigt (Vorgeschichte)
 - System-Check-Audit 2026-06-10: alle 6 Phasen umgesetzt, PR `chore/system-check` → `main`

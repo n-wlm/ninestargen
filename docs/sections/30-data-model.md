@@ -3,7 +3,7 @@ id: data-model
 title: Data model
 order: 30
 status: current
-last_updated: 2026-07-03
+last_updated: 2026-07-04
 owner: @naim
 linked_paths: types/star.ts, types/geometry.ts, types/composition.ts, hooks/useStarComposition.ts, lib/history.ts, lib/url-params.ts, lib/recent-colors.ts, lib/changelog.ts
 summary: The three config shapes — StarConfig, CompositionConfig/ImageLayer, and HistoryEntry.
@@ -147,6 +147,18 @@ guarantee this (see ADR-006):
 > handles them. Bump `SCHEMA_VERSION` and add an explicit migration only for a
 > breaking change (a renamed/retyped field that defaults can't repair).
 
+## Presets (templates)
+
+Defined in [lib/presets.ts](lib/presets.ts). A `Preset` is `{ id, name,
+category, config }` with an optional `composition` — **multi-layer showcase**
+presets (e.g. *Emerald Weave*, a stacked enneagram + triple-triangle) carry a
+full `GeometryComposition`; single presets carry just a `StarConfig`.
+`presetToComposition()` ([lib/preset-normalization.ts](lib/preset-normalization.ts))
+is the one place that resolves either into the composition used for **both** the
+preview and the applied state, so a template's card and its result always match.
+Applying dispatches `nsg:apply-preset` with that composition; the URL is
+`compositionToParams(...)`.
+
 ## localStorage keys (complete list)
 
 All persistence is client-side. Every key the app writes:
@@ -156,7 +168,7 @@ All persistence is client-side. Every key the app writes:
 | `nsg:history` | [lib/history.ts](lib/history.ts) | versioned envelope of download snapshots (above) |
 | `nsg:recent-colors` | [lib/recent-colors.ts](lib/recent-colors.ts) | JSON array of up to 8 hex colors, newest first, deduped |
 | `nsg:version-seen` | [lib/changelog.ts](lib/changelog.ts) | last `APP_VERSION` whose changelog the visitor saw |
-| `templates_seen` | `AppHeader` | `"1"` once the auto-opened templates modal was closed |
+| `templates_seen` | `HeaderNav` | `"1"` once the auto-opened templates modal was closed |
 
 All reads/writes are wrapped in `try/catch` — a full or unavailable storage
 degrades features (no recents, dot shows again) but never breaks the app.

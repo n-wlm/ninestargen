@@ -7,8 +7,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { MoreHorizontal } from "lucide-react";
 import WhatsNewDialog from "@/components/WhatsNewDialog";
 import { hasUnseenChanges, markChangesSeen } from "@/lib/changelog";
-import { configToParams } from "@/lib/url-params";
-import { normalizePresetConfig } from "@/lib/preset-normalization";
+import { compositionToParams } from "@/lib/url-params";
+import { presetToComposition } from "@/lib/preset-normalization";
 import type { Preset } from "@/lib/presets";
 
 const TemplatesModal = dynamic(() => import("@/components/TemplatesModal"), {
@@ -86,12 +86,12 @@ export default function HeaderNav() {
 
   const selectPreset = useCallback(
     (preset: Preset) => {
-      const normalizedConfig = normalizePresetConfig(preset.config);
-      const params = configToParams(normalizedConfig).toString();
+      const composition = presetToComposition(preset);
+      const params = compositionToParams(composition).toString();
 
       if (pathname === "/") {
         window.dispatchEvent(
-          new CustomEvent("nsg:apply-preset", { detail: normalizedConfig }),
+          new CustomEvent("nsg:apply-preset", { detail: composition }),
         );
         router.replace(params ? `/?${params}` : "/", { scroll: false });
       } else {

@@ -25,7 +25,6 @@ import type { StarConfig } from '@/types/star';
 import { MAX_LAYERS, type CompositionConfig } from '@/types/composition';
 import {
   asComposition,
-  compositionFromConfig,
   configFromLayer,
   isGeometryCanvasKey,
   DEFAULT_GEOMETRY_COMPOSITION,
@@ -84,10 +83,6 @@ function Generator() {
     },
     [updateCanvas, updateLayer, selectedLayerId],
   );
-  const setConfig = useCallback(
-    (c: StarConfig) => setStarComposition(compositionFromConfig(c)),
-    [setStarComposition],
-  );
   const [snapKey, setSnapKey] = useState(0);
 
   // Download history (local to the browser).
@@ -115,13 +110,15 @@ function Generator() {
 
   useEffect(() => {
     const handler = (e: Event) => {
-      setConfig((e as CustomEvent).detail);
+      // Preset detail is a GeometryComposition (single-config presets are
+      // wrapped upstream); asComposition also tolerates a legacy flat config.
+      setStarComposition(asComposition((e as CustomEvent).detail));
       setMode('geometry');
       setSnapKey((k) => k + 1);
     };
     window.addEventListener('nsg:apply-preset', handler);
     return () => window.removeEventListener('nsg:apply-preset', handler);
-  }, [setConfig]);
+  }, [setStarComposition]);
 
   const isImages = mode === 'images';
 

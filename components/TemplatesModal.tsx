@@ -4,7 +4,7 @@ import { useCallback, useRef, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import StarPreview from "@/components/StarPreview";
 import { PRESETS } from "@/lib/presets";
-import { normalizePresetConfig } from "@/lib/preset-normalization";
+import { presetToComposition } from "@/lib/preset-normalization";
 import type { Preset } from "@/lib/presets";
 
 const FEATURE_PILLS = ["Styles", "Gradients", "SVG · PNG · JPG", "Free & instant"];
@@ -38,7 +38,7 @@ function PresetCard({
   onSelect: () => void;
 }) {
   const { ref, tilt, handleMove, handleLeave } = useTilt(5);
-  const previewConfig = normalizePresetConfig(preset.config);
+  const previewComposition = presetToComposition(preset);
 
   return (
     <motion.div
@@ -67,7 +67,7 @@ function PresetCard({
       className="group flex flex-col rounded-xl border border-[#E5E7EB] bg-white hover:border-[#C7D2FE] transition-colors overflow-hidden shadow-sm hover:shadow-md"
     >
       <div className="aspect-square p-3 flex items-center justify-center bg-white rounded-lg overflow-hidden">
-        <StarPreview config={previewConfig} className="w-full h-full rounded-lg" />
+        <StarPreview composition={previewComposition} className="w-full h-full rounded-lg" />
       </div>
 
       <div className="px-2.5 py-2">
