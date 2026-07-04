@@ -1,19 +1,26 @@
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import TopBar from "@/components/header/TopBar";
 import Wordmark from "@/components/header/Wordmark";
 import HeaderNav from "@/components/header/HeaderNav";
 
 // The standalone site header used on non-home routes (/about, /gallery, …).
-// On the home route the generator renders its own top bar (with the mode
-// switch + actions) and this is suppressed by SiteHeader.
+// Same shell as the home top bar; the mode switch + document actions don't apply
+// here, so the right side is a single "Open editor" CTA back to the generator.
 export default function AppHeader() {
   return (
-    <header className="h-11 flex items-center px-5 border-b border-[#EAECF0] bg-white shrink-0">
+    <TopBar>
       <Wordmark />
-      <div className="ml-5">
+      <div className="ml-4">
         <HeaderNav />
       </div>
-      <div className="ml-auto hidden sm:block">
-        <span className="text-[11px] text-[#9CA3AF]">Free nine-pointed star creator</span>
-      </div>
-    </header>
+      <Link
+        href="/"
+        className="ml-auto flex items-center gap-1.5 px-3 h-8 lg:h-9 rounded-lg text-[12px] lg:text-[13px] font-semibold text-white bg-[var(--nsg-accent)] hover:bg-[var(--nsg-accent-strong)] transition-colors"
+      >
+        Open editor
+        <ArrowRight className="w-3.5 h-3.5" />
+      </Link>
+    </TopBar>
   );
 }

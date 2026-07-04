@@ -136,11 +136,13 @@ function coerceLayerValue(layer: GeometryLayer, key: LayerKey, value: string) {
 }
 
 export function paramsToComposition(params: URLSearchParams): GeometryComposition {
-  // First pass: how many layers? (explicit `n`, else the highest prefixed index)
+  // First pass: how many layers? (explicit `n`, else the highest prefixed index).
+  // Layer keys all start with a letter, so the leading digits are the index —
+  // this handles two-digit indices (layers 10+).
   let maxIndex = 0;
   const declared = parseInt(params.get(LAYER_COUNT_KEY) ?? '', 10);
   for (const key of params.keys()) {
-    const m = /^([0-9])(.+)$/.exec(key);
+    const m = /^(\d+)([a-z].*)$/.exec(key);
     if (m && LAYER_REVERSE[m[2]]) maxIndex = Math.max(maxIndex, parseInt(m[1], 10));
   }
   const count = Math.min(
@@ -177,8 +179,9 @@ export function paramsToComposition(params: URLSearchParams): GeometryCompositio
       continue;
     }
 
-    // Prefixed layer key → layer[index]
-    const m = /^([0-9])(.+)$/.exec(key);
+    // Prefixed layer key → layer[index] (leading digits = index; keys start
+    // with a letter, so two-digit indices for layers 10+ parse correctly)
+    const m = /^(\d+)([a-z].*)$/.exec(key);
     if (m) {
       const idx = parseInt(m[1], 10);
       const layerKey = LAYER_REVERSE[m[2]];

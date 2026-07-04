@@ -87,17 +87,26 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   `StarPreview`; image thumbnails an `<img>`.
 - **ControlPanel (geometry)**: the selected star's Type / Shape / Stroke / Fill /
   Effects; per-layer **Layer Opacity / Offset X / Offset Y** appear in Shape only
-  when >1 layer. `MAX_GEOMETRY_LAYERS = 5`. Background + Outer Container sit under
+  when >1 layer. `MAX_GEOMETRY_LAYERS = 15` (the floating panel scrolls past a
+  few). Background + Outer Container sit under
   a **Canvas** `GroupLabel` (composition-level), separated by a divider not tabs.
 - **ImageControlPanel**: upload (dropzone, demotes to a slim button once a layer
   exists) + the selected image layer's **Arrangement** (count 9/3, Mirror, Angle)
   and **Transform** (Size, Radius, Spin, Offset X/Y, Opacity) sections, then the
   same **Canvas** group. Same selected-layer shape as geometry.
-- **Top bar** (R1): a full-width header the generator renders on home — logo +
-  colored `ModeSwitch` (accent-filled active pill, drives indigo/teal) + app nav
-  (Templates, About, What's new) + an `ActionsCluster` bundling History · Share ·
-  Download. This replaces the sidebar mode switch, the sidebar export panel, the
-  mobile export FAB, and the canvas History/Share overlays.
+- **Top bar**: a shared [TopBar](components/header/TopBar.tsx) shell (one height
+  — taller on desktop — border, padding) used by **both** the home generator bar
+  and the standalone `AppHeader` on other routes, so `/about` and `/gallery` read
+  as the same system (their right side is an accent "Open editor" CTA instead of
+  the mode switch + actions). The home bar holds logo + colored `ModeSwitch`
+  (accent-filled active pill, drives indigo/teal) + app nav (Templates, About,
+  What's new) + an `ActionsCluster` bundling History · **Share Design** ·
+  Download. It replaces the old sidebar mode switch, sidebar export panel, mobile
+  export FAB, and canvas overlays.
+- **ActionsCluster**: **Share Design** copies the full design link and fires a
+  toast ("Design link copied to clipboard"); the **Download** button is the
+  prominent accent primary, and its menu lists PNG/SVG/JPG as clear bordered
+  buttons (each with a download icon) so it's obvious a click downloads.
 - **Canvas**: square preview via container-query units
   (`w-[min(100cqw,100cqh)] aspect-square`), now **free of overlays** (actions
   live in the header); `ImageEmptyState` explains the mode when no image is

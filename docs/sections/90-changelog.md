@@ -14,6 +14,13 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Redesign polish (branch `feature/layout-redesign`): `MAX_GEOMETRY_LAYERS`
+  5 → 15 (matches images) — the URL parser now splits **two-digit** layer indices
+  (`^(\d+)([a-z].*)$`) and the floating layers panel scrolls past a few. Shared
+  `TopBar` shell so `/about` + `/gallery` match the home bar (with an "Open
+  editor" CTA). Desktop bar is taller and the Download button more prominent; its
+  menu lists PNG/SVG/JPG as clear bordered buttons. "Share" → "Share Design" with
+  a toast confirmation on copy. (Performance with many layers is the next step.)
 - Template curation finalized + multi-layer presets (branch
   `feature/layout-redesign`): dropped Modern Minimal, Crystalline, Diamond Grid,
   Sunset Gradient, Neon Glow; added the owner's picks (Porcelain, Sage Circle,

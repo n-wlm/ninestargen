@@ -158,6 +158,24 @@ Owner-Entscheidungen (Mockup + Rückfragen bestätigt):
 - [x] Mobile: Controls/Layers-Segmented-Toggle im Sidebar-Kopf; `HeaderNav` → ⋯-Overflow-Menü;
       Wordmark nur Logo, kompakte Aktions-Icons; Header passt in 375 px (Verifiziert: Screenshot).
 
+### R5 — Redesign-Polish (Owner-Feedback 2026-07-04, direkt umgesetzt) ✅
+- [x] P1: `MAX_GEOMETRY_LAYERS` 5 → 15; URL-Parser für zweistellige Indizes
+      (`^(\d+)([a-z].*)$`); Layer-Panel scrollt (`max-h-[60vh]`). Verifiziert:
+      12-Layer-Round-Trip, Indizes 10/11 korrekt.
+- [x] P2: gemeinsame `TopBar`-Hülle; `AppHeader` (About/Gallery) = gleiche Leiste
+      + „Open editor"-CTA (Tagline weg). Verifiziert: About-Screenshot.
+- [x] P3: „Share" → „Share Design" + Toast („Design link copied to clipboard").
+- [x] P4: Desktop-Leiste höher (`h-12 lg:h-14`), Download-Button prominenter.
+- [x] P5: Download-Menü = klare umrandete Format-Buttons (PNG/SVG/JPG + Icon).
+- Verifiziert: tsc/lint/build ✓; SSR + Desktop-Screenshot (Layer 1/15, größere Bar,
+  Share Design). Live-Klick (Menü, Toast, Modus-Switch, Multi-Layer-URL) → Naim.
+
+### ⏭ NÄCHSTER SCHRITT (Owner): Performance mit vielen Layern
+Owner meldet leichtes Ruckeln bei mehreren Layern. Eigener Analyse-/Umsetzungs-Schritt:
+Render-Kosten pro Layer (Blur-Filter, useId, unmemoized `StarLayerGroup`?),
+unnötige Re-Renders bei unrelatem State, evtl. Debounce/Virtualisierung. Erst
+analysieren, dann Plan, dann umsetzen.
+
 ### R4 — Doku-Kapitel + Template-Finalisierung (S) ✅
 - [x] Presets finalisiert: 5 schwache raus, 4 Picks + Multi-Layer-Showcase „Emerald Weave";
       `Preset.composition` + `presetToComposition` (ein Pfad für Preview & Apply);

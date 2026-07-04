@@ -51,7 +51,7 @@ each) to invent compound shapes. The images mode already has a solid layer model
 
 **Decision** — introduce `GeometryLayer` (the per-star subset of `StarConfig` +
 `opacity`/`offsetX`/`offsetY`) and `GeometryComposition` (`layers[]` + canvas
-fields), capped at `MAX_GEOMETRY_LAYERS = 5`. Keep `StarConfig` untouched as the
+fields), capped at `MAX_GEOMETRY_LAYERS = 15` (matches images). Keep `StarConfig` untouched as the
 vocabulary that presets, old URLs, and old history speak; **all three load
 through `compositionFromConfig()`** as a one-layer composition. No `scale` field —
 `outerRadius` already is a generated star's size. Each rendered layer gets unique
@@ -61,8 +61,9 @@ gradient/filter ids so stacks don't cross-bleed. The URL keeps layer-0 keys bare
 **Consequences** — every existing shared link and saved design keeps working; the
 control panel and single-config paths can migrate incrementally (they still read
 a flat `StarConfig` derived from the selected layer via `configFromLayer`). Cost:
-two parallel layer models (geometry + images) until a later unification, and a
-5-layer ceiling to keep the URL and sidebar bounded.
+two parallel layer models (geometry + images) until a later unification; the URL
+parser must split multi-digit layer indices, and many maxed layers make long
+(but valid) share links.
 
 ## ADR-006: History survives app updates (versioned + normalized on load)
 

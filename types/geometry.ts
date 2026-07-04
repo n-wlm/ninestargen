@@ -53,7 +53,7 @@ export interface GeometryComposition {
   exportHeight: number;
 }
 
-export const MAX_GEOMETRY_LAYERS = 5;
+export const MAX_GEOMETRY_LAYERS = 15;
 
 const STAR_SHAPE_KEYS = [
   'starType', 'outerRadius', 'innerRadiusRatio', 'rotation', 'curveIntensity',

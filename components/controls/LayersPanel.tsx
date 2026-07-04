@@ -43,7 +43,7 @@ export default function LayersPanel(props: LayersPanelProps) {
       </button>
 
       {!collapsed && (
-        <div className="px-2 pb-2 pt-0.5 border-t border-[#F3F4F6]">
+        <div className="px-2 pb-2 pt-0.5 border-t border-[#F3F4F6] max-h-[60vh] overflow-y-auto">
           <LayerList {...props} />
         </div>
       )}

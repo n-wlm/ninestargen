@@ -70,7 +70,7 @@ generated stars, mirroring the images layer model.
   a generated star.
 - **GeometryComposition**: `layers[]` (rendered bottom→top, list reversed in the
   UI) plus the canvas-level fields `bgColor`, outer-container fields, and export
-  size. `MAX_GEOMETRY_LAYERS = 5`.
+  size. `MAX_GEOMETRY_LAYERS = 15` (matches images).
 - **`compositionFromConfig(StarConfig)`** is the single backward-compat seam:
   legacy single-star URLs, presets, and history entries load as a one-layer
   composition. `asComposition()` accepts either shape; `configFromLayer()`
@@ -87,11 +87,13 @@ generated stars, mirroring the images layer model.
 > **URL scheme (multi-layer).** Canvas fields use bare short keys (`bg`, `oc`,
 > …). Layer 0 also uses bare per-star keys, so a single-star design encodes
 > **byte-identically to the pre-layer scheme** — every old shared link still
-> parses. Layers 1+ prefix their keys with the layer index (`1t`, `1rot`, `2x`),
-> and `n=<count>` marks multi-layer compositions (so an all-default extra layer
-> still round-trips). Five fully-tweaked layers stay ~1.2k chars, well under the
-> ~2k URL budget. See [lib/url-params.ts](lib/url-params.ts)
-> (`compositionToParams`/`paramsToComposition`).
+> parses. Layers 1+ prefix their keys with the layer index; the index is the
+> **leading digits**, so two-digit indices (layers 10–14) parse via
+> `^(\d+)([a-z].*)$`. `n=<count>` marks multi-layer compositions (so an
+> all-default extra layer still round-trips). A handful of tweaked layers stay
+> well under the ~2k URL budget; maxing every field on all 15 layers makes a long
+> (but still working) share link — an acceptable edge. See
+> [lib/url-params.ts](lib/url-params.ts) (`compositionToParams`/`paramsToComposition`).
 
 ## CompositionConfig & ImageLayer — images
 

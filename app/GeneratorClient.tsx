@@ -11,6 +11,7 @@ import ImageControlPanel from '@/components/controls/ImageControlPanel';
 import LayersPanel, { type LayersPanelProps } from '@/components/controls/LayersPanel';
 import LayerList from '@/components/controls/LayerList';
 import { SegmentedControl } from '@/components/controls/primitives';
+import TopBar from '@/components/header/TopBar';
 import Wordmark from '@/components/header/Wordmark';
 import HeaderNav from '@/components/header/HeaderNav';
 import ModeSwitch from '@/components/generator/ModeSwitch';
@@ -214,10 +215,10 @@ function Generator() {
   return (
     <div className="flex flex-col flex-1 min-h-0" style={isImages ? IMAGES_ACCENT : undefined}>
       {/* Unified top bar: identity · mode · app nav · document actions */}
-      <header className="h-11 flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 border-b border-[#EAECF0] bg-white shrink-0">
+      <TopBar>
         <Wordmark />
         <ModeSwitch mode={mode} onChange={setMode} />
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <HeaderNav />
           <ActionsCluster
             entriesCount={entries.length}
@@ -226,7 +227,7 @@ function Generator() {
             {...exportProps}
           />
         </div>
-      </header>
+      </TopBar>
 
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
         {/* Controls sidebar */}
