@@ -1,7 +1,5 @@
 'use client';
 
-import { ImagePlus } from 'lucide-react';
-
 // 9-dot ring hinting at the nine-fold layout. Sized down on small screens.
 function NineFoldGlyph() {
   const dots = Array.from({ length: 9 }, (_, i) => {
@@ -17,7 +15,7 @@ function NineFoldGlyph() {
   );
 }
 
-export default function ImageEmptyState({ onAddImage }: { onAddImage: () => void }) {
+export default function ImageEmptyState() {
   return (
     <div className="max-w-md w-full mx-auto text-center px-5 py-4 lg:px-8 lg:py-10 rounded-xl lg:rounded-2xl bg-white/95 backdrop-blur border border-[#EAECF0] shadow-xl flex flex-col items-center gap-2 lg:gap-4 overflow-y-auto max-h-full">
       <NineFoldGlyph />
@@ -29,13 +27,9 @@ export default function ImageEmptyState({ onAddImage }: { onAddImage: () => void
         <span className="hidden lg:inline"> stack several layers and tune size, distance, rotation and mirroring for each one.</span>
         <span className="lg:hidden"> stack layers and tweak each one.</span>
       </p>
-      <button
-        onClick={onAddImage}
-        className="mt-0.5 lg:mt-1 inline-flex items-center gap-2 px-4 py-2 lg:px-5 lg:py-2.5 rounded-lg bg-[var(--nsg-accent)] hover:bg-[var(--nsg-accent-strong)] text-white text-[13px] lg:text-[14px] font-semibold shadow-sm transition-colors"
-      >
-        <ImagePlus className="w-4 h-4" />
-        Add image
-      </button>
+      <p className="text-[12px] lg:text-[13px] text-[#9CA3AF]">
+        Add your first image in the Layers panel.
+      </p>
     </div>
   );
 }

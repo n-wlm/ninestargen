@@ -289,7 +289,7 @@ function Generator() {
           {/* Preview */}
           <div className="relative z-10 w-full h-full flex items-center justify-center p-5 lg:p-14 [container-type:size]">
             {isImages && comp.config.layers.length === 0 ? (
-              <ImageEmptyState onAddImage={() => window.dispatchEvent(new CustomEvent('nsg:add-image'))} />
+              <ImageEmptyState />
             ) : (
               <motion.div
                 key={snapKey}

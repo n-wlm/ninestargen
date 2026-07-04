@@ -208,7 +208,7 @@ export default function ImageControlPanel({
         ) : (
           <>
             <p className="px-4 pt-3.5 pb-1 text-[11px] text-[#9CA3AF] leading-snug">
-              Add an image in the Layers panel to edit these.
+              Add an image in the Layers panel to edit the controls.
             </p>
             <div className="opacity-45 pointer-events-none select-none" aria-hidden="true">
               <LayerControls layer={PLACEHOLDER_LAYER} updateLayer={NOOP} />

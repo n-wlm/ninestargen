@@ -14,6 +14,10 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Images empty state, follow-up (on `main`): the canvas onboarding card lost its
+  now-redundant "Add image" button (the Layers panel is the single add point) —
+  it ends with a muted "Add your first image in the Layers panel." line instead;
+  reworded the left hint to "…to edit the controls."
 - Images empty-state emphasis (on `main`): toned the left "add an image" hint
   down to a quiet muted line (was a prominent accent box); `LayerList` now shows
   a **prominent dashed "Add image" button** while the stack is empty, so the
