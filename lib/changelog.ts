@@ -27,7 +27,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     title: 'Layers, a fresh layout & a big speed-up',
     items: [
       'Stack multiple stars — or images — in layers to build richer, compound designs.',
-      'A redesigned layout: the Geometry / Images switch and your History, Share and Download actions moved up into a new top bar, with layers in their own floating panel.',
+      'Reworked navigation, with layers now living in their own floating panel.',
       'A refreshed template gallery and a bigger color picker with soft pastels and recent colors.',
       'A big performance pass, so editing stays smooth even with many layers.',
       'Minor visual improvements and polish throughout.',
