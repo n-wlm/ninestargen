@@ -26,7 +26,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     date: '2026-07-04',
     title: 'Layers, a fresh layout & a big speed-up',
     items: [
-      'Stack multiple stars — or images — in layers to build richer, compound designs.',
+      'Stack multiple stars, or images, in layers to build richer, compound designs.',
       'Reworked navigation, with layers now living in their own floating panel.',
       'A refreshed template gallery and a bigger color picker with soft pastels and recent colors.',
       'A big performance pass, so editing stays smooth even with many layers.',
