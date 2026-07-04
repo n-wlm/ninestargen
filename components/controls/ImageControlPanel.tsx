@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import SliderInput, { parsePercent } from './SliderInput';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import SliderInput, { parsePercent, fmtDeg, fmtInt, fmtPct } from './SliderInput';
 import { ColorControl } from './ColorControl';
 import { Section, SegmentedControl, Toggle, ConfirmButton, GroupLabel } from './primitives';
 import type { CompositionConfig, ImageLayer, SymmetryCount } from '@/types/composition';
@@ -27,6 +27,9 @@ const COUNT_OPTIONS: { value: string; label: string }[] = [
   { value: '3', label: '3 ×' },
 ];
 
+// Numeric ImageLayer fields driven by sliders — for stable per-key handlers.
+const IMAGE_FIELDS = ['angleOffset', 'scale', 'radius', 'spin', 'offsetX', 'offsetY', 'opacity'] as const;
+
 const OUTER_CONTAINERS: { value: CompositionConfig['outerContainer']; label: string }[] = [
   { value: 'none', label: 'None' },
   { value: '9-gon', label: '9-Gon' },
@@ -38,15 +41,28 @@ const OUTER_CONTAINERS: { value: CompositionConfig['outerContainer']; label: str
 // geometry ControlPanel's selected-layer pattern (the layer LIST is in the
 // floating LayersPanel).
 function LayerControls({ layer, updateLayer }: { layer: ImageLayer; updateLayer: (id: string, p: Partial<ImageLayer>) => void }) {
+  const id = layer.id;
+  // Stable per-key handlers (built eagerly) so memo(SliderInput) skips unchanged sliders.
+  const handlers = useMemo(() => {
+    const h = {} as Record<string, (v: number) => void>;
+    for (const k of IMAGE_FIELDS) h[k] = (v) => updateLayer(id, { [k]: v } as Partial<ImageLayer>);
+    return h;
+  }, [updateLayer, id]);
+  const onField = (key: (typeof IMAGE_FIELDS)[number]) => handlers[key];
+  const angleSnap = useMemo(
+    () => Array.from({ length: layer.count * 2 + 1 }, (_, i) => (360 / (layer.count * 2)) * i),
+    [layer.count],
+  );
+
   return (
     <>
       <Section title="Arrangement">
         <SegmentedControl
           options={COUNT_OPTIONS}
           value={String(layer.count)}
-          onChange={(v) => updateLayer(layer.id, { count: Number(v) as SymmetryCount })}
+          onChange={(v) => updateLayer(id, { count: Number(v) as SymmetryCount })}
         />
-        <Toggle label="Mirror" value={layer.mirror} onChange={(v) => updateLayer(layer.id, { mirror: v })} />
+        <Toggle label="Mirror" value={layer.mirror} onChange={(v) => updateLayer(id, { mirror: v })} />
         <SliderInput
           label="Angle"
           tooltip="Rotate the whole arrangement"
@@ -55,9 +71,9 @@ function LayerControls({ layer, updateLayer }: { layer: ImageLayer; updateLayer:
           min={LAYER_LIMITS.angleOffset.min}
           max={LAYER_LIMITS.angleOffset.max}
           step={LAYER_LIMITS.angleOffset.step}
-          format={(v) => `${Math.round(v)}°`}
-          snap={Array.from({ length: layer.count * 2 + 1 }, (_, i) => (360 / (layer.count * 2)) * i)}
-          onChange={(v) => updateLayer(layer.id, { angleOffset: v })}
+          format={fmtDeg}
+          snap={angleSnap}
+          onChange={onField('angleOffset')}
           resetLabel="Set to default"
         />
       </Section>
@@ -71,7 +87,8 @@ function LayerControls({ layer, updateLayer }: { layer: ImageLayer; updateLayer:
           min={LAYER_LIMITS.scale.min}
           max={LAYER_LIMITS.scale.max}
           step={LAYER_LIMITS.scale.step}
-          onChange={(v) => updateLayer(layer.id, { scale: v })}
+          format={fmtInt}
+          onChange={onField('scale')}
         />
         <SliderInput
           label="Radius"
@@ -81,7 +98,8 @@ function LayerControls({ layer, updateLayer }: { layer: ImageLayer; updateLayer:
           min={LAYER_LIMITS.radius.min}
           max={LAYER_LIMITS.radius.max}
           step={LAYER_LIMITS.radius.step}
-          onChange={(v) => updateLayer(layer.id, { radius: v })}
+          format={fmtInt}
+          onChange={onField('radius')}
         />
         <SliderInput
           label="Spin"
@@ -91,8 +109,8 @@ function LayerControls({ layer, updateLayer }: { layer: ImageLayer; updateLayer:
           min={LAYER_LIMITS.spin.min}
           max={LAYER_LIMITS.spin.max}
           step={LAYER_LIMITS.spin.step}
-          format={(v) => `${Math.round(v)}°`}
-          onChange={(v) => updateLayer(layer.id, { spin: v })}
+          format={fmtDeg}
+          onChange={onField('spin')}
         />
         <SliderInput
           label="Offset X"
@@ -102,8 +120,8 @@ function LayerControls({ layer, updateLayer }: { layer: ImageLayer; updateLayer:
           min={LAYER_LIMITS.offsetX.min}
           max={LAYER_LIMITS.offsetX.max}
           step={LAYER_LIMITS.offsetX.step}
-          format={(v) => String(Math.round(v))}
-          onChange={(v) => updateLayer(layer.id, { offsetX: v })}
+          format={fmtInt}
+          onChange={onField('offsetX')}
         />
         <SliderInput
           label="Offset Y"
@@ -113,8 +131,8 @@ function LayerControls({ layer, updateLayer }: { layer: ImageLayer; updateLayer:
           min={LAYER_LIMITS.offsetY.min}
           max={LAYER_LIMITS.offsetY.max}
           step={LAYER_LIMITS.offsetY.step}
-          format={(v) => String(Math.round(v))}
-          onChange={(v) => updateLayer(layer.id, { offsetY: v })}
+          format={fmtInt}
+          onChange={onField('offsetY')}
         />
         <SliderInput
           label="Opacity"
@@ -124,16 +142,16 @@ function LayerControls({ layer, updateLayer }: { layer: ImageLayer; updateLayer:
           min={LAYER_LIMITS.opacity.min}
           max={LAYER_LIMITS.opacity.max}
           step={LAYER_LIMITS.opacity.step}
-          format={(v) => `${Math.round(v * 100)}%`}
+          format={fmtPct}
           parse={parsePercent}
-          onChange={(v) => updateLayer(layer.id, { opacity: v })}
+          onChange={onField('opacity')}
         />
       </Section>
     </>
   );
 }
 
-export default function ImageControlPanel({
+function ImageControlPanel({
   config, update, addLayer, updateLayer, selectedLayer, onReset,
 }: ImageControlPanelProps) {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -294,3 +312,5 @@ export default function ImageControlPanel({
     </div>
   );
 }
+
+export default memo(ImageControlPanel);

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { motion, LayoutGroup } from 'motion/react';
 
 export type Mode = 'geometry' | 'images';
@@ -12,7 +13,7 @@ const OPTIONS: { value: Mode; label: string }[] = [
 // The primary mode control, lifted into the header. The active pill is filled
 // with the accent colour, which is itself overridden per mode (indigo for
 // geometry, teal for images) — so the switch both shows and drives the theme.
-export default function ModeSwitch({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => void }) {
+function ModeSwitch({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => void }) {
   return (
     <LayoutGroup id="mode-switch">
       <div className="flex rounded-lg bg-[#EEF0F3] p-0.5 gap-0.5">
@@ -41,3 +42,5 @@ export default function ModeSwitch({ mode, onChange }: { mode: Mode; onChange: (
     </LayoutGroup>
   );
 }
+
+export default memo(ModeSwitch);

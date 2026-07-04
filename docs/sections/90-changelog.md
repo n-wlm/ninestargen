@@ -14,6 +14,22 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Performance audit + optimization (branch `chore/perf-audit`). Root cause:
+  `GeneratorClient` holds all state, so a slider tick re-rendered the whole tree
+  and fresh prop objects defeated existing `memo()`s. Fixes: stabilized the hook
+  callbacks (refs + functional updaters), memoized `exportProps`/`layerProps` and
+  the whole chrome (`ModeSwitch`, `HeaderNav`, `LogoStar`, `ActionsCluster`,
+  `ControlPanel`, `ImageControlPanel`, `LayersPanel`), extracted memoized
+  `LayerThumb`/`LayerRowItem` (CSS hover instead of JS state), static corner-preview
+  configs, `memo(SliderInput)` fed by module-level formatters + stable per-key
+  handlers, and narrowed `StarLayerGroup`'s path `useMemo` to geometric fields.
+  Measured on a 5-layer outer-radius drag (60 ticks): dev region render time
+  header −92 %, sidebar −65 %, layers panel −83 %, wall 446 ms → 128 ms (−71 %);
+  prod ~0.35 ms/tick (very smooth). A temporary `Profiler` harness was used to
+  measure and then removed. Updated architecture (render-cost section).
+
+## 2026-07-04
+
 - Fixes (on `main`): the colour picker's custom-colour trigger is now a clean
   **pipette button** — the old approach overlaid an `opacity-0`
   `<input type=color>` whose native swatch leaked through as a dark box in some

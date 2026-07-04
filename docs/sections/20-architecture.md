@@ -83,11 +83,27 @@ Everything is **SVG**, on a fixed `600×600` viewBox centred at `(300,300)`.
 - **Images**: [ImagePreview](components/ImagePreview.tsx) places each visible
   layer `count` (or `2×count` when mirrored) times via SVG `transform`, each an
   `<image href="data:…">`.
-- **Render cost**: both previews are `memo()`-wrapped and compute their
-  geometry/placements in `useMemo`, so unrelated editor state (modals, history
-  panel, toasts) re-renders neither the trigonometry nor the data-URL-heavy
-  `<image>` trees. `GeneratorClient` keeps the preview `style` prop a module
-  constant for the same reason.
+- **Render cost / re-render isolation**: `GeneratorClient` holds all state, so a
+  slider tick would re-render the whole tree — the app is structured so the
+  *expensive* work bails out instead. The rules:
+  - **Stable identities.** The hook layer callbacks (`useStarComposition` /
+    `useComposition`) are `useCallback([])` — add/duplicate/remove read the latest
+    layers from a ref, and `toggleLayerVisible` uses a functional updater — so they
+    never churn. `GeneratorClient` memoizes `exportProps`/`layerProps` and derives
+    download/history handlers from refs, keeping them stable across ticks.
+  - **memo boundaries.** The whole chrome is `memo()`: `ModeSwitch`, `HeaderNav`,
+    `LogoStar`, `ActionsCluster`, `ControlPanel`, `ImageControlPanel`,
+    `LayersPanel`, plus per-row `LayerRowItem` and per-layer `LayerThumb`. With
+    stable props, only the parts whose data actually changed re-render.
+  - **Stable slider props.** Control panels pass module-level formatters
+    (`fmtInt`/`fmtDeg`/…) and per-key change handlers built once (a record keyed to
+    `update`), so `memo(SliderInput)` re-renders only the one slider being dragged.
+  - **Narrow useMemo deps.** `StarLayerGroup` depends only on the geometric fields
+    `buildStarPaths` reads, so a colour/opacity change re-applies attributes without
+    rebuilding path strings. Corner/type previews use precomputed static configs.
+  - Both previews are `memo()`-wrapped and compute geometry/placements in `useMemo`;
+    the preview `style` prop is a module constant. (Measured: a 5-layer slider drag
+    went from every region re-rendering to the chrome bailing out — see changelog.)
 - **Export**: [lib/export.ts](lib/export.ts) serialises the `<svg>` behind
   `svgRef`. SVG is downloaded directly (self-contained, images inlined); PNG/JPG
   are drawn onto a canvas at the chosen resolution. Because uploaded images are

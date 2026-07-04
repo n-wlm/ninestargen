@@ -62,6 +62,14 @@ export function useComposition(initial?: Partial<CompositionConfig>) {
     }));
   }, []);
 
+  // Stable (no closure over `layers`) so the layer-row memo isn't defeated.
+  const toggleLayerVisible = useCallback((id: string) => {
+    setConfigState((prev) => ({
+      ...prev,
+      layers: prev.layers.map((l) => (l.id === id ? { ...l, visible: !l.visible } : l)),
+    }));
+  }, []);
+
   // dir is added to the array index: +1 moves toward the front (end of array,
   // rendered on top), -1 toward the back. The UI list is shown reversed.
   const reorderLayer = useCallback((id: string, dir: -1 | 1) => {
@@ -93,6 +101,7 @@ export function useComposition(initial?: Partial<CompositionConfig>) {
     duplicateLayer,
     removeLayer,
     updateLayer,
+    toggleLayerVisible,
     reorderLayer,
     reset,
     selectedLayer,

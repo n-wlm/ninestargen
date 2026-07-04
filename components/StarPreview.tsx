@@ -55,10 +55,19 @@ const StarLayerGroup = memo(function StarLayerGroup({ layer }: { layer: Geometry
 
   const cx = CX + layer.offsetX;
   const cy = CY + layer.offsetY;
-  const paths = useMemo(() => buildStarPaths(cx, cy, layer), [cx, cy, layer]);
+  // Depend only on the GEOMETRIC fields buildStarPaths reads — so a colour /
+  // opacity / stroke / effect change (which replaces the layer object) doesn't
+  // rebuild the path strings, only re-applies fill/stroke attributes.
+  const { starType, outerRadius, innerRadiusRatio, rotation, curveIntensity, cornerRounding, petalWidth, petalCurve, showInnerPolygon } = layer;
+  const paths = useMemo(
+    () => buildStarPaths(cx, cy, layer),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cx, cy, starType, outerRadius, innerRadiusRatio, rotation, curveIntensity, cornerRounding, petalWidth, petalCurve],
+  );
   const innerPath = useMemo(
-    () => (layer.showInnerPolygon ? buildInnerPolygonPath(cx, cy, layer) : null),
-    [cx, cy, layer],
+    () => (showInnerPolygon ? buildInnerPolygonPath(cx, cy, layer) : null),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [cx, cy, showInnerPolygon, starType, outerRadius, innerRadiusRatio, rotation, curveIntensity, cornerRounding, petalWidth, petalCurve],
   );
 
   const fill =

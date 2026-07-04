@@ -18,7 +18,6 @@ import ModeSwitch from '@/components/generator/ModeSwitch';
 import ActionsCluster from '@/components/generator/ActionsCluster';
 import SaveDesignModal from '@/components/SaveDesignModal';
 import HistoryPanel from '@/components/HistoryPanel';
-import { PerfRegion } from '@/components/dev/Perf';
 import { useStarComposition } from '@/hooks/useStarComposition';
 import { useComposition } from '@/hooks/useComposition';
 import { useUrlSync } from '@/hooks/useUrlSync';
@@ -29,7 +28,6 @@ import {
   asComposition,
   configFromLayer,
   isGeometryCanvasKey,
-  DEFAULT_GEOMETRY_COMPOSITION,
   MAX_GEOMETRY_LAYERS,
   type GeometryComposition,
   type GeometryLayer,
@@ -49,9 +47,6 @@ const IMAGES_ACCENT = {
 // Stable reference — an inline literal here would defeat memo() on the previews.
 const PREVIEW_SHADOW: React.CSSProperties = { filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.10))' };
 
-// Neutral canvas for geometry layer thumbnails — just the star, no bg/container.
-const THUMB_CANVAS = { ...DEFAULT_GEOMETRY_COMPOSITION, bgColor: 'transparent', outerContainer: 'none' as const };
-
 type MobileTab = 'controls' | 'layers';
 const MOBILE_TABS: { value: MobileTab; label: string }[] = [
   { value: 'controls', label: 'Controls' },
@@ -65,6 +60,14 @@ function Generator() {
 
   const star = useStarComposition();
   const comp = useComposition();
+
+  // Latest values behind refs so download/history handlers stay STABLE (so
+  // memoized header/actions don't re-render on every slider tick).
+  const starConfigRef = useRef(star.config);
+  const compConfigRef = useRef(comp.config);
+  const modeRef = useRef<Mode>('geometry');
+  useEffect(() => { starConfigRef.current = star.config; }, [star.config]);
+  useEffect(() => { compConfigRef.current = comp.config; }, [comp.config]);
 
   // Legacy flat view of the selected layer + canvas. The control panel (and
   // the single-config URL sync) still speak StarConfig; the layer UI and the
@@ -123,24 +126,29 @@ function Generator() {
   }, [setStarComposition]);
 
   const isImages = mode === 'images';
+  useEffect(() => { modeRef.current = mode; }, [mode]);
 
   // Snapshot the design on every download, then offer to save the link.
-  function handleDownloaded(format: 'svg' | 'png' | 'jpeg') {
-    const link = !isImages && typeof window !== 'undefined' ? window.location.href : undefined;
+  // Stable ([] deps) — reads current config/mode from refs.
+  const handleDownloaded = useCallback((format: 'svg' | 'png' | 'jpeg') => {
+    const im = modeRef.current === 'images';
+    const link = !im && typeof window !== 'undefined' ? window.location.href : undefined;
     const { entries: nextEntries, trimmed } = addHistory(
-      isImages
-        ? { mode: 'images', format, config: comp.config }
-        : { mode: 'geometry', format, config: star.config, link },
+      im
+        ? { mode: 'images', format, config: compConfigRef.current }
+        : { mode: 'geometry', format, config: starConfigRef.current, link },
     );
     setEntries(nextEntries);
     setSavePrompt({
       open: true,
-      mode,
+      mode: modeRef.current,
       link,
       format: format === 'jpeg' ? 'jpg' : format,
       storageWarning: trimmed,
     });
-  }
+  }, []);
+
+  const onOpenHistory = useCallback(() => setHistoryOpen(true), []);
 
   function restore(entry: HistoryEntry) {
     if (entry.mode === 'geometry') {
@@ -154,69 +162,89 @@ function Generator() {
     setHistoryOpen(false);
   }
 
-  const exportProps = isImages
-    ? {
-        svgRef,
-        exportWidth: comp.config.exportWidth,
-        exportHeight: comp.config.exportHeight,
-        onSize: (w: number, h: number) => { comp.update('exportWidth', w); comp.update('exportHeight', h); },
-        filename: 'ninestar-composition',
-        onDownloaded: handleDownloaded,
-        disabled: comp.config.layers.length === 0,
-      }
-    : {
-        svgRef,
-        exportWidth: star.config.exportWidth,
-        exportHeight: star.config.exportHeight,
-        onSize: (w: number, h: number) => { updateCanvas('exportWidth', w); updateCanvas('exportHeight', h); },
-        filename: 'star',
-        onDownloaded: handleDownloaded,
-      };
+  const compUpdate = comp.update;
+  const exportProps = useMemo(
+    () =>
+      isImages
+        ? {
+            svgRef,
+            exportWidth: comp.config.exportWidth,
+            exportHeight: comp.config.exportHeight,
+            onSize: (w: number, h: number) => { compUpdate('exportWidth', w); compUpdate('exportHeight', h); },
+            filename: 'ninestar-composition',
+            onDownloaded: handleDownloaded,
+            disabled: comp.config.layers.length === 0,
+          }
+        : {
+            svgRef,
+            exportWidth: star.config.exportWidth,
+            exportHeight: star.config.exportHeight,
+            onSize: (w: number, h: number) => { updateCanvas('exportWidth', w); updateCanvas('exportHeight', h); },
+            filename: 'star',
+            onDownloaded: handleDownloaded,
+          },
+    // Value deps (numbers/bools) stay stable across slider ticks; callbacks are stable.
+    [isImages, comp.config.exportWidth, comp.config.exportHeight, comp.config.layers.length,
+     star.config.exportWidth, star.config.exportHeight, compUpdate, updateCanvas, handleDownloaded],
+  );
 
   // One layer-surface prop set per mode, shared by the floating LayersPanel
-  // (desktop) and the sidebar Controls/Layers toggle (mobile).
-  const layerProps: LayersPanelProps = isImages
-    ? {
-        layers: comp.config.layers,
-        selectedId: comp.selectedLayerId,
-        max: MAX_LAYERS,
-        minLayers: 0,
-        addLabel: 'Add image',
-        maxHint: `Layer limit reached (${MAX_LAYERS}).`,
-        renderThumb: (id) => {
-          const l = comp.config.layers.find((x) => x.id === id);
-          // eslint-disable-next-line @next/next/no-img-element
-          return l ? <img src={l.src} alt="" className="w-full h-full object-contain" /> : null;
-        },
-        onSelect: comp.selectLayer,
-        onToggleVisible: (id) => { const l = comp.config.layers.find((x) => x.id === id); if (l) comp.updateLayer(id, { visible: !l.visible }); },
-        onReorder: comp.reorderLayer,
-        onDuplicate: comp.duplicateLayer,
-        onRemove: comp.removeLayer,
-        onAdd: () => window.dispatchEvent(new CustomEvent('nsg:add-image')),
-      }
-    : {
-        layers: star.config.layers,
-        selectedId: star.selectedLayerId,
-        max: MAX_GEOMETRY_LAYERS,
-        addLabel: 'Add layer',
-        maxHint: `Layer limit reached (${MAX_GEOMETRY_LAYERS}).`,
-        renderThumb: (id) => {
-          const l = star.config.layers.find((x) => x.id === id);
-          return l ? <StarPreview config={configFromLayer(l, THUMB_CANVAS)} className="w-full h-full" /> : null;
-        },
-        onSelect: star.selectLayer,
-        onToggleVisible: (id) => { const l = star.config.layers.find((x) => x.id === id); if (l) star.updateLayer(id, { visible: !l.visible }); },
-        onReorder: star.reorderLayer,
-        onDuplicate: star.duplicateLayer,
-        onRemove: star.removeLayer,
-        onAdd: () => star.duplicateLayer(star.selectedLayerId),
-      };
+  // (desktop) and the sidebar Controls/Layers toggle (mobile). Memoized so it
+  // only changes when the layers/selection actually change (not every tick);
+  // thumbnails come from stable memo'd components (kind + layers), not a closure.
+  const {
+    selectLayer: cSelect, toggleLayerVisible: cToggle, reorderLayer: cReorder,
+    duplicateLayer: cDup, removeLayer: cRemove,
+  } = comp;
+  const {
+    selectLayer: sSelect, toggleLayerVisible: sToggle, reorderLayer: sReorder,
+    duplicateLayer: sDup, removeLayer: sRemove,
+  } = star;
+  const imgLayers = comp.config.layers;
+  const geoLayers = star.config.layers;
+  const geoSelectedId = star.selectedLayerId;
+  const onAddImage = useCallback(() => window.dispatchEvent(new CustomEvent('nsg:add-image')), []);
+  const onAddLayer = useCallback(() => sDup(geoSelectedId), [sDup, geoSelectedId]);
+
+  const layerProps: LayersPanelProps = useMemo(
+    () =>
+      isImages
+        ? {
+            layers: imgLayers,
+            selectedId: comp.selectedLayerId,
+            max: MAX_LAYERS,
+            minLayers: 0,
+            addLabel: 'Add image',
+            maxHint: `Layer limit reached (${MAX_LAYERS}).`,
+            kind: 'images' as const,
+            onSelect: cSelect,
+            onToggleVisible: cToggle,
+            onReorder: cReorder,
+            onDuplicate: cDup,
+            onRemove: cRemove,
+            onAdd: onAddImage,
+          }
+        : {
+            layers: geoLayers,
+            selectedId: geoSelectedId,
+            max: MAX_GEOMETRY_LAYERS,
+            addLabel: 'Add layer',
+            maxHint: `Layer limit reached (${MAX_GEOMETRY_LAYERS}).`,
+            kind: 'geometry' as const,
+            onSelect: sSelect,
+            onToggleVisible: sToggle,
+            onReorder: sReorder,
+            onDuplicate: sDup,
+            onRemove: sRemove,
+            onAdd: onAddLayer,
+          },
+    [isImages, imgLayers, comp.selectedLayerId, geoLayers, geoSelectedId,
+     cSelect, cToggle, cReorder, cDup, cRemove, sSelect, sToggle, sReorder, sDup, sRemove, onAddImage, onAddLayer],
+  );
 
   return (
     <div className="flex flex-col flex-1 min-h-0" style={isImages ? IMAGES_ACCENT : undefined}>
       {/* Unified top bar: identity · mode · app nav · document actions */}
-      <PerfRegion id="header">
       <TopBar>
         <Wordmark />
         <ModeSwitch mode={mode} onChange={setMode} />
@@ -224,13 +252,12 @@ function Generator() {
           <HeaderNav />
           <ActionsCluster
             entriesCount={entries.length}
-            onOpenHistory={() => setHistoryOpen(true)}
+            onOpenHistory={onOpenHistory}
             isImages={isImages}
             {...exportProps}
           />
         </div>
       </TopBar>
-      </PerfRegion>
 
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
         {/* Controls sidebar */}
@@ -252,7 +279,6 @@ function Generator() {
 
           {/* Controls view — always on desktop; on mobile when its tab is active */}
           <div className={`flex-1 overflow-y-auto min-h-0 ${mobileTab === 'layers' ? 'hidden lg:block' : ''}`}>
-            <PerfRegion id="sidebar">
             {isImages ? (
               <ImageControlPanel
                 config={comp.config}
@@ -272,7 +298,6 @@ function Generator() {
                 updateLayer={star.updateLayer}
               />
             )}
-            </PerfRegion>
           </div>
         </motion.aside>
 
@@ -293,7 +318,6 @@ function Generator() {
 
           {/* Preview */}
           <div className="relative z-10 w-full h-full flex items-center justify-center p-5 lg:p-14 [container-type:size]">
-            <PerfRegion id="preview">
             {isImages && comp.config.layers.length === 0 ? (
               <ImageEmptyState />
             ) : (
@@ -323,15 +347,12 @@ function Generator() {
                 </PreviewErrorBoundary>
               </motion.div>
             )}
-            </PerfRegion>
           </div>
 
           {/* Floating layers window — always shown (images add their first image
               here too); desktop only, mobile uses the sidebar Layers toggle. */}
           <div className="absolute top-3 left-3 z-20 hidden lg:block">
-            <PerfRegion id="layersPanel">
-              <LayersPanel {...layerProps} />
-            </PerfRegion>
+            <LayersPanel {...layerProps} />
           </div>
         </motion.section>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { memo, useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -19,7 +19,7 @@ const TemplatesModal = dynamic(() => import("@/components/TemplatesModal"), {
 // top bar (home): Templates, About, What's new. Pathname-aware — on home it
 // applies a preset in place via the `nsg:apply-preset` event the generator
 // listens for; elsewhere it navigates to the encoded URL.
-export default function HeaderNav() {
+function HeaderNav() {
   const [showTemplates, setShowTemplates] = useState(false);
   const [showWhatsNew, setShowWhatsNew] = useState(false);
   const [unseenChanges, setUnseenChanges] = useState(false);
@@ -160,3 +160,5 @@ export default function HeaderNav() {
     </>
   );
 }
+
+export default memo(HeaderNav);

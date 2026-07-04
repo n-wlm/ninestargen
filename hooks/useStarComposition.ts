@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GeometryComposition, GeometryLayer } from '@/types/geometry';
 import { DEFAULT_GEOMETRY_COMPOSITION, MAX_GEOMETRY_LAYERS, makeGeometryLayer } from '@/types/geometry';
 
@@ -21,6 +21,12 @@ export function useStarComposition(initial?: Partial<GeometryComposition>) {
     (initial?.layers ?? DEFAULT_GEOMETRY_COMPOSITION.layers)[0]?.id ?? 'star-1',
   );
 
+  // Latest layers, so add/duplicate/remove can keep STABLE identities ([] deps)
+  // instead of churning every time a layer changes — which was defeating memo on
+  // everything downstream (LayersPanel, ActionsCluster…).
+  const layersRef = useRef(config.layers);
+  useEffect(() => { layersRef.current = config.layers; }, [config.layers]);
+
   // Full replace (URL parse, preset apply, history restore) — selection resets
   // to the top-most layer of the incoming composition.
   const setConfig = useCallback((next: GeometryComposition) => {
@@ -33,41 +39,51 @@ export function useStarComposition(initial?: Partial<GeometryComposition>) {
   }, []);
 
   // Layers are stored back-to-front; index 0 renders at the bottom.
-  // These read `config` from the closure (not a functional updater) so the
-  // MAX check and the selection change stay outside the pure state updater.
+  // Read the latest layers from the ref so these callbacks stay stable.
   const addLayer = useCallback((from?: GeometryLayer) => {
-    if (config.layers.length >= MAX_GEOMETRY_LAYERS) return;
-    const layer = makeGeometryLayer(newLayerId(), nextName(config.layers), from);
+    const layers = layersRef.current;
+    if (layers.length >= MAX_GEOMETRY_LAYERS) return;
+    const layer = makeGeometryLayer(newLayerId(), nextName(layers), from);
     setConfigState((prev) => ({ ...prev, layers: [...prev.layers, layer] }));
     setSelectedLayerId(layer.id);
-  }, [config.layers]);
+  }, []);
 
   const duplicateLayer = useCallback((sourceId: string) => {
-    if (config.layers.length >= MAX_GEOMETRY_LAYERS) return;
-    const idx = config.layers.findIndex((l) => l.id === sourceId);
+    const layers = layersRef.current;
+    if (layers.length >= MAX_GEOMETRY_LAYERS) return;
+    const idx = layers.findIndex((l) => l.id === sourceId);
     if (idx === -1) return;
-    const copy = makeGeometryLayer(newLayerId(), nextName(config.layers), config.layers[idx]);
+    const copy = makeGeometryLayer(newLayerId(), nextName(layers), layers[idx]);
     setConfigState((prev) => {
-      const layers = [...prev.layers];
-      layers.splice(idx + 1, 0, copy); // directly above the source
-      return { ...prev, layers };
+      const next = [...prev.layers];
+      next.splice(idx + 1, 0, copy); // directly above the source
+      return { ...prev, layers: next };
     });
     setSelectedLayerId(copy.id);
-  }, [config.layers]);
+  }, []);
 
   const removeLayer = useCallback((id: string) => {
-    if (config.layers.length <= 1) return; // a composition always has ≥1 layer
-    const idx = config.layers.findIndex((l) => l.id === id);
+    const layers = layersRef.current;
+    if (layers.length <= 1) return; // a composition always has ≥1 layer
+    const idx = layers.findIndex((l) => l.id === id);
     if (idx === -1) return;
-    const remaining = config.layers.filter((l) => l.id !== id);
+    const remaining = layers.filter((l) => l.id !== id);
     setConfigState((prev) => ({ ...prev, layers: prev.layers.filter((l) => l.id !== id) }));
     setSelectedLayerId((sel) => (sel === id ? remaining[Math.min(idx, remaining.length - 1)].id : sel));
-  }, [config.layers]);
+  }, []);
 
   const updateLayer = useCallback((id: string, partial: Partial<GeometryLayer>) => {
     setConfigState((prev) => ({
       ...prev,
       layers: prev.layers.map((l) => (l.id === id ? { ...l, ...partial } : l)),
+    }));
+  }, []);
+
+  // Stable (no closure over `layers`) so the layer-row memo isn't defeated.
+  const toggleLayerVisible = useCallback((id: string) => {
+    setConfigState((prev) => ({
+      ...prev,
+      layers: prev.layers.map((l) => (l.id === id ? { ...l, visible: !l.visible } : l)),
     }));
   }, []);
 
@@ -103,6 +119,7 @@ export function useStarComposition(initial?: Partial<GeometryComposition>) {
     duplicateLayer,
     removeLayer,
     updateLayer,
+    toggleLayerVisible,
     reorderLayer,
     reset,
     selectedLayer,

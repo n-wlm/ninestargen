@@ -1,7 +1,8 @@
 'use client';
 
+import { memo, useMemo } from 'react';
 import { Lightbulb } from 'lucide-react';
-import SliderInput, { parsePercent } from './SliderInput';
+import SliderInput, { parsePercent, fmtDeg, fmtInt, fmtPct, fmtRatio, fmtPx } from './SliderInput';
 import { ColorControl, GradientBuilder } from './ColorControl';
 import { Section, SegmentedControl, ConfirmButton, GroupLabel } from './primitives';
 import StarPreview from '@/components/StarPreview';
@@ -42,11 +43,17 @@ const PREVIEW_BASE: StarConfig = {
   rotation: -90,
 };
 
+// Precomputed once per star type — a fresh `{ ...PREVIEW_BASE, starType }` each
+// render defeated StarPreview's memo, rebuilding all 6 corner previews on every
+// keystroke. These configs are stable, so the previews bail out.
+const CORNER_CONFIGS = Object.fromEntries(
+  STAR_TYPES_ORDERED.map((t) => [t, { ...PREVIEW_BASE, starType: t }]),
+) as Record<StarType, StarConfig>;
+
 function StarCornerPreview({ starType }: { starType: StarType }) {
-  const cfg: StarConfig = { ...PREVIEW_BASE, starType };
   return (
     <div className="shrink-0 rounded-sm" style={{ width: 28, height: 28 }}>
-      <StarPreview config={cfg} className="w-full h-full" />
+      <StarPreview config={CORNER_CONFIGS[starType]} className="w-full h-full" />
     </div>
   );
 }
@@ -114,18 +121,45 @@ const OUTER_CONTAINERS: { value: StarConfig['outerContainer']; label: string }[]
 
 // ── Main Panel ─────────────────────────────────────────────────────────────────
 
+// Numeric StarConfig / GeometryLayer fields driven by sliders — used to build
+// stable per-key onChange handlers once.
+const NUMERIC_FIELDS = [
+  'outerRadius', 'innerRadiusRatio', 'rotation', 'curveIntensity', 'cornerRounding',
+  'petalWidth', 'petalCurve', 'strokeWidth', 'glowRadius', 'shadowBlur', 'outerContainerPadding',
+] as const;
+const LAYER_FIELDS = ['opacity', 'offsetX', 'offsetY'] as const;
+
 const NO_INNER_RATIO = new Set(['9-2', '9-4', '3-triangles', 'petal']);
 const NO_CURVE = new Set(['petal']);
 const NO_ROUNDING = new Set(['petal']);
 const NO_PETAL = new Set(['9-2', '9-4', '3-triangles', 'spike', 'kite']);
 
-export default function ControlPanel({
+function ControlPanel({
   config, update, onReset,
   layers, selectedLayer, updateLayer,
 }: ControlPanelProps) {
   const t = config.starType;
   const D = DEFAULT_CONFIG;
   const multiLayer = layers.length > 1;
+
+  // Stable per-key change handlers, built eagerly (rebuilt only when `update`
+  // changes, i.e. on selection change) so memo(SliderInput) can skip the ~12
+  // sliders whose value didn't change on a given tick.
+  const fieldHandlers = useMemo(() => {
+    const h = {} as Record<string, (v: number) => void>;
+    for (const k of NUMERIC_FIELDS) h[k] = (v) => update(k as keyof StarConfig, v as never);
+    return h;
+  }, [update]);
+  const onField = (key: (typeof NUMERIC_FIELDS)[number]) => fieldHandlers[key];
+
+  // Per selected-layer-field handlers (opacity/offset).
+  const selId = selectedLayer.id;
+  const layerHandlers = useMemo(() => {
+    const h = {} as Record<string, (v: number) => void>;
+    for (const k of LAYER_FIELDS) h[k] = (v) => updateLayer(selId, { [k]: v } as Partial<GeometryLayer>);
+    return h;
+  }, [updateLayer, selId]);
+  const onLayerField = (key: (typeof LAYER_FIELDS)[number]) => layerHandlers[key];
 
   return (
     <div className="flex flex-col bg-white h-full">
@@ -164,9 +198,9 @@ export default function ControlPanel({
                 min={0}
                 max={1}
                 step={0.01}
-                format={(v) => `${Math.round(v * 100)}%`}
+                format={fmtPct}
                 parse={parsePercent}
-                onChange={(v) => updateLayer(selectedLayer.id, { opacity: v })}
+                onChange={onLayerField('opacity')}
               />
               <SliderInput
                 label="Offset X"
@@ -176,8 +210,8 @@ export default function ControlPanel({
                 min={-300}
                 max={300}
                 step={1}
-                format={(v) => String(Math.round(v))}
-                onChange={(v) => updateLayer(selectedLayer.id, { offsetX: v })}
+                format={fmtInt}
+                onChange={onLayerField('offsetX')}
                 resetLabel="Set to default"
               />
               <SliderInput
@@ -188,8 +222,8 @@ export default function ControlPanel({
                 min={-300}
                 max={300}
                 step={1}
-                format={(v) => String(Math.round(v))}
-                onChange={(v) => updateLayer(selectedLayer.id, { offsetY: v })}
+                format={fmtInt}
+                onChange={onLayerField('offsetY')}
                 resetLabel="Set to default"
               />
             </>
@@ -202,7 +236,8 @@ export default function ControlPanel({
             min={60}
             max={350}
             step={1}
-            onChange={(v) => update('outerRadius', v)}
+            format={fmtInt}
+            onChange={onField('outerRadius')}
             resetLabel="Set to default"
           />
           <SliderInput
@@ -213,8 +248,8 @@ export default function ControlPanel({
             min={0.1}
             max={0.9}
             step={0.01}
-            format={(v) => v.toFixed(2)}
-            onChange={(v) => update('innerRadiusRatio', v)}
+            format={fmtRatio}
+            onChange={onField('innerRadiusRatio')}
             disabled={NO_INNER_RATIO.has(t)}
           />
           <SliderInput
@@ -225,8 +260,8 @@ export default function ControlPanel({
             min={-180}
             max={180}
             step={1}
-            format={(v) => `${v}°`}
-            onChange={(v) => update('rotation', v)}
+            format={fmtDeg}
+            onChange={onField('rotation')}
             resetLabel="Set to default"
           />
           <SliderInput
@@ -237,8 +272,8 @@ export default function ControlPanel({
             min={-250}
             max={250}
             step={1}
-            format={(v) => String(Math.round(v))}
-            onChange={(v) => update('curveIntensity', v)}
+            format={fmtInt}
+            onChange={onField('curveIntensity')}
             disabled={NO_CURVE.has(t)}
           />
           <SliderInput
@@ -249,9 +284,9 @@ export default function ControlPanel({
             min={0}
             max={1}
             step={0.01}
-            format={(v) => `${Math.round(v * 100)}%`}
+            format={fmtPct}
             parse={parsePercent}
-            onChange={(v) => update('cornerRounding', v)}
+            onChange={onField('cornerRounding')}
             disabled={NO_ROUNDING.has(t)}
           />
           <SliderInput
@@ -262,9 +297,9 @@ export default function ControlPanel({
             min={0.1}
             max={1}
             step={0.01}
-            format={(v) => `${Math.round(v * 100)}%`}
+            format={fmtPct}
             parse={parsePercent}
-            onChange={(v) => update('petalWidth', v)}
+            onChange={onField('petalWidth')}
             disabled={NO_PETAL.has(t)}
           />
           <SliderInput
@@ -275,9 +310,9 @@ export default function ControlPanel({
             min={0}
             max={1}
             step={0.01}
-            format={(v) => `${Math.round(v * 100)}%`}
+            format={fmtPct}
             parse={parsePercent}
-            onChange={(v) => update('petalCurve', v)}
+            onChange={onField('petalCurve')}
             disabled={NO_PETAL.has(t)}
           />
         </Section>
@@ -292,8 +327,8 @@ export default function ControlPanel({
             min={0}
             max={20}
             step={0.5}
-            format={(v) => `${v}px`}
-            onChange={(v) => update('strokeWidth', v)}
+            format={fmtPx}
+            onChange={onField('strokeWidth')}
           />
           {config.strokeWidth > 0 && (
             <>
@@ -351,8 +386,8 @@ export default function ControlPanel({
             min={0}
             max={40}
             step={1}
-            format={(v) => `${v}px`}
-            onChange={(v) => update('glowRadius', v)}
+            format={fmtPx}
+            onChange={onField('glowRadius')}
           />
           {config.glowRadius > 0 && (
             <ColorControl
@@ -369,8 +404,8 @@ export default function ControlPanel({
             min={0}
             max={40}
             step={1}
-            format={(v) => `${v}px`}
-            onChange={(v) => update('shadowBlur', v)}
+            format={fmtPx}
+            onChange={onField('shadowBlur')}
           />
           {config.shadowBlur > 0 && (
             <ColorControl
@@ -422,8 +457,8 @@ export default function ControlPanel({
                 min={0}
                 max={45}
                 step={1}
-                format={(v) => `${v}px`}
-                onChange={(v) => update('outerContainerPadding', v)}
+                format={fmtPx}
+                onChange={onField('outerContainerPadding')}
               />
               <ColorControl
                 label="Stroke"
@@ -467,3 +502,5 @@ export default function ControlPanel({
     </div>
   );
 }
+
+export default memo(ControlPanel);

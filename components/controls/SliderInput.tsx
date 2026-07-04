@@ -1,12 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Slider } from "@/components/ui/slider";
 
 // Strips non-numeric characters and returns the typed number as-is (1:1 units).
 export const stripNumber = (raw: string) => parseFloat(raw.replace(/[^0-9.\-]/g, ""));
 // Inverse of a `${Math.round(v * 100)}%` formatter: typed "50" → 0.5.
 export const parsePercent = (raw: string) => stripNumber(raw) / 100;
+
+// Stable module-level formatters — passing an inline `format={(v)=>…}` defeats
+// SliderInput's memo (new identity every render), so use these shared ones.
+export const fmtDeg = (v: number) => `${Math.round(v)}°`;
+export const fmtInt = (v: number) => String(Math.round(v));
+export const fmtPct = (v: number) => `${Math.round(v * 100)}%`;
+export const fmtRatio = (v: number) => v.toFixed(2);
+export const fmtPx = (v: number) => `${v}px`;
 
 interface SliderInputProps {
   label: string;
@@ -28,7 +36,7 @@ interface SliderInputProps {
   resetLabel?: string;
 }
 
-export default function SliderInput({
+function SliderInput({
   label,
   tooltip,
   value,
@@ -165,3 +173,8 @@ export default function SliderInput({
     </div>
   );
 }
+
+// Memoized so a single-field edit only re-renders that one slider — provided the
+// parent passes STABLE onChange/format/snap (see the module-level formatters and
+// the per-key handler caches in the control panels).
+export default memo(SliderInput);

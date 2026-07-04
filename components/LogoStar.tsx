@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { memo, useState, useEffect, useMemo } from 'react';
 import { buildStarPaths } from '@/lib/star-geometry';
 import { DEFAULT_CONFIG } from '@/types/star';
 import { LOGO_CONFIGS, LOGO_INTERVAL_MS } from '@/lib/logo-configs';
@@ -10,7 +10,7 @@ const LOGO_VB = 500;
 const CX = LOGO_VB / 2;
 const CY = LOGO_VB / 2;
 
-export default function LogoStar() {
+function LogoStar() {
   const [idx, setIdx] = useState(0);
   const [fading, setFading] = useState(false);
 
@@ -25,8 +25,12 @@ export default function LogoStar() {
     return () => clearInterval(interval);
   }, []);
 
-  const cfg = { ...DEFAULT_CONFIG, ...LOGO_CONFIGS[idx], outerRadius: 200 };
-  const paths = buildStarPaths(CX, CY, cfg);
+  // Only rebuilt when the rotating config index changes (every 30 min), not on
+  // the fade toggle or unrelated parent renders.
+  const { cfg, paths } = useMemo(() => {
+    const c = { ...DEFAULT_CONFIG, ...LOGO_CONFIGS[idx], outerRadius: 200 };
+    return { cfg: c, paths: buildStarPaths(CX, CY, c) };
+  }, [idx]);
 
   return (
     <svg
@@ -51,3 +55,5 @@ export default function LogoStar() {
     </svg>
   );
 }
+
+export default memo(LogoStar);

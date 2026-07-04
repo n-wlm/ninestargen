@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { memo, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
 import { History, Share2, Download, ChevronDown, Check } from 'lucide-react';
 import { useExport, RESOLUTIONS, type ExportFormat } from '@/hooks/useExport';
@@ -27,7 +27,7 @@ const FORMATS: { id: ExportFormat; label: string; desc: string; recommended?: bo
 ];
 
 // History · Share · Download, bundled into one container in the header.
-export default function ActionsCluster({
+function ActionsCluster({
   entriesCount, onOpenHistory, isImages,
   svgRef, exportWidth, exportHeight, onSize, filename, onDownloaded, disabled,
 }: Props) {
@@ -161,3 +161,5 @@ export default function ActionsCluster({
     </div>
   );
 }
+
+export default memo(ActionsCluster);

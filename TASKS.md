@@ -170,11 +170,17 @@ Owner-Entscheidungen (Mockup + Rückfragen bestätigt):
 - Verifiziert: tsc/lint/build ✓; SSR + Desktop-Screenshot (Layer 1/15, größere Bar,
   Share Design). Live-Klick (Menü, Toast, Modus-Switch, Multi-Layer-URL) → Naim.
 
-### ⏭ NÄCHSTER SCHRITT (Owner): Performance mit vielen Layern
-Owner meldet leichtes Ruckeln bei mehreren Layern. Eigener Analyse-/Umsetzungs-Schritt:
-Render-Kosten pro Layer (Blur-Filter, useId, unmemoized `StarLayerGroup`?),
-unnötige Re-Renders bei unrelatem State, evtl. Debounce/Virtualisierung. Erst
-analysieren, dann Plan, dann umsetzen.
+### Performance-Audit (Branch `chore/perf-audit`) ✅
+Ursache: `GeneratorClient` hält allen State → jeder Slider-Tick re-renderte den
+ganzen Baum; frische Prop-Objekte defeateten bestehende `memo()`s.
+Fixes: stabile Hook-Callbacks (Refs/funktionale Updater), `exportProps`/`layerProps`
++ ganzer Chrome memoized, `LayerThumb`/`LayerRowItem` memo + CSS-Hover, statische
+Ecken-Configs, `memo(SliderInput)` + Modul-Formatter + stabile Per-Key-Handler,
+verfeinerte `StarLayerGroup`-Deps. Gemessen (5-Layer, 60 Ticks): Dev header −92 %,
+sidebar −65 %, layersPanel −83 %, Wall 446→128 ms (−71 %); Prod ~0,35 ms/Tick.
+Mess-Harness (Profiler) danach entfernt. **Offen:** Naim testet Klick-Durchlauf live
+(memo-Fehler = „UI aktualisiert nicht"); ggf. GPU/Paint (Blur-Filter bei vielen
+Layern) als separater Folgeschritt, falls bei sehr schweren Designs noch Jank.
 
 ### R4 — Doku-Kapitel + Template-Finalisierung (S) ✅
 - [x] Presets finalisiert: 5 schwache raus, 4 Picks + Multi-Layer-Showcase „Emerald Weave";

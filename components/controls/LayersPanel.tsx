@@ -1,29 +1,16 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { memo, useState } from 'react';
 import { ChevronDown, Layers as LayersIcon } from 'lucide-react';
-import LayerList, { type LayerListItem } from './LayerList';
+import LayerList, { type LayerListProps } from './LayerList';
 
 // The floating, collapsible Layers window shown over the canvas (both modes).
 // It's just chrome around the shared LayerList — so geometry and images get an
 // identical, prominent layer surface separated from the property controls.
-export interface LayersPanelProps {
-  layers: LayerListItem[];
-  selectedId: string;
-  max: number;
-  minLayers?: number;
-  addLabel: string;
-  maxHint: string;
-  renderThumb: (id: string) => ReactNode;
-  onSelect: (id: string) => void;
-  onToggleVisible: (id: string) => void;
-  onReorder: (id: string, dir: -1 | 1) => void;
-  onDuplicate: (id: string) => void;
-  onRemove: (id: string) => void;
-  onAdd: () => void;
-}
+// Memoized: only re-renders when the (memoized) layerProps actually change.
+export type LayersPanelProps = LayerListProps;
 
-export default function LayersPanel(props: LayersPanelProps) {
+function LayersPanel(props: LayersPanelProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -49,3 +36,5 @@ export default function LayersPanel(props: LayersPanelProps) {
     </div>
   );
 }
+
+export default memo(LayersPanel);
