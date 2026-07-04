@@ -5,7 +5,7 @@ import { exportSVG, exportRaster } from '@/lib/export';
 
 export type ExportFormat = 'svg' | 'png' | 'jpeg';
 
-// Shared by the desktop ExportPanel and the MobileExportFab.
+// Used by the header ActionsCluster download menu — one export path.
 export const RESOLUTIONS = [
   { label: '512', value: 512 },
   { label: '1K', value: 1024 },

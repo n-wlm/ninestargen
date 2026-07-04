@@ -14,6 +14,14 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Layout redesign R1 — unified header (branch `feature/layout-redesign`): the
+  mode switch moves into a full-width top bar the generator renders on home
+  (colored `ModeSwitch` driving the theme), and History · Share · Download are
+  bundled into one header `ActionsCluster`. The canvas is cleared of overlays;
+  the sidebar loses its mode switch and export panel. Shared header pieces
+  extracted (`Wordmark`, `HeaderNav`); `SiteHeader` hides the standalone
+  `AppHeader` on `/`. Deleted the now-dead `ExportPanel`, `MobileExportFab`,
+  `ShareButton`. Updated architecture.
 - Color picker swatches expanded from 20 to 30 (branch `feature/layout-redesign`):
   a 5-wide grid of neutrals, warm, green, cool, purple/pink plus a full row of
   soft pastels; each hue row leads with a lighter tint. `SWATCH_COLORS` in

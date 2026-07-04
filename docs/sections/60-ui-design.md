@@ -3,9 +3,9 @@ id: ui-design
 title: UI design
 order: 60
 status: current
-last_updated: 2026-07-03
+last_updated: 2026-07-04
 owner: @naim
-linked_paths: components/controls/, components/ui/popover.tsx, app/globals.css, components/SaveDesignModal.tsx, components/HistoryPanel.tsx, components/ImageEmptyState.tsx, components/ShareButton.tsx, components/WhatsNewDialog.tsx, lib/clipboard.ts, lib/color-palettes.ts, lib/recent-colors.ts
+linked_paths: components/controls/, components/generator/, components/header/, components/ui/popover.tsx, app/globals.css, components/SaveDesignModal.tsx, components/HistoryPanel.tsx, components/ImageEmptyState.tsx, components/WhatsNewDialog.tsx, lib/clipboard.ts, lib/color-palettes.ts, lib/recent-colors.ts
 summary: Design language, the accent-variable system, control conventions, and accessibility notes.
 ---
 
@@ -42,9 +42,10 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   optional amber "Set to default" pill). `ColorControl` pairs an editable hex
   field (accepting `#abc`/`aabbcc`) with a swatch that opens a **color popover**
   ([ui/popover.tsx](components/ui/popover.tsx), a Base UI Popover in house
-  style): a curated 20-color grid (`SWATCH_COLORS` in
-  [lib/color-palettes.ts](lib/color-palettes.ts) — neutrals, warm, pink/purple,
-  cool; includes every fill-palette anchor), a Recent row
+  style): a curated 30-color grid (`SWATCH_COLORS` in
+  [lib/color-palettes.ts](lib/color-palettes.ts) — 5-wide: neutrals, warm, green,
+  cool, purple/pink, plus a full soft-pastel row; each hue row leads with a
+  lighter tint), a Recent row
   ([lib/recent-colors.ts](lib/recent-colors.ts), localStorage
   `nsg:recent-colors`, max 8, deduped, only pushed when a color actually changed
   between popover open and close), and the native OS picker + hex as the custom
@@ -77,11 +78,16 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   `ImageControlPanel` (images, still with expandable layer cards: thumbnail,
   expand chevron, reorder arrows, visibility, separated delete; dropzone demotes
   to a slim button once a layer exists).
+- **Top bar** (R1): a full-width header the generator renders on home — logo +
+  colored `ModeSwitch` (accent-filled active pill, drives indigo/teal) + app nav
+  (Templates, About, What's new) + an `ActionsCluster` bundling History · Share ·
+  Download. This replaces the sidebar mode switch, the sidebar export panel, the
+  mobile export FAB, and the canvas History/Share overlays.
 - **Canvas**: square preview via container-query units
-  (`w-[min(100cqw,100cqh)] aspect-square`); `ImageEmptyState` explains the mode
-  when no image is loaded (compact on mobile — smaller glyph/text and a shorter
-  blurb — with `max-h-full overflow-y-auto` so it fits the short 40svh mobile
-  canvas); History (top-left) and Share (top-right, geometry).
+  (`w-[min(100cqw,100cqh)] aspect-square`), now **free of overlays** (actions
+  live in the header); `ImageEmptyState` explains the mode when no image is
+  loaded (compact on mobile — smaller glyph/text and a shorter blurb — with
+  `max-h-full overflow-y-auto` so it fits the short 40svh mobile canvas).
 - **Responsive**: desktop is a side-by-side sidebar + canvas (≥`lg`); below that
   it stacks (canvas on top, controls below). The centered confirm popover is
   clamped to the viewport so it never runs off-screen on narrow widths.

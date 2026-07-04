@@ -3,7 +3,7 @@ id: architecture
 title: Architecture
 order: 20
 status: current
-last_updated: 2026-07-03
+last_updated: 2026-07-04
 owner: @naim
 linked_paths: app/GeneratorClient.tsx, components/, hooks/, lib/export.ts, components/ui/slider.tsx
 summary: How the editor shell, the two render paths, state, and the shared export pipeline fit together.
@@ -33,36 +33,45 @@ multi-layer URL scheme and layer UI are follow-up cycles.
 
 ```mermaid
 flowchart TD
-  GC[GeneratorClient] --> MT[Mode switch]
+  GC[GeneratorClient] --> TB[Top bar: ModeSwitch · HeaderNav · ActionsCluster]
   GC -->|geometry| CP[ControlPanel] --> EB[PreviewErrorBoundary] --> SP[StarPreview svg]
   GC -->|images| ICP[ImageControlPanel] --> EB --> IP[ImagePreview svg]
-  GC --> EP[ExportPanel / MobileExportFab]
-  EP -.shared logic.-> UE[useExport + ExportToast]
+  TB --> AC[ActionsCluster: History · Share · Download]
+  AC -.shared logic.-> UE[useExport + ExportToast]
   GC --> SM[SaveDesignModal]
   GC --> HP[HistoryPanel]
   CP -.uses.-> SI[SliderInput / ColorControl / primitives]
   ICP -.uses.-> SI
-  SP -.svgRef.-> EP
-  IP -.svgRef.-> EP
+  SP -.svgRef.-> AC
+  IP -.svgRef.-> AC
 ```
 
-Outside the shell, `AppHeader` owns the app-level chrome: the templates modal
-(auto-opened on first visit), the About link, and the "What's new" dialog
-([WhatsNewDialog](components/WhatsNewDialog.tsx) fed by
-[lib/changelog.ts](lib/changelog.ts)). Control panels draw color input from the
-shared `ColorControl`, whose swatch popover is built on
-[ui/popover.tsx](components/ui/popover.tsx) (Base UI).
+**Top bar.** On the home route the generator renders its own full-width top bar
+(logo + colored `ModeSwitch` + `HeaderNav` + `ActionsCluster`); the standalone
+`AppHeader` is suppressed there by [SiteHeader](components/SiteHeader.tsx)
+(`usePathname() === '/'` → null) and only shows on other routes. Both reuse the
+shared `Wordmark` and `HeaderNav` (Templates modal auto-opened on first visit,
+About, the "What's new" dialog — [WhatsNewDialog](components/WhatsNewDialog.tsx)
+fed by [lib/changelog.ts](lib/changelog.ts)). `ModeSwitch`
+([components/generator/](components/generator/ModeSwitch.tsx)) is the mode
+control (lifted out of the sidebar); its active pill is accent-filled so it
+shows and drives the indigo/teal theme. `ActionsCluster` bundles History · Share
+· Download into one header container (replacing the former canvas overlays,
+sidebar export panel, and mobile FAB — one export path via
+[useExport](hooks/useExport.ts)). The canvas is now free of chrome. Control
+panels draw color input from the shared `ColorControl`, whose swatch popover is
+built on [ui/popover.tsx](components/ui/popover.tsx) (Base UI).
 
 Both previews render into the **same `svgRef`**, which is all the export
 pipeline needs — so PNG/SVG/JPG export is identical for both modes. They are
 wrapped in [PreviewErrorBoundary](components/PreviewErrorBoundary.tsx) so a
 corrupted design (e.g. restored from history) can't take down the editor.
 
-The two export UIs — desktop [ExportPanel](components/ExportPanel.tsx) and the
-mobile sheet [MobileExportFab](components/MobileExportFab.tsx) — share their
-download/toast logic via the [useExport](hooks/useExport.ts) hook (which also
-owns the canonical `RESOLUTIONS` list) and render the same
-[ExportToast](components/ExportToast.tsx); only the surrounding UI differs.
+Export runs through a single UI now: the header
+[ActionsCluster](components/generator/ActionsCluster.tsx) download menu, backed
+by the [useExport](hooks/useExport.ts) hook (which owns the canonical
+`RESOLUTIONS` list) and [ExportToast](components/ExportToast.tsx). (The old
+desktop `ExportPanel` and mobile `MobileExportFab` were removed in R1.)
 
 ## Rendering & export pipeline
 
@@ -86,11 +95,13 @@ Everything is **SVG**, on a fixed `600×600` viewBox centred at `(300,300)`.
 
 ## State
 
-- [useStarConfig](hooks/useStarConfig.ts) — `StarConfig` for geometry.
-- [useComposition](hooks/useComposition.ts) — `CompositionConfig` (layer list +
-  background/container/export) with add/remove/update/reorder.
+- [useStarComposition](hooks/useStarComposition.ts) — `GeometryComposition`
+  (layer list + canvas) for geometry, with add/duplicate/remove/update/reorder +
+  the selected-layer id.
+- [useComposition](hooks/useComposition.ts) — `CompositionConfig` (image layer
+  list + background/container/export) with add/remove/update/reorder.
 - [useUrlSync](hooks/useUrlSync.ts) — debounced two-way sync of the geometry
-  config with the URL query string. Image state is **not** URL-synced.
+  composition with the URL query string. Image state is **not** URL-synced.
 - History lives in `GeneratorClient` state, backed by
   [lib/history.ts](lib/history.ts) (`localStorage`).
 

@@ -2,17 +2,16 @@
 
 import { useRef, useEffect, useState, useMemo, useCallback, Suspense } from 'react';
 import { motion } from 'motion/react';
-import { History } from 'lucide-react';
 import StarPreview from '@/components/StarPreview';
 import ImagePreview from '@/components/ImagePreview';
 import PreviewErrorBoundary from '@/components/PreviewErrorBoundary';
 import ImageEmptyState from '@/components/ImageEmptyState';
 import ControlPanel from '@/components/controls/ControlPanel';
 import ImageControlPanel from '@/components/controls/ImageControlPanel';
-import { SegmentedControl } from '@/components/controls/primitives';
-import ExportPanel from '@/components/ExportPanel';
-import MobileExportFab from '@/components/MobileExportFab';
-import ShareButton from '@/components/ShareButton';
+import Wordmark from '@/components/header/Wordmark';
+import HeaderNav from '@/components/header/HeaderNav';
+import ModeSwitch from '@/components/generator/ModeSwitch';
+import ActionsCluster from '@/components/generator/ActionsCluster';
 import SaveDesignModal from '@/components/SaveDesignModal';
 import HistoryPanel from '@/components/HistoryPanel';
 import { useStarComposition } from '@/hooks/useStarComposition';
@@ -31,11 +30,6 @@ import {
 } from '@/types/geometry';
 
 type Mode = 'geometry' | 'images';
-
-const MODE_OPTIONS: { value: Mode; label: string }[] = [
-  { value: 'geometry', label: 'Geometry' },
-  { value: 'images', label: 'Images' },
-];
 
 // Images mode uses a teal accent to feel distinct from geometry's indigo.
 const IMAGES_ACCENT = {
@@ -166,127 +160,109 @@ function Generator() {
       };
 
   return (
-    <div className="flex flex-col lg:flex-row flex-1 min-h-0" style={isImages ? IMAGES_ACCENT : undefined}>
-      {/* Controls sidebar */}
-      <motion.aside
-        className="w-full lg:w-80 xl:w-88 flex-1 min-h-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[#EAECF0] bg-white order-2 lg:order-1 lg:flex-none lg:h-full"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.25, ease: 'easeOut' }}
-      >
-        {/* Mode switch */}
-        <div className="px-4 py-2.5 border-b border-[#EAECF0] shrink-0">
-          <SegmentedControl options={MODE_OPTIONS} value={mode} onChange={setMode} />
-        </div>
-
-        <div className="flex-1 overflow-y-auto min-h-0">
-          {isImages ? (
-            <ImageControlPanel
-              config={comp.config}
-              update={comp.update}
-              addLayer={comp.addLayer}
-              removeLayer={comp.removeLayer}
-              updateLayer={comp.updateLayer}
-              reorderLayer={comp.reorderLayer}
-              onReset={comp.reset}
-            />
-          ) : (
-            <ControlPanel
-              config={config}
-              update={update}
-              onReset={star.reset}
-              layers={star.config.layers}
-              selectedLayer={star.selectedLayer}
-              selectLayer={star.selectLayer}
-              duplicateLayer={star.duplicateLayer}
-              removeLayer={star.removeLayer}
-              reorderLayer={star.reorderLayer}
-              updateLayer={star.updateLayer}
-            />
-          )}
-        </div>
-        {/* Export panel: desktop only */}
-        <div className="hidden lg:block">
-          <ExportPanel {...exportProps} />
-        </div>
-      </motion.aside>
-
-      {/* Preview canvas */}
-      <motion.section
-        className="shrink-0 h-[40svh] flex items-center justify-center relative order-1 lg:order-2 lg:h-auto lg:shrink lg:flex-1 lg:min-h-0 bg-[#F7F8FA]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}
-      >
-        <div
-          className="absolute inset-0 opacity-[0.4]"
-          style={{
-            backgroundImage: 'radial-gradient(circle, #D1D5DB 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
-
-        {/* Preview */}
-        <div className="relative z-10 w-full h-full flex items-center justify-center p-5 lg:p-14 [container-type:size]">
-          {isImages && comp.config.layers.length === 0 ? (
-            <ImageEmptyState onAddImage={() => window.dispatchEvent(new CustomEvent('nsg:add-image'))} />
-          ) : (
-            <motion.div
-              key={snapKey}
-              className="aspect-square w-[min(100cqw,100cqh)] flex items-center justify-center"
-              initial={snapKey > 0 ? { scale: 0.93, opacity: 0.7 } : false}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-            >
-              <PreviewErrorBoundary>
-                {isImages ? (
-                  <ImagePreview
-                    config={comp.config}
-                    svgRef={svgRef}
-                    className="w-full h-full"
-                    style={PREVIEW_SHADOW}
-                  />
-                ) : (
-                  <StarPreview
-                    composition={star.config}
-                    svgRef={svgRef}
-                    className="w-full h-full"
-                    style={PREVIEW_SHADOW}
-                  />
-                )}
-              </PreviewErrorBoundary>
-            </motion.div>
-          )}
-        </div>
-
-        {/* History — top left */}
-        <div className="absolute top-3 left-3 z-20">
-          <button
-            onClick={() => setHistoryOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium border bg-white/90 border-[#E5E7EB] text-[#6B7280] hover:text-[#111827] hover:border-[#D1D5DB] backdrop-blur-sm transition-colors"
-          >
-            <History className="w-3.5 h-3.5" />
-            History
-            {entries.length > 0 && (
-              <span className="ml-0.5 px-1.5 rounded-full bg-[var(--nsg-accent-soft)] text-[var(--nsg-accent)] text-[10px] font-semibold">
-                {entries.length}
-              </span>
-            )}
-          </button>
-        </div>
-
-        {/* Share — top right (geometry mode only; image compositions aren't URL-encoded) */}
-        {!isImages && (
-          <div className="absolute top-3 right-3 z-20">
-            <ShareButton />
+    <div className="flex flex-col flex-1 min-h-0" style={isImages ? IMAGES_ACCENT : undefined}>
+      {/* Unified top bar: identity · mode · app nav · document actions */}
+      <header className="h-11 flex items-center gap-3 px-4 border-b border-[#EAECF0] bg-white shrink-0">
+        <Wordmark />
+        <ModeSwitch mode={mode} onChange={setMode} />
+        <div className="ml-auto flex items-center gap-2">
+          <div className="hidden md:block">
+            <HeaderNav />
           </div>
-        )}
-
-        {/* Export FAB — bottom left, mobile only */}
-        <div className="absolute bottom-3 left-3 z-20 lg:hidden">
-          <MobileExportFab {...exportProps} />
+          <ActionsCluster
+            entriesCount={entries.length}
+            onOpenHistory={() => setHistoryOpen(true)}
+            isImages={isImages}
+            {...exportProps}
+          />
         </div>
-      </motion.section>
+      </header>
+
+      <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+        {/* Controls sidebar */}
+        <motion.aside
+          className="w-full lg:w-80 xl:w-88 flex-1 min-h-0 flex flex-col border-b lg:border-b-0 lg:border-r border-[#EAECF0] bg-white order-2 lg:order-1 lg:flex-none lg:h-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+        >
+          <div className="flex-1 overflow-y-auto min-h-0">
+            {isImages ? (
+              <ImageControlPanel
+                config={comp.config}
+                update={comp.update}
+                addLayer={comp.addLayer}
+                removeLayer={comp.removeLayer}
+                updateLayer={comp.updateLayer}
+                reorderLayer={comp.reorderLayer}
+                onReset={comp.reset}
+              />
+            ) : (
+              <ControlPanel
+                config={config}
+                update={update}
+                onReset={star.reset}
+                layers={star.config.layers}
+                selectedLayer={star.selectedLayer}
+                selectLayer={star.selectLayer}
+                duplicateLayer={star.duplicateLayer}
+                removeLayer={star.removeLayer}
+                reorderLayer={star.reorderLayer}
+                updateLayer={star.updateLayer}
+              />
+            )}
+          </div>
+        </motion.aside>
+
+        {/* Preview canvas — cleared of overlays; actions live in the header */}
+        <motion.section
+          className="shrink-0 h-[40svh] flex items-center justify-center relative order-1 lg:order-2 lg:h-auto lg:shrink lg:flex-1 lg:min-h-0 bg-[#F7F8FA]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, ease: 'easeOut', delay: 0.05 }}
+        >
+          <div
+            className="absolute inset-0 opacity-[0.4]"
+            style={{
+              backgroundImage: 'radial-gradient(circle, #D1D5DB 1px, transparent 1px)',
+              backgroundSize: '24px 24px',
+            }}
+          />
+
+          {/* Preview */}
+          <div className="relative z-10 w-full h-full flex items-center justify-center p-5 lg:p-14 [container-type:size]">
+            {isImages && comp.config.layers.length === 0 ? (
+              <ImageEmptyState onAddImage={() => window.dispatchEvent(new CustomEvent('nsg:add-image'))} />
+            ) : (
+              <motion.div
+                key={snapKey}
+                className="aspect-square w-[min(100cqw,100cqh)] flex items-center justify-center"
+                initial={snapKey > 0 ? { scale: 0.93, opacity: 0.7 } : false}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 350, damping: 28 }}
+              >
+                <PreviewErrorBoundary>
+                  {isImages ? (
+                    <ImagePreview
+                      config={comp.config}
+                      svgRef={svgRef}
+                      className="w-full h-full"
+                      style={PREVIEW_SHADOW}
+                    />
+                  ) : (
+                    <StarPreview
+                      composition={star.config}
+                      svgRef={svgRef}
+                      className="w-full h-full"
+                      style={PREVIEW_SHADOW}
+                    />
+                  )}
+                </PreviewErrorBoundary>
+              </motion.div>
+            )}
+          </div>
+        </motion.section>
+      </div>
 
       {/* Save-design prompt after a download */}
       <SaveDesignModal

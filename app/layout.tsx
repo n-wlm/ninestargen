@@ -3,7 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import AppHeader from "@/components/AppHeader";
+import SiteHeader from "@/components/SiteHeader";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const jetbrainsMono = JetBrains_Mono({
@@ -70,7 +70,7 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased bg-[#F7F8FA] text-[#111827] flex flex-col h-full">
         <TooltipProvider>
-          <AppHeader />
+          <SiteHeader />
           <main className="flex-1 flex flex-col min-h-0">{children}</main>
         </TooltipProvider>
         <Analytics />

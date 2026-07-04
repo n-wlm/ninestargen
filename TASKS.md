@@ -23,6 +23,11 @@
 
 Branches stacken in dieser Reihenfolge (jeder baut auf dem vorigen auf); Naim pusht + öffnet PRs.
 
+**Arbeitsmodus (Owner 2026-07-04):** R1–R4 werden autonom durchgezogen (Commit + Selbst-
+Verifikation je Scheibe), **keine Zwischenfragen** — erst beim fertigen Gesamtergebnis Rückfrage
+für Owner-Input (inkl. Template-Feinschliff). Template-Set wird mit Owner-Picks + selbst erstellten
+Multi-Layer-Showcases vorläufig final gemacht; Owner justiert am Ende nach.
+
 **Bestätigte Architektur-Entscheidungen:**
 - `GeometryComposition { layers: GeometryLayer[], canvas-Props }`, MAX 5 Layer; kein `scale`
   (outerRadius IST die Größe); neu pro Layer: `opacity`, `offsetX/Y`.
