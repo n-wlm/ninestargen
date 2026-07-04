@@ -129,12 +129,14 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   wordmark drops to just the logo, and the sidebar gains the Controls/Layers
   toggle (the desktop floating layers panel is hidden).
   To keep the top bar from squeezing the Download action out on narrow phones,
-  the **`ModeSwitch` collapses to icons below `sm`** (`Spline` — a flowing curve —
-  for geometry, `Images` for images — with a ~40px tap target and `aria-label`),
-  the History / Share segments are already icon-only there, and below ~360px the
-  **Download label** itself drops to just the icon + caret (accent button stays
-  fully visible rather than being clipped); mobile bar gaps/padding are a touch
-  tighter.
+  the text labels turn on in **staggered steps** (rather than all at `sm`, which
+  caused the Download button to overflow in the 640–700px band): Download label
+  ≥ ~360px, **`ModeSwitch` labels ≥ 480px** (`Spline` — a flowing curve — for
+  geometry, `Images` for images, ~40px tap target + `aria-label` below that),
+  **History / Share labels ≥ 720px**, and the **wordmark text ≥ `lg`**. Keeping
+  the mode labels down to 480px also fills the mid-width middle gap. Below ~360px
+  the Download label itself drops to the icon + caret; mobile bar gaps/padding
+  are a touch tighter. Verified no header overflow across 360–1280px.
 - **Mobile Controls/Layers toggle**: in images mode with no image yet, the
   property controls are inert, so the toggle **locks to Layers** (the only place
   to add an image) — the Controls segment is `disabled` in `SegmentedControl`

@@ -61,7 +61,7 @@ function ActionsCluster({
     <div className="flex items-stretch h-8 lg:h-9 border border-[#E5E7EB] rounded-lg overflow-visible bg-white">
       <button onClick={onOpenHistory} className={`${seg} rounded-l-lg`} title="History">
         <History className="w-4 h-4" />
-        <span className="hidden sm:inline">History</span>
+        <span className="hidden min-[720px]:inline">History</span>
         {entriesCount > 0 && (
           <span className="ml-0.5 px-1.5 rounded-full bg-[var(--nsg-accent-soft)] text-[var(--nsg-accent)] text-[10px] font-semibold">
             {entriesCount}
@@ -74,7 +74,7 @@ function ActionsCluster({
           <span className="w-px self-center h-5 bg-[#EAECF0]" />
           <button onClick={handleShare} className={seg} title="Copy shareable design link">
             {copied ? <Check className="w-4 h-4 text-[#059669]" /> : <Share2 className="w-4 h-4" />}
-            <span className="hidden sm:inline">{copied ? 'Copied' : 'Share Design'}</span>
+            <span className="hidden min-[720px]:inline">{copied ? 'Copied' : 'Share Design'}</span>
           </button>
         </>
       )}

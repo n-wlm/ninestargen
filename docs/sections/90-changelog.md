@@ -14,6 +14,12 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Mid-width header overflow (branch `chore/perf-audit`): in the 640–700px band
+  the `sm` breakpoint turned on the wordmark, mode-switch and History/Share
+  labels all at once, pushing the Download button past the edge; and just below
+  that the middle sat empty. Staggered the label breakpoints instead — Download
+  ≥360, ModeSwitch ≥480 (fills the middle gap), History/Share ≥720, wordmark
+  ≥`lg`. Swept 360–1280px: no header overflow at any width. Updated ui-design.
 - Tablet header wrap (branch `chore/perf-audit`): at ~768–1023px the inline nav
   (Templates/About/What's new) appeared and pushed "Share Design" onto a second
   line. Moved the nav's inline↔`⋯` breakpoint from `md` to **`lg`** (tablet now

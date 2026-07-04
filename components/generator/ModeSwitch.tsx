@@ -41,8 +41,8 @@ function ModeSwitch({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => voi
                   transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                 />
               )}
-              <Icon className="w-4 h-4 sm:hidden shrink-0" aria-hidden />
-              <span className="hidden sm:inline">{label}</span>
+              <Icon className="w-4 h-4 min-[480px]:hidden shrink-0" aria-hidden />
+              <span className="hidden min-[480px]:inline">{label}</span>
             </button>
           );
         })}

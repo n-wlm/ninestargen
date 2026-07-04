@@ -12,7 +12,7 @@ export default function Wordmark({ mode = 'geometry' }: { mode?: LogoMode }) {
       className="flex items-center gap-2 text-[#111827] hover:text-[var(--nsg-accent)] transition-colors shrink-0"
     >
       <LogoStar mode={mode} />
-      <span className="hidden sm:inline text-[13px] font-semibold tracking-tight">ninestar.app</span>
+      <span className="hidden lg:inline text-[13px] font-semibold tracking-tight">ninestar.app</span>
     </Link>
   );
 }
