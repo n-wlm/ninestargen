@@ -122,9 +122,12 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   loaded (compact on mobile — smaller glyph/text and a shorter blurb — with
   `max-h-full overflow-y-auto` so it fits the short 40svh mobile canvas).
 - **Responsive**: desktop is a side-by-side sidebar + canvas (≥`lg`); below that
-  it stacks (canvas on top, controls below). On mobile the header nav collapses
-  into a `⋯` overflow menu, the wordmark drops to just the logo, and the sidebar
-  gains the Controls/Layers toggle (the desktop floating layers panel is hidden).
+  it stacks (canvas on top, controls below). The header nav (Templates / About /
+  What's new) collapses into a `⋯` overflow menu **below `lg`** — so tablet
+  widths use it too, otherwise the inline links push History · Share · Download
+  into a second line (the action labels are also `whitespace-nowrap`). The
+  wordmark drops to just the logo, and the sidebar gains the Controls/Layers
+  toggle (the desktop floating layers panel is hidden).
   To keep the top bar from squeezing the Download action out on narrow phones,
   the **`ModeSwitch` collapses to icons below `sm`** (`Spline` — a flowing curve —
   for geometry, `Images` for images — with a ~40px tap target and `aria-label`),

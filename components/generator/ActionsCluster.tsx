@@ -55,7 +55,7 @@ function ActionsCluster({
     setTimeout(() => setCopied(false), 2000);
   }
 
-  const seg = 'flex items-center gap-1.5 px-2 sm:px-2.5 lg:px-3 h-full text-[12px] lg:text-[13px] font-medium text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB] transition-colors';
+  const seg = 'flex items-center gap-1.5 px-2 sm:px-2.5 lg:px-3 h-full text-[12px] lg:text-[13px] font-medium text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB] transition-colors whitespace-nowrap';
 
   return (
     <div className="flex items-stretch h-8 lg:h-9 border border-[#E5E7EB] rounded-lg overflow-visible bg-white">
@@ -86,7 +86,7 @@ function ActionsCluster({
           onClick={() => setOpen((v) => !v)}
           disabled={loading !== null || disabled}
           title={disabled ? 'Add an image first' : undefined}
-          className="flex items-center gap-1.5 px-3 lg:px-4 text-[12px] lg:text-[13px] font-semibold text-white bg-[var(--nsg-accent)] hover:bg-[var(--nsg-accent-strong)] transition-colors rounded-r-lg disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center gap-1.5 px-3 lg:px-4 text-[12px] lg:text-[13px] font-semibold text-white bg-[var(--nsg-accent)] hover:bg-[var(--nsg-accent-strong)] transition-colors rounded-r-lg disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
         >
           <Download className="w-4 h-4" />
           {/* Below ~360px the word drops so the button stays fully visible

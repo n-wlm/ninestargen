@@ -114,8 +114,9 @@ function HeaderNav() {
 
   return (
     <>
-      {/* Inline text nav — md and up */}
-      <nav className="hidden md:flex items-center">
+      {/* Inline text nav — lg and up (below that the ⋯ menu, so tablet widths
+          don't push the header actions into a second line) */}
+      <nav className="hidden lg:flex items-center">
         <button onClick={() => setShowTemplates(true)} className={linkCls}>Templates</button>
         <button onClick={() => setShowAbout(true)} className={linkCls}>About</button>
         <button onClick={openWhatsNew} className={`relative ${linkCls}`}>
@@ -126,8 +127,8 @@ function HeaderNav() {
         </button>
       </nav>
 
-      {/* Compact overflow menu — below md */}
-      <div className="relative md:hidden" ref={menuRef}>
+      {/* Compact overflow menu — below lg */}
+      <div className="relative lg:hidden" ref={menuRef}>
         <button
           onClick={() => setMenuOpen((v) => !v)}
           aria-label="More"

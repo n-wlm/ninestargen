@@ -14,6 +14,12 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Tablet header wrap (branch `chore/perf-audit`): at ~768–1023px the inline nav
+  (Templates/About/What's new) appeared and pushed "Share Design" onto a second
+  line. Moved the nav's inline↔`⋯` breakpoint from `md` to **`lg`** (tablet now
+  uses the overflow menu) and made the action labels `whitespace-nowrap`.
+  Verified one-line actions with no overflow at 800/1024/1280px. Updated
+  ui-design (responsive).
 - Mobile polish trio (branch `chore/perf-audit`): (1) on mobile in images mode
   with no image, the Controls/Layers toggle now **locks to Layers** (Controls
   segment `disabled`, `effectiveMobileTab` derives to `layers`) so you can't land
