@@ -14,6 +14,10 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Small tweaks (branch `feature/layout-redesign`): dropped the `n/15` count from
+  the Layers panel header (the max-reached hint already covers the limit); moved
+  **None** to the far left of the Fill type control, consistent with Background /
+  Outer Container.
 - Redesign polish (branch `feature/layout-redesign`): `MAX_GEOMETRY_LAYERS`
   5 → 15 (matches images) — the URL parser now splits **two-digit** layer indices
   (`^(\d+)([a-z].*)$`) and the floating layers panel scrolls past a few. Shared

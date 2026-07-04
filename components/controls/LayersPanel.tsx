@@ -35,7 +35,6 @@ export default function LayersPanel(props: LayersPanelProps) {
       >
         <LayersIcon className="w-3.5 h-3.5 text-[var(--nsg-accent)]" aria-hidden="true" />
         <span className="flex-1 text-[12px] font-semibold text-[#111827]">Layers</span>
-        <span className="text-[11px] text-[#9CA3AF] font-mono">{props.layers.length}/{props.max}</span>
         <ChevronDown
           className={`w-4 h-4 text-[#9CA3AF] transition-transform ${collapsed ? '-rotate-90' : ''}`}
           aria-hidden="true"

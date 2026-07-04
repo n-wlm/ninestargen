@@ -93,10 +93,10 @@ function PalettePicker({ onSelect }: {
 }
 
 const FILL_TYPES: { value: StarConfig['fillType']; label: string }[] = [
+  { value: 'none', label: 'None' },
   { value: 'solid', label: 'Solid' },
   { value: 'linear-gradient', label: 'Linear' },
   { value: 'radial-gradient', label: 'Radial' },
-  { value: 'none', label: 'None' },
 ];
 
 const STROKE_DASHES: { value: StarConfig['strokeDash']; label: string }[] = [
