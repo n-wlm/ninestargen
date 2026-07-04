@@ -135,6 +135,11 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
 - **Clipboard**: Share / copy-link actions go through [lib/clipboard.ts](lib/clipboard.ts)
   (`copyText`), which falls back to `document.execCommand('copy')` when the async
   Clipboard API is unavailable (insecure/sandboxed contexts).
+- **About**: opens as a modal (`AboutDialog`) from the header — the app content
+  over a semi-transparent, blurred backdrop with the signature gradient laid on
+  top — rather than navigating to a page (the `/about` route still exists as a
+  direct-link fallback). The logo (`LogoStar`) does a 3-D `rotateY` flip on mode
+  switch: an indigo enneagram for geometry, a teal spike star for images.
 - **What's new**: header item next to About; a 5px accent dot appears while
   [lib/changelog.ts](lib/changelog.ts)'s `APP_VERSION` is newer than the
   visitor's `nsg:version-seen`. Clicking opens `WhatsNewDialog` (HistoryPanel

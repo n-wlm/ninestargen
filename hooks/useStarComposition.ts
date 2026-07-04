@@ -68,7 +68,14 @@ export function useStarComposition(initial?: Partial<GeometryComposition>) {
     const idx = layers.findIndex((l) => l.id === id);
     if (idx === -1) return;
     const remaining = layers.filter((l) => l.id !== id);
-    setConfigState((prev) => ({ ...prev, layers: prev.layers.filter((l) => l.id !== id) }));
+    setConfigState((prev) => {
+      let next = prev.layers.filter((l) => l.id !== id);
+      // Back down to a single layer: the per-layer stacking controls (offset,
+      // opacity) are hidden, so reset them — otherwise the lone star stays shifted
+      // or faded with no slider to fix it.
+      if (next.length === 1) next = next.map((l) => ({ ...l, offsetX: 0, offsetY: 0, opacity: 1 }));
+      return { ...prev, layers: next };
+    });
     setSelectedLayerId((sel) => (sel === id ? remaining[Math.min(idx, remaining.length - 1)].id : sel));
   }, []);
 

@@ -246,7 +246,7 @@ function Generator() {
     <div className="flex flex-col flex-1 min-h-0" style={isImages ? IMAGES_ACCENT : undefined}>
       {/* Unified top bar: identity · mode · app nav · document actions */}
       <TopBar>
-        <Wordmark />
+        <Wordmark mode={mode} />
         <ModeSwitch mode={mode} onChange={setMode} />
         <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <HeaderNav />

@@ -14,6 +14,14 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Three additions (branch `chore/perf-audit`): (1) deleting geometry layers back
+  down to one now resets the lone layer's `offsetX/offsetY/opacity` (the stacking
+  sliders are hidden at one layer, so a shifted/faded star had no fix);
+  (2) `LogoStar` flips in 3-D on mode switch — indigo enneagram for geometry, teal
+  spike star for images (replaced the never-seen 30-min rotation; removed the dead
+  `lib/logo-configs.ts`); (3) About is now an `AboutDialog` modal (gradient over a
+  blurred backdrop) opened from the header instead of navigating to the page.
+  Updated ui-design.
 - Performance audit + optimization (branch `chore/perf-audit`). Root cause:
   `GeneratorClient` holds all state, so a slider tick re-rendered the whole tree
   and fresh prop objects defeated existing `memo()`s. Fixes: stabilized the hook

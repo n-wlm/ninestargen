@@ -2,10 +2,10 @@
 
 import { memo, useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { MoreHorizontal } from "lucide-react";
 import WhatsNewDialog from "@/components/WhatsNewDialog";
+import AboutDialog from "@/components/AboutDialog";
 import { hasUnseenChanges, markChangesSeen } from "@/lib/changelog";
 import { compositionToParams } from "@/lib/url-params";
 import { presetToComposition } from "@/lib/preset-normalization";
@@ -22,6 +22,7 @@ const TemplatesModal = dynamic(() => import("@/components/TemplatesModal"), {
 function HeaderNav() {
   const [showTemplates, setShowTemplates] = useState(false);
   const [showWhatsNew, setShowWhatsNew] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
   const [unseenChanges, setUnseenChanges] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -116,7 +117,7 @@ function HeaderNav() {
       {/* Inline text nav — md and up */}
       <nav className="hidden md:flex items-center">
         <button onClick={() => setShowTemplates(true)} className={linkCls}>Templates</button>
-        <Link href="/about" className={linkCls}>About</Link>
+        <button onClick={() => setShowAbout(true)} className={linkCls}>About</button>
         <button onClick={openWhatsNew} className={`relative ${linkCls}`}>
           What&apos;s new
           {unseenChanges && (
@@ -140,7 +141,7 @@ function HeaderNav() {
         {menuOpen && (
           <div className="absolute top-full right-0 mt-1.5 w-40 bg-white rounded-lg shadow-lg border border-[#E5E7EB] overflow-hidden z-50 py-1">
             <button onClick={() => { setMenuOpen(false); setShowTemplates(true); }} className="w-full text-left px-3 py-2 text-[13px] text-[#374151] hover:bg-[#F9FAFB]">Templates</button>
-            <Link href="/about" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-[13px] text-[#374151] hover:bg-[#F9FAFB]">About</Link>
+            <button onClick={() => { setMenuOpen(false); setShowAbout(true); }} className="w-full text-left px-3 py-2 text-[13px] text-[#374151] hover:bg-[#F9FAFB]">About</button>
             <button onClick={() => { setMenuOpen(false); openWhatsNew(); }} className="w-full text-left px-3 py-2 text-[13px] text-[#374151] hover:bg-[#F9FAFB] flex items-center justify-between">
               What&apos;s new
               {unseenChanges && <span aria-hidden="true" className="w-[5px] h-[5px] rounded-full bg-[var(--nsg-accent)]" />}
@@ -157,6 +158,8 @@ function HeaderNav() {
       />
 
       <WhatsNewDialog open={showWhatsNew} onClose={() => setShowWhatsNew(false)} />
+
+      <AboutDialog open={showAbout} onClose={() => setShowAbout(false)} />
     </>
   );
 }
