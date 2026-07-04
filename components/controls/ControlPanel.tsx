@@ -168,7 +168,7 @@ function ControlPanel({
         <span className="text-[12px] font-semibold text-[#111827] tracking-tight">Controls</span>
         <ConfirmButton
           label="Reset all"
-          message="Reset all settings to their defaults?"
+          message="Reset all layers and settings to the defaults? This can't be undone."
           confirmLabel="Reset"
           onConfirm={onReset}
           destructive
