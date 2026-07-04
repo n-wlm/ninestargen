@@ -9,13 +9,17 @@ export interface ColorPalette {
   gradientColors: string[];
 }
 
-// Curated single colors for the picker popover — one row each of neutrals,
-// warm, pink/purple, and cool tones; includes every palette anchor below.
+// Curated single colors for the picker popover, laid out as a 5-wide grid:
+// neutrals, warm, green, cool, purple/pink, and a full row of soft pastels.
+// Each hue row leads with a lighter/pastel tint so gentle colors are as easy
+// to reach as saturated ones.
 export const SWATCH_COLORS: string[] = [
-  '#FFFFFF', '#E5E7EB', '#9CA3AF', '#374151', '#111827',
-  '#C5961E', '#F59E0B', '#F97316', '#EF4444', '#B45309',
-  '#EC4899', '#BE185D', '#A78BFA', '#8B5CF6', '#5E6AD2',
-  '#0EA5E9', '#22D3EE', '#14B8A6', '#10B981', '#059669',
+  '#FFFFFF', '#E5E7EB', '#9CA3AF', '#4B5563', '#111827',
+  '#FCA5A5', '#EF4444', '#F97316', '#F59E0B', '#C5961E',
+  '#86EFAC', '#A3E635', '#34D399', '#10B981', '#059669',
+  '#99F6E4', '#22D3EE', '#38BDF8', '#3B82F6', '#1D4ED8',
+  '#C4B5FD', '#8B5CF6', '#5E6AD2', '#EC4899', '#BE185D',
+  '#FED7AA', '#FEF3C7', '#BBF7D0', '#BAE6FD', '#DDD6FE',
 ];
 
 export const PALETTES: ColorPalette[] = [

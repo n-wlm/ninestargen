@@ -93,12 +93,58 @@ Template-Kuration (5 schwache Presets ersetzen, Owner wählt aus Kandidaten), �
       Select, Reorder, Auge, Duplizieren, Löschen, Export, History-Restore, Share).
 - Kritisch erfüllt: 4c auf 4b aufgesetzt (Share-Links tragen Layer).
 
-### Phase 5 — `feature/images-layer-ui` (M, nach Phase 4)
-- [ ] ImageControlPanel auf gemeinsame LayerList + Selected-Layer-Sektionen migrieren
-- [ ] `useComposition`: `selectedLayerId`, `duplicateLayer`
+### Phase 5 (ALT) — `feature/images-layer-ui` → aufgegangen im Layout-Redesign
+Wird durch R2 ersetzt (Images bekommt dasselbe schwebende Layer-Panel wie Geometry).
 
-### Phase 6 — Doku-Kapitel UX (S)
-- [ ] User Stories, Chrome-Prinzipien, Layer-Modell, URL-Schema in documentation.html
+---
+
+## LAYOUT-REDESIGN (Owner-Feedback 2026-07-04, Richtung freigegeben)
+Branch: `feature/layout-redesign` (auf `feature/geometry-layers` gestackt).
+Owner-Entscheidungen (Mockup + Rückfragen bestätigt):
+- **Modus-Switch (Geometry/Images) wandert in die Kopfleiste**, farbig (Indigo/Teal),
+  mit gleitendem Indikator; treibt das Akzent-Theme sichtbar.
+- **History · Share · Download** gebündelt in einen Container **rechts oben im Header**;
+  Canvas-Overlays verschwinden, Fläche wird frei.
+- **Layer als schwebendes Fenster** oben links auf der Fläche (Figma-Stil), einklappbar —
+  raus aus den Controls. **Gleiches Muster für Geometry UND Images.**
+- Mobile: Modus-Switch in den Header; der frei werdende Slot wird zum **Controls/Layers-Umschalter**;
+  Layer-Panel darf mobil bleiben wo es ist (bzw. über den Umschalter).
+- Farbauswahl: mehr Farben + Pastelltöne (✅ erledigt, siehe R0).
+- Templates: Owner-Picks (Porcelain, Sage Circle, Copper Thread, Honey Petal) + Multi-Layer-
+  Showcases folgen — Template-Finalisierung wartet noch auf weitere Owner-Vorschläge.
+
+### R0 — Farbauswahl erweitern (S) ✅
+- [x] `SWATCH_COLORS` 20 → 30 (5×6-Grid inkl. voller Pastellreihe, jede Hue-Reihe hell zuerst)
+- Verifiziert: 30 gültige/eindeutige Hex, tsc/build ✓ (Popover-Live-Klick: Tab backgrounded → Naim testet)
+
+### R1 — Unified Header (Modus-Switch + Aktionen) (L) — NÄCHSTER SCHRITT
+- [ ] Home-Route: `GeneratorClient` rendert eigene volle Kopfleiste (Logo + farbiger
+      Modus-Switch + Templates/What's-new + Aktions-Container History·Share·Download);
+      globaler `AppHeader` auf `/` unterdrückt (Client-Wrapper via `usePathname`),
+      bleibt für /about, /gallery. Gemeinsame Header-Teile extrahieren (Wordmark,
+      Templates/What's-new) → kein Duplikat.
+- [ ] Modus-Switch aus der Sidebar entfernen; History/Share-Overlays + Export-Panel/FAB
+      in den Header-Aktions-Container zusammenführen. Fläche wird leer.
+- Verifikation: SSR-Struktur + tsc/lint/build; **Naim testet live** (Switch schaltet + färbt,
+  Aktionen funktionieren, andere Routen unversehrt).
+
+### R2 — Schwebendes Layer-Panel, beide Modi (L)
+- [ ] `components/controls/LayersPanel.tsx` (schwebende, einklappbare Karte oben links auf
+      der Fläche) auf Basis der bestehenden `LayerList`.
+- [ ] Geometry: LayerList aus `ControlPanel` raus → ins schwebende Panel; ControlPanel = nur
+      noch Eigenschaften des selektierten Layers + Canvas-Gruppe.
+- [ ] Images: `useComposition` + `selectedLayerId`/`duplicateLayer`; `ImageControlPanel` auf
+      Selected-Layer-Muster (aufklappbare Karten weg); dasselbe schwebende Panel nutzen.
+      (Ersetzt Alt-Phase 5.)
+
+### R3 — Mobile-Layout (M)
+- [ ] Modus-Switch mobil in den Header; freigewordener Sidebar-Slot → Controls/Layers-Toggle
+      (Segmented). Aktionen kompakt im Header.
+
+### R4 — Doku-Kapitel UX + Template-Finalisierung (S)
+- [ ] User Stories, Chrome-Prinzipien (aktualisiert!), Layer-Modell in documentation.html
+- [ ] Nach Owner-Auswahl: `lib/presets.ts` finalisieren (Picks + Multi-Layer-Showcases),
+      `/dev-candidates` + `lib/preset-candidates.ts` löschen
 
 ## Erledigt (Vorgeschichte)
 - System-Check-Audit 2026-06-10: alle 6 Phasen umgesetzt, PR `chore/system-check` → `main`

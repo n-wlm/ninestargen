@@ -12,6 +12,13 @@ summary: A running log of documentation updates, newest first.
 Append one entry per documentation update, newest first. Each records the date,
 the sections touched, and a one-line summary.
 
+## 2026-07-04
+
+- Color picker swatches expanded from 20 to 30 (branch `feature/layout-redesign`):
+  a 5-wide grid of neutrals, warm, green, cool, purple/pink plus a full row of
+  soft pastels; each hue row leads with a lighter tint. `SWATCH_COLORS` in
+  `lib/color-palettes.ts`. First slice of the layout-redesign work (see below).
+
 ## 2026-07-03
 
 - Geometry layers — cycle 4c (branch `feature/geometry-layers`): the layer UI.
