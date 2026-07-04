@@ -14,6 +14,12 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Fixes (on `main`): the colour picker's custom-colour trigger is now a clean
+  **pipette button** — the old approach overlaid an `opacity-0`
+  `<input type=color>` whose native swatch leaked through as a dark box in some
+  browsers; it's now a real 0×0 input opened via `.click()`. Gave the Outer
+  Container **Fill** its own label (matching Stroke) in both control panels, and
+  unified the toggle wording to "None" (was "No fill").
 - Images empty state, follow-up (on `main`): the canvas onboarding card lost its
   now-redundant "Add image" button (the Layers panel is the single add point) —
   it ends with a muted "Add your first image in the Layers panel." line instead;

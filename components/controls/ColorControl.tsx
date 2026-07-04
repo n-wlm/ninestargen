@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { ArrowDown, ArrowDownRight, ArrowRight, ArrowUpRight, type LucideIcon } from 'lucide-react';
+import { ArrowDown, ArrowDownRight, ArrowRight, ArrowUpRight, Pipette, type LucideIcon } from 'lucide-react';
 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { SWATCH_COLORS } from '@/lib/color-palettes';
@@ -82,6 +82,7 @@ function ColorSwatchButton({ value, onChange, swatchClass, iconSize }: {
   const [recent, setRecent] = useState<string[]>([]);
   // Only colors the user actually changed count as "recent".
   const openedWith = useRef(value);
+  const nativeRef = useRef<HTMLInputElement>(null);
 
   function handleOpenChange(next: boolean) {
     if (next) {
@@ -120,18 +121,29 @@ function ColorSwatchButton({ value, onChange, swatchClass, iconSize }: {
           </div>
         )}
         <div className="flex items-center gap-2 pt-2 border-t border-[#F3F4F6]">
-          <label className="relative shrink-0 cursor-pointer" title="Custom color">
-            <span
-              className="block h-7 w-7 lg:h-6 lg:w-6 rounded-md border border-black/10 shadow-sm"
-              style={{ background: 'conic-gradient(from 180deg, #EF4444, #F59E0B, #10B981, #0EA5E9, #8B5CF6, #EC4899, #EF4444)' }}
-            />
+          {/* Clean pipette trigger. The native <input type=color> is a real 0×0
+              element opened via .click() — overlaying it visibly (opacity-0)
+              leaked its swatch through in some browsers. */}
+          <div className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => nativeRef.current?.click()}
+              title="Custom color (system picker)"
+              aria-label="Pick a custom color with the system picker"
+              className="flex items-center justify-center h-7 w-7 lg:h-6 lg:w-6 rounded-md border border-[#E5E7EB] bg-white text-[#6B7280] hover:bg-[#F3F4F6] hover:text-[#374151] transition-colors"
+            >
+              <Pipette className="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
             <input
+              ref={nativeRef}
               type="color"
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              tabIndex={-1}
+              aria-hidden="true"
+              className="pointer-events-none absolute bottom-0 left-0 h-0 w-0 opacity-0"
             />
-          </label>
+          </div>
           <HexInput
             value={value}
             onChange={onChange}

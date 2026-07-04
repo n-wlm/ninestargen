@@ -430,22 +430,25 @@ export default function ControlPanel({
                 value={config.outerContainerColor}
                 onChange={(v) => update('outerContainerColor', v)}
               />
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => update('outerContainerFill', 'none')}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
-                    config.outerContainerFill === 'none'
-                      ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
-                      : 'bg-[#F3F4F6] text-[#6B7280] hover:text-[#374151]'
-                  }`}
-                >
-                  No fill
-                </button>
-                <ColorControl
-                  label=""
-                  value={config.outerContainerFill === 'none' ? '#ffffff' : config.outerContainerFill}
-                  onChange={(v) => update('outerContainerFill', v)}
-                />
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[12px] lg:text-[10px] font-semibold uppercase tracking-[0.08em] text-[#6B7280]">Fill</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => update('outerContainerFill', 'none')}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+                      config.outerContainerFill === 'none'
+                        ? 'bg-[#EEF2FF] text-[#5E6AD2] ring-1 ring-inset ring-[#C7D2FE]'
+                        : 'bg-[#F3F4F6] text-[#6B7280] hover:text-[#374151]'
+                    }`}
+                  >
+                    None
+                  </button>
+                  <ColorControl
+                    label=""
+                    value={config.outerContainerFill === 'none' ? '#ffffff' : config.outerContainerFill}
+                    onChange={(v) => update('outerContainerFill', v)}
+                  />
+                </div>
               </div>
             </>
           )}

@@ -62,8 +62,10 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   lighter tint), a Recent row
   ([lib/recent-colors.ts](lib/recent-colors.ts), localStorage
   `nsg:recent-colors`, max 8, deduped, only pushed when a color actually changed
-  between popover open and close), and the native OS picker + hex as the custom
-  fallback. Gradient stops in `GradientBuilder` use the same popover; the
+  between popover open and close), and a **pipette button** that opens the system
+  colour picker (a real 0×0 `<input type=color>` triggered via `.click()` — an
+  overlaid `opacity-0` input leaked its native swatch through in some browsers)
+  plus the hex field. Gradient stops in `GradientBuilder` use the same popover; the
   at-rest layout is unchanged, so the picker stays invisible until clicked.
   Shared `primitives`: `Section`, `GroupLabel` (a heavier divider that
   introduces a group of sections — used for the geometry **Canvas** group),
