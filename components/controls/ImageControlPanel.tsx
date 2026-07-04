@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ImagePlus } from 'lucide-react';
 import SliderInput, { parsePercent } from './SliderInput';
 import { ColorControl } from './ColorControl';
 import { Section, SegmentedControl, Toggle, ConfirmButton, GroupLabel } from './primitives';
@@ -208,14 +207,9 @@ export default function ImageControlPanel({
           <LayerControls layer={selectedLayer} updateLayer={updateLayer} />
         ) : (
           <>
-            <div className="px-4 pt-4 pb-1">
-              <div className="flex items-center gap-2 rounded-lg bg-[var(--nsg-accent-soft)] border border-[var(--nsg-accent-ring)] px-3 py-2.5">
-                <ImagePlus className="w-4 h-4 text-[var(--nsg-accent)] shrink-0" />
-                <span className="text-[12px] font-medium text-[var(--nsg-accent-strong)] leading-snug">
-                  Add an image in the Layers panel to edit these controls.
-                </span>
-              </div>
-            </div>
+            <p className="px-4 pt-3.5 pb-1 text-[11px] text-[#9CA3AF] leading-snug">
+              Add an image in the Layers panel to edit these.
+            </p>
             <div className="opacity-45 pointer-events-none select-none" aria-hidden="true">
               <LayerControls layer={PLACEHOLDER_LAYER} updateLayer={NOOP} />
             </div>

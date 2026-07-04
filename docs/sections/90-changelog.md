@@ -14,6 +14,10 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Images empty-state emphasis (on `main`): toned the left "add an image" hint
+  down to a quiet muted line (was a prominent accent box); `LayerList` now shows
+  a **prominent dashed "Add image" button** while the stack is empty, so the
+  Layers panel is the clear add point.
 - Images add-flow consistency (branch `feature/layout-redesign`): images are now
   added **only** via the Layers panel (shown from the start in images mode with a
   "+ Add image" row) — the left control column's upload button is gone. Before

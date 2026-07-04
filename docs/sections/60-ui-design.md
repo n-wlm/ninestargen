@@ -96,9 +96,11 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   panel** (the "+ Add image" row / canvas empty-state, both firing
   `nsg:add-image` → the hidden file input this panel still owns) — the control
   column has no upload button. Before the first image the layer controls show
-  **greyed-out** behind an "Add an image in the Layers panel" hint, so they're
-  discoverable but inert. So the floating Layers panel is shown from the start in
-  images mode (with just the add-image affordance).
+  **greyed-out** under a quiet muted hint (not an accent banner), so they're
+  discoverable but clearly inert. The floating Layers panel is shown from the
+  start in images mode, and while it's empty it shows a **prominent dashed
+  "Add image" button** (`LayerList` renders this whenever the stack is empty) so
+  the add point is unmistakable.
 - **Top bar**: a shared [TopBar](components/header/TopBar.tsx) shell (one height
   — taller on desktop — border, padding) used by **both** the home generator bar
   and the standalone `AppHeader` on other routes, so `/about` and `/gallery` read

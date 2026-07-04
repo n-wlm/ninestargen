@@ -122,6 +122,17 @@ export default function LayerList({
 
       {atMax ? (
         <p className="px-1.5 text-[11px] lg:text-[10px] text-[#9CA3AF] italic">{maxHint}</p>
+      ) : total === 0 ? (
+        // Empty stack: a prominent dashed button so it's clear this is where you
+        // add the first item (e.g. the first image in images mode).
+        <button
+          type="button"
+          onClick={onAdd}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border-2 border-dashed border-[var(--nsg-accent-border)] text-[var(--nsg-accent)] hover:bg-[var(--nsg-accent-soft)] hover:border-[var(--nsg-accent)] transition-colors text-[13px] font-semibold"
+        >
+          <Plus className="w-4 h-4" />
+          {addLabel}
+        </button>
       ) : (
         <button
           type="button"
