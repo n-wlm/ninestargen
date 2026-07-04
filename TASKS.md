@@ -1,20 +1,39 @@
 # TASKS.md — Source of Truth
 
 ## Aktuelles Ziel
-**Feature-Ausbau 2026-07** (Plan vom 2026-07-03, vom Owner freigegeben — Details in
-`/Users/nwlm/.claude/plans/eager-meandering-meteor.md`):
-Geometry-Layer (mehrere Sterne übereinander), einheitliches Layer-UI für beide Modi
-(Ausgewählter-Layer-Prinzip, Owner-Entscheidung), Farbauswahl v2 (Popover mit Presets/Recent),
-Template-Kuration (5 schwache Presets ersetzen, Owner wählt aus Kandidaten), „What's new"-Hinweis.
+**Feature-Ausbau 2026-07** — zwei aufeinander aufbauende Arbeitsströme:
+1. **Feature-Stack** (Plan `eager-meandering-meteor.md`, freigegeben 2026-07-03):
+   Farbauswahl v2, „What's new", Template-Kuration, Geometry-Layer. → weitgehend fertig.
+2. **Layout-Redesign** (Owner-Feedback 2026-07-04, Richtung per Mockup+Rückfragen freigegeben):
+   Modus-Switch + Aktionen in den Header, schwebendes Layer-Fenster für beide Modi, Mobile-Umbau,
+   mehr Farben/Pastell. → R0 fertig, R1–R4 offen.
+
+**Gesamtstatus auf einen Blick:**
+| # | Thema | Branch | Status |
+|---|-------|--------|--------|
+| 1 | Farbauswahl v2 (Popover, Recent) | `feature/color-picker-v2` | ✅ PR-bereit |
+| 2 | „What's new" | `feature/whats-new` | ✅ PR-bereit |
+| 3 | Template-Kuration | `feature/template-curation` | ⏸ wartet auf Owner-Auswahl |
+| 4 | Geometry-Layer (Modell/URL/UI) | `feature/geometry-layers` | ✅ Code fertig, ⏳ Live-Klick-Test offen |
+| R0 | Farben 20→30 + Pastell | `feature/layout-redesign` | ✅ committet |
+| R1 | Unified Header | `feature/layout-redesign` | ⬜ **nächster Schritt** |
+| R2 | Schwebendes Layer-Fenster (beide Modi) | `feature/layout-redesign` | ⬜ offen |
+| R3 | Mobile-Layout | `feature/layout-redesign` | ⬜ offen |
+| R4 | Doku + Template-Finalisierung | `feature/layout-redesign` | ⬜ offen |
+
+Branches stacken in dieser Reihenfolge (jeder baut auf dem vorigen auf); Naim pusht + öffnet PRs.
 
 **Bestätigte Architektur-Entscheidungen:**
 - `GeometryComposition { layers: GeometryLayer[], canvas-Props }`, MAX 5 Layer; kein `scale`
   (outerRadius IST die Größe); neu pro Layer: `opacity`, `offsetX/Y`.
 - URL v2: Ziffern-präfixierte Kurz-Keys (`0t=`, `1rot=`…), Canvas-Keys unverändert,
   `n=<count>`-Marker; alte URLs (nackte Keys) parsen unverändert als Layer 0.
-- Layer-UI: kompakte Liste oben, Sektionen bearbeiten den ausgewählten Layer; bei Geometry
-  mit 1 Layer unsichtbar (nur Ghost-„+ Layer"). Canvas-Sektionen unter Gruppen-Trenner „Canvas".
+- Redesign: Modus-Switch farbig in den Header (treibt Akzent-Theme); History·Share·Download
+  gebündelt im Header rechts; Layer als schwebende, einklappbare Karte oben links auf der Fläche
+  (gleiches Muster für Geometry + Images); mobil Controls/Layers-Umschalter im Sidebar-Kopf.
 - Keine neuen Dependencies (Popover aus installiertem `@base-ui/react`).
+- **Verifikations-Realität:** Preview-Tab läuft hier backgrounded → interaktive Teile per SSR +
+  Build absichern, Live-Klick-Durchlauf macht Naim im echten Browser (siehe Memory).
 
 ## Phasen (je Branch → PR; Gates: tsc ✓ lint ✓ build ✓ + Preview; keystonedoc + Commit je Zyklus)
 
