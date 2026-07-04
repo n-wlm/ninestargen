@@ -319,12 +319,11 @@ function Generator() {
             )}
           </div>
 
-          {/* Floating layers window — desktop (mobile uses the sidebar toggle) */}
-          {(isImages ? comp.config.layers.length > 0 : true) && (
-            <div className="absolute top-3 left-3 z-20 hidden lg:block">
-              <LayersPanel {...layerProps} />
-            </div>
-          )}
+          {/* Floating layers window — always shown (images add their first image
+              here too); desktop only, mobile uses the sidebar Layers toggle. */}
+          <div className="absolute top-3 left-3 z-20 hidden lg:block">
+            <LayersPanel {...layerProps} />
+          </div>
         </motion.section>
       </div>
 

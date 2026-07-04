@@ -6,8 +6,13 @@ import SliderInput, { parsePercent } from './SliderInput';
 import { ColorControl } from './ColorControl';
 import { Section, SegmentedControl, Toggle, ConfirmButton, GroupLabel } from './primitives';
 import type { CompositionConfig, ImageLayer, SymmetryCount } from '@/types/composition';
-import { LAYER_LIMITS, MAX_LAYERS } from '@/types/composition';
+import { LAYER_LIMITS, MAX_LAYERS, makeLayer } from '@/types/composition';
 import { ACCEPT_ATTR, fileToLayer, UploadError } from '@/lib/image-upload';
+
+// Rendered greyed-out behind the "add an image" hint when no layer exists yet,
+// so the controls are visible (but inert) before the first upload.
+const PLACEHOLDER_LAYER = makeLayer('placeholder', '', '', 100, 100);
+const NOOP = () => {};
 
 interface ImageControlPanelProps {
   config: CompositionConfig;
@@ -134,7 +139,6 @@ export default function ImageControlPanel({
 }: ImageControlPanelProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const atLimit = config.layers.length >= MAX_LAYERS;
   const hasLayers = config.layers.length > 0;
 
   async function handleFiles(files: FileList | null) {
@@ -182,41 +186,41 @@ export default function ImageControlPanel({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        {/* UPLOAD */}
-        <Section title={`Images · ${config.layers.length}/${MAX_LAYERS}`}>
-          <input
-            ref={fileRef}
-            type="file"
-            accept={ACCEPT_ATTR}
-            multiple
-            className="hidden"
-            onChange={(e) => handleFiles(e.target.files)}
-          />
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={atLimit}
-            className={`w-full flex items-center justify-center gap-2 font-medium transition-all ${
-              atLimit
-                ? 'py-3 rounded-lg border-2 border-dashed border-[#E5E7EB] text-[#D1D5DB] cursor-not-allowed text-[13px] lg:text-[12px]'
-                : hasLayers
-                  ? 'py-2 rounded-md bg-[#F3F4F6] text-[#6B7280] hover:bg-[var(--nsg-accent-soft)] hover:text-[var(--nsg-accent)] text-[12px] lg:text-[11px]'
-                  : 'py-3 rounded-lg border-2 border-dashed border-[var(--nsg-accent-ring)] text-[var(--nsg-accent)] hover:bg-[var(--nsg-accent-soft)] hover:border-[var(--nsg-accent-border)] text-[13px] lg:text-[12px]'
-            }`}
-          >
-            <ImagePlus className="w-4 h-4" />
-            {atLimit ? 'Layer limit reached' : 'Add image'}
-          </button>
-          {error && <p className="text-[12px] lg:text-[11px] text-[#EF4444] font-medium">{error}</p>}
-          {!hasLayers && (
-            <p className="text-[11px] text-[#9CA3AF] leading-relaxed">
-              Upload an image to start — it&apos;s repeated into a nine-fold mandala. Add more as layers.
-            </p>
-          )}
-        </Section>
+      {/* Hidden file input — triggered from the Layers panel / empty state via
+          the `nsg:add-image` event; images are added there, not in this column. */}
+      <input
+        ref={fileRef}
+        type="file"
+        accept={ACCEPT_ATTR}
+        multiple
+        className="hidden"
+        onChange={(e) => handleFiles(e.target.files)}
+      />
 
-        {/* SELECTED LAYER — arrangement + transform */}
-        {selectedLayer && <LayerControls layer={selectedLayer} updateLayer={updateLayer} />}
+      <div className="flex-1 overflow-y-auto">
+        {error && (
+          <p className="px-4 pt-3 text-[12px] lg:text-[11px] text-[#EF4444] font-medium">{error}</p>
+        )}
+
+        {/* SELECTED LAYER — arrangement + transform. Before the first image the
+            same controls show greyed-out behind an "add an image" hint. */}
+        {selectedLayer ? (
+          <LayerControls layer={selectedLayer} updateLayer={updateLayer} />
+        ) : (
+          <>
+            <div className="px-4 pt-4 pb-1">
+              <div className="flex items-center gap-2 rounded-lg bg-[var(--nsg-accent-soft)] border border-[var(--nsg-accent-ring)] px-3 py-2.5">
+                <ImagePlus className="w-4 h-4 text-[var(--nsg-accent)] shrink-0" />
+                <span className="text-[12px] font-medium text-[var(--nsg-accent-strong)] leading-snug">
+                  Add an image in the Layers panel to edit these controls.
+                </span>
+              </div>
+            </div>
+            <div className="opacity-45 pointer-events-none select-none" aria-hidden="true">
+              <LayerControls layer={PLACEHOLDER_LAYER} updateLayer={NOOP} />
+            </div>
+          </>
+        )}
 
         {/* CANVAS — composition-level */}
         <GroupLabel label="Canvas" />

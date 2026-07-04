@@ -14,6 +14,12 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Images add-flow consistency (branch `feature/layout-redesign`): images are now
+  added **only** via the Layers panel (shown from the start in images mode with a
+  "+ Add image" row) — the left control column's upload button is gone. Before
+  the first image the Arrangement/Transform controls show greyed-out behind an
+  "Add an image in the Layers panel" hint. The hidden file input + `nsg:add-image`
+  listener stay in `ImageControlPanel`. Updated ui-design.
 - Small tweaks (branch `feature/layout-redesign`): dropped the `n/15` count from
   the Layers panel header (the max-reached hint already covers the limit); moved
   **None** to the far left of the Fill type control, consistent with Background /

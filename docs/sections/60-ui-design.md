@@ -90,10 +90,15 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   when >1 layer. `MAX_GEOMETRY_LAYERS = 15` (the floating panel scrolls past a
   few). Background + Outer Container sit under
   a **Canvas** `GroupLabel` (composition-level), separated by a divider not tabs.
-- **ImageControlPanel**: upload (dropzone, demotes to a slim button once a layer
-  exists) + the selected image layer's **Arrangement** (count 9/3, Mirror, Angle)
-  and **Transform** (Size, Radius, Spin, Offset X/Y, Opacity) sections, then the
-  same **Canvas** group. Same selected-layer shape as geometry.
+- **ImageControlPanel**: the selected image layer's **Arrangement** (count 9/3,
+  Mirror, Angle) and **Transform** (Size, Radius, Spin, Offset X/Y, Opacity)
+  sections, then the **Canvas** group. **Images are added only in the Layers
+  panel** (the "+ Add image" row / canvas empty-state, both firing
+  `nsg:add-image` → the hidden file input this panel still owns) — the control
+  column has no upload button. Before the first image the layer controls show
+  **greyed-out** behind an "Add an image in the Layers panel" hint, so they're
+  discoverable but inert. So the floating Layers panel is shown from the start in
+  images mode (with just the add-image affordance).
 - **Top bar**: a shared [TopBar](components/header/TopBar.tsx) shell (one height
   — taller on desktop — border, padding) used by **both** the home generator bar
   and the standalone `AppHeader` on other routes, so `/about` and `/gallery` read
