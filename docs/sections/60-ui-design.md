@@ -143,10 +143,20 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
 - **What's new**: header item next to About; a 5px accent dot appears while
   [lib/changelog.ts](lib/changelog.ts)'s `APP_VERSION` is newer than the
   visitor's `nsg:version-seen`. Clicking opens `WhatsNewDialog` (HistoryPanel
-  modal pattern) and marks the version seen. True first visits are silently
-  marked seen — the auto-opened templates modal is the only attention-grabber
-  a new visitor gets. Bump `APP_VERSION` + add a `CHANGELOG` entry with each
-  user-visible release.
+  modal pattern) and marks the version seen. The dialog shows **only the current
+  release** (`CHANGELOG[0]`) expanded; a subtle "Show full changelog" toggle
+  reveals the earlier entries below it (animated height, resets on close). True
+  first visits are silently marked seen — the auto-opened templates modal is the
+  only attention-grabber a new visitor gets.
+- **Versioning** — `MAJOR.FEATURE.PATCH`, kept in `lib/changelog.ts`:
+  **MAJOR** (1st) = sweeping overhauls that redefine the app; **FEATURE** (2nd) =
+  a notable new capability (a mode, a system, a redesign); **PATCH** (3rd) =
+  everything else, numbered straight up (…1.2.1, 1.2.2, …1.2.15). Reconstructed
+  from git: geometry-only launch = **1.0**, adding Images mode = **1.1**, the
+  layers + layout + performance release = **1.2** (current). Early ad-hoc
+  `v0.x`/`v1.x` commit tags predate the scheme and roll up into 1.0. On each
+  user-visible release: bump `APP_VERSION`, add a `CHANGELOG` entry (newest
+  first), and put the version in the commit subject (e.g. `1.2.1 — …`).
 
 ## Accessibility notes
 

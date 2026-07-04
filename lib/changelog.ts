@@ -1,7 +1,15 @@
-// Bump APP_VERSION with each user-visible release and add an entry below
-// (newest first, keep roughly the last five). The header shows a dot while
-// the visitor's last seen version is older than APP_VERSION.
-export const APP_VERSION = '1.1.0';
+// Versioning — MAJOR.FEATURE.PATCH (see docs/sections/60-ui-design.md):
+//   • MAJOR  (1st) — sweeping overhauls that redefine the app.
+//   • FEATURE (2nd) — a notable new capability (a mode, a system, a redesign).
+//   • PATCH  (3rd) — everything else, numbered straight up (…1.2.1, 1.2.2, …1.2.15).
+// Reconstructed from the git history: geometry-only launch = 1.0, adding Images
+// mode = 1.1, the layers + layout + performance release = 1.2. The early ad-hoc
+// v0.x/v1.x commit tags predate this scheme and roll up into 1.0.
+//
+// On each user-visible release: bump APP_VERSION to match and add a CHANGELOG
+// entry below (newest first). The header shows a dot while the visitor's last
+// seen version is older than APP_VERSION.
+export const APP_VERSION = '1.2.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -10,25 +18,40 @@ export interface ChangelogEntry {
   items: string[];
 }
 
+// Newest first — CHANGELOG[0] is the current release (shown expanded in the
+// dialog; the rest sit behind "Show full changelog").
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: '1.1.0',
-    date: '2026-07-03',
-    title: 'Smarter color picker',
+    version: '1.2.0',
+    date: '2026-07-04',
+    title: 'Layers, a fresh layout & a big speed-up',
     items: [
-      'Every color swatch now opens a picker with 20 curated preset colors.',
-      'Your recently used colors are remembered across visits.',
-      'The native color picker and hex input are still one click away.',
+      'Stack multiple stars — or images — in layers to build richer, compound designs.',
+      'Redesigned top bar: the Geometry / Images switch moved up top, with History, Share and Download bundled beside it.',
+      'Layers now live in their own floating panel over the canvas, out of the property controls.',
+      'A refreshed template gallery and a bigger color picker — 30 swatches, soft pastels and your recent colors.',
+      'A thorough performance pass, so editing stays smooth even with many layers.',
+      'Smaller touches: a logo that flips between modes and an About popup.',
+    ],
+  },
+  {
+    version: '1.1.0',
+    date: '2026-06-10',
+    title: 'Images mode',
+    items: [
+      'Turn your own images (SVG, PNG or JPG) into a nine-fold kaleidoscopic mandala.',
+      'Arrange several image layers, each with its own size, distance, rotation and mirroring.',
+      'Compositions are kept in your local history so you can restore them later.',
     ],
   },
   {
     version: '1.0.0',
-    date: '2026-06-10',
+    date: '2026-03-24',
     title: 'ninestar.app launch',
     items: [
-      'Geometry mode with six nine-pointed star types, fills, strokes and effects.',
-      'Images mode: arrange your own images into a nine-fold mandala with layers.',
-      'PNG, SVG and JPG export up to 4K, shareable links and a local design history.',
+      'Design nine-pointed stars: six star types with fills, gradients, strokes and effects.',
+      'Export as PNG, SVG or JPG, all the way up to 4K.',
+      'Shareable links that encode your whole design, plus a local design history.',
     ],
   },
 ];

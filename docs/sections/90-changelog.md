@@ -14,6 +14,14 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- App versioning + "What's new" rework (branch `chore/perf-audit`): adopted a
+  `MAJOR.FEATURE.PATCH` scheme, reconstructed the release history from git
+  (geometry launch = **1.0.0**, Images mode = **1.1.0**, this layers/layout/perf
+  release = **1.2.0**) and rewrote `CHANGELOG` accordingly; `APP_VERSION`
+  1.1.0 → 1.2.0 (so returning visitors see the dot). `WhatsNewDialog` now shows
+  only the current release, with a subtle "Show full changelog" toggle revealing
+  the earlier entries. Scheme documented in ui-design; versions go in commit
+  subjects going forward.
 - Three additions (branch `chore/perf-audit`): (1) deleting geometry layers back
   down to one now resets the lone layer's `offsetX/offsetY/opacity` (the stacking
   sliders are hidden at one layer, so a shifted/faded star had no fix);
