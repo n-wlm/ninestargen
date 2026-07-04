@@ -17,6 +17,7 @@ interface LayerListProps {
   layers: LayerListItem[];
   selectedId: string;
   max: number;
+  minLayers?: number; // below this, delete is disabled (geometry needs ≥1)
   addLabel: string;
   maxHint: string;
   renderThumb: (id: string) => ReactNode;
@@ -56,7 +57,7 @@ function IconBtn({ title, onClick, disabled, danger, children }: {
 }
 
 export default function LayerList({
-  layers, selectedId, max, addLabel, maxHint, renderThumb,
+  layers, selectedId, max, minLayers = 1, addLabel, maxHint, renderThumb,
   onSelect, onToggleVisible, onReorder, onDuplicate, onRemove, onAdd,
 }: LayerListProps) {
   const [hovered, setHovered] = useState<string | null>(null);
@@ -108,7 +109,7 @@ export default function LayerList({
                   <Copy className="w-3.5 h-3.5" />
                 </IconBtn>
                 <span className="w-px h-3.5 bg-[#EAECF0] mx-0.5" />
-                <IconBtn title="Delete layer" danger disabled={total <= 1} onClick={() => onRemove(layer.id)}>
+                <IconBtn title="Delete layer" danger disabled={total <= minLayers} onClick={() => onRemove(layer.id)}>
                   <Trash2 className="w-3.5 h-3.5" />
                 </IconBtn>
               </div>

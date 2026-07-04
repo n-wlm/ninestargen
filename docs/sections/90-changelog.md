@@ -14,6 +14,16 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-04
 
+- Layout redesign R2/R3 — floating layers panel + mobile (branch
+  `feature/layout-redesign`): the layer stack moved out of the controls into a
+  floating, collapsible `LayersPanel` over the canvas (desktop) and a
+  Controls/Layers sidebar toggle (mobile) — the **same** shared `LayerList` and
+  `layerProps` drive both, for geometry **and** images. `useComposition` gained
+  selected-layer + `duplicateLayer`; `ImageControlPanel` was rebuilt on the
+  selected-layer pattern (Arrangement/Transform sections + Canvas group, no more
+  expandable cards); `ControlPanel` dropped its inline layer list. Header nav
+  collapses to a `⋯` menu on mobile. `LayerList` gained `minLayers` (images may
+  reach 0). Updated ui-design.
 - Layout redesign R1 — unified header (branch `feature/layout-redesign`): the
   mode switch moves into a full-width top bar the generator renders on home
   (colored `ModeSwitch` driving the theme), and History · Share · Download are

@@ -11,7 +11,7 @@ export default function Wordmark() {
       className="flex items-center gap-2 text-[#111827] hover:text-[var(--nsg-accent)] transition-colors shrink-0"
     >
       <LogoStar />
-      <span className="text-[13px] font-semibold tracking-tight">ninestar.app</span>
+      <span className="hidden sm:inline text-[13px] font-semibold tracking-tight">ninestar.app</span>
     </Link>
   );
 }

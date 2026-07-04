@@ -58,26 +58,27 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   the centered variant is **portaled to `<body>`** with fixed positioning so it
   isn't clipped by the sidebar's `overflow`; the in-flow right variant is used
   inside modals).
-- **Geometry layer UI** (selected-layer pattern): `LayerList`
-  ([controls/LayerList.tsx](components/controls/LayerList.tsx)) is a compact
-  list shown front→back; clicking a row selects it and **all the sections below
-  edit that layer** (so the sidebar keeps the same shape as a single star). The
-  action cluster (visibility, reorder ▲▼, duplicate, delete) only appears on
-  hover/selection, keeping the list calm. With **one** layer the list is hidden
-  entirely — only a quiet "+ Layer" ghost button in the Controls header — so a
-  first-time visitor never meets the concept. "+ Layer" duplicates the current
-  star; per-layer **Layer Opacity / Offset X / Offset Y** appear in Shape only
+- **Layers — selected-layer pattern, both modes** (R2/R3). The layer stack is a
+  shared `LayerList` ([controls/LayerList.tsx](components/controls/LayerList.tsx))
+  — a compact list shown front→back; clicking a row selects it and **all the
+  property sections edit that selected layer**. The action cluster (visibility,
+  reorder ▲▼, duplicate, delete) appears on hover/selection, keeping the list
+  calm; delete is disabled below `minLayers` (geometry needs ≥1, images may reach
+  0). On **desktop** the list lives in a floating, collapsible
+  `LayersPanel` ([controls/LayersPanel.tsx](components/controls/LayersPanel.tsx))
+  over the top-left of the canvas — prominent and separated from the property
+  controls (the owner's ask). On **mobile** the sidebar shows a **Controls /
+  Layers** segmented toggle instead. `GeneratorClient` builds one `layerProps`
+  set per mode and feeds both surfaces. Geometry thumbnails render a mini
+  `StarPreview`; image thumbnails an `<img>`.
+- **ControlPanel (geometry)**: the selected star's Type / Shape / Stroke / Fill /
+  Effects; per-layer **Layer Opacity / Offset X / Offset Y** appear in Shape only
   when >1 layer. `MAX_GEOMETRY_LAYERS = 5`. Background + Outer Container sit under
-  a **Canvas** `GroupLabel` (composition-level), separated from the per-layer
-  sections by a divider rather than tabs. *(Future: the images panel will adopt
-  this same `LayerList`, replacing its expandable cards.)*
-- **Image layer controls**: per layer — count (9/3), Mirror toggle, Size, Radius,
-  Spin, Angle (rotates the whole arrangement; snaps to half-sectors), **Offset X /
-  Offset Y** (nudge the image off-centre within each copy), Opacity.
-- **Panels**: `ControlPanel` (geometry, with the `LayerList` above) and
-  `ImageControlPanel` (images, still with expandable layer cards: thumbnail,
-  expand chevron, reorder arrows, visibility, separated delete; dropzone demotes
-  to a slim button once a layer exists).
+  a **Canvas** `GroupLabel` (composition-level), separated by a divider not tabs.
+- **ImageControlPanel**: upload (dropzone, demotes to a slim button once a layer
+  exists) + the selected image layer's **Arrangement** (count 9/3, Mirror, Angle)
+  and **Transform** (Size, Radius, Spin, Offset X/Y, Opacity) sections, then the
+  same **Canvas** group. Same selected-layer shape as geometry.
 - **Top bar** (R1): a full-width header the generator renders on home — logo +
   colored `ModeSwitch` (accent-filled active pill, drives indigo/teal) + app nav
   (Templates, About, What's new) + an `ActionsCluster` bundling History · Share ·
@@ -89,8 +90,11 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   loaded (compact on mobile — smaller glyph/text and a shorter blurb — with
   `max-h-full overflow-y-auto` so it fits the short 40svh mobile canvas).
 - **Responsive**: desktop is a side-by-side sidebar + canvas (≥`lg`); below that
-  it stacks (canvas on top, controls below). The centered confirm popover is
-  clamped to the viewport so it never runs off-screen on narrow widths.
+  it stacks (canvas on top, controls below). On mobile the header nav collapses
+  into a `⋯` overflow menu, the wordmark drops to just the logo, and the sidebar
+  gains the Controls/Layers toggle (the desktop floating layers panel is hidden).
+  The centered confirm popover is clamped to the viewport so it never runs
+  off-screen on narrow widths.
 - **Modals**: `SaveDesignModal` (post-download) and `HistoryPanel` — white
   rounded cards over a blurred backdrop, matching the export dropdown style.
   `SaveDesignModal` leads with a green check + "{FORMAT} downloaded" so it's

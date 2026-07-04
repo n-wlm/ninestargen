@@ -8,6 +8,9 @@ import PreviewErrorBoundary from '@/components/PreviewErrorBoundary';
 import ImageEmptyState from '@/components/ImageEmptyState';
 import ControlPanel from '@/components/controls/ControlPanel';
 import ImageControlPanel from '@/components/controls/ImageControlPanel';
+import LayersPanel, { type LayersPanelProps } from '@/components/controls/LayersPanel';
+import LayerList from '@/components/controls/LayerList';
+import { SegmentedControl } from '@/components/controls/primitives';
 import Wordmark from '@/components/header/Wordmark';
 import HeaderNav from '@/components/header/HeaderNav';
 import ModeSwitch from '@/components/generator/ModeSwitch';
@@ -19,12 +22,14 @@ import { useComposition } from '@/hooks/useComposition';
 import { useUrlSync } from '@/hooks/useUrlSync';
 import { addHistory, loadHistory, removeHistory, clearHistory, type HistoryEntry } from '@/lib/history';
 import type { StarConfig } from '@/types/star';
-import type { CompositionConfig } from '@/types/composition';
+import { MAX_LAYERS, type CompositionConfig } from '@/types/composition';
 import {
   asComposition,
   compositionFromConfig,
   configFromLayer,
   isGeometryCanvasKey,
+  DEFAULT_GEOMETRY_COMPOSITION,
+  MAX_GEOMETRY_LAYERS,
   type GeometryComposition,
   type GeometryLayer,
 } from '@/types/geometry';
@@ -43,9 +48,19 @@ const IMAGES_ACCENT = {
 // Stable reference — an inline literal here would defeat memo() on the previews.
 const PREVIEW_SHADOW: React.CSSProperties = { filter: 'drop-shadow(0 8px 32px rgba(0,0,0,0.10))' };
 
+// Neutral canvas for geometry layer thumbnails — just the star, no bg/container.
+const THUMB_CANVAS = { ...DEFAULT_GEOMETRY_COMPOSITION, bgColor: 'transparent', outerContainer: 'none' as const };
+
+type MobileTab = 'controls' | 'layers';
+const MOBILE_TABS: { value: MobileTab; label: string }[] = [
+  { value: 'controls', label: 'Controls' },
+  { value: 'layers', label: 'Layers' },
+];
+
 function Generator() {
   const svgRef = useRef<SVGSVGElement>(null);
   const [mode, setMode] = useState<Mode>('geometry');
+  const [mobileTab, setMobileTab] = useState<MobileTab>('controls');
 
   const star = useStarComposition();
   const comp = useComposition();
@@ -159,16 +174,54 @@ function Generator() {
         onDownloaded: handleDownloaded,
       };
 
+  // One layer-surface prop set per mode, shared by the floating LayersPanel
+  // (desktop) and the sidebar Controls/Layers toggle (mobile).
+  const layerProps: LayersPanelProps = isImages
+    ? {
+        layers: comp.config.layers,
+        selectedId: comp.selectedLayerId,
+        max: MAX_LAYERS,
+        minLayers: 0,
+        addLabel: 'Add image',
+        maxHint: `Layer limit reached (${MAX_LAYERS}).`,
+        renderThumb: (id) => {
+          const l = comp.config.layers.find((x) => x.id === id);
+          // eslint-disable-next-line @next/next/no-img-element
+          return l ? <img src={l.src} alt="" className="w-full h-full object-contain" /> : null;
+        },
+        onSelect: comp.selectLayer,
+        onToggleVisible: (id) => { const l = comp.config.layers.find((x) => x.id === id); if (l) comp.updateLayer(id, { visible: !l.visible }); },
+        onReorder: comp.reorderLayer,
+        onDuplicate: comp.duplicateLayer,
+        onRemove: comp.removeLayer,
+        onAdd: () => window.dispatchEvent(new CustomEvent('nsg:add-image')),
+      }
+    : {
+        layers: star.config.layers,
+        selectedId: star.selectedLayerId,
+        max: MAX_GEOMETRY_LAYERS,
+        addLabel: 'Add layer',
+        maxHint: `Layer limit reached (${MAX_GEOMETRY_LAYERS}).`,
+        renderThumb: (id) => {
+          const l = star.config.layers.find((x) => x.id === id);
+          return l ? <StarPreview config={configFromLayer(l, THUMB_CANVAS)} className="w-full h-full" /> : null;
+        },
+        onSelect: star.selectLayer,
+        onToggleVisible: (id) => { const l = star.config.layers.find((x) => x.id === id); if (l) star.updateLayer(id, { visible: !l.visible }); },
+        onReorder: star.reorderLayer,
+        onDuplicate: star.duplicateLayer,
+        onRemove: star.removeLayer,
+        onAdd: () => star.duplicateLayer(star.selectedLayerId),
+      };
+
   return (
     <div className="flex flex-col flex-1 min-h-0" style={isImages ? IMAGES_ACCENT : undefined}>
       {/* Unified top bar: identity · mode · app nav · document actions */}
-      <header className="h-11 flex items-center gap-3 px-4 border-b border-[#EAECF0] bg-white shrink-0">
+      <header className="h-11 flex items-center gap-2 sm:gap-3 px-2.5 sm:px-4 border-b border-[#EAECF0] bg-white shrink-0">
         <Wordmark />
         <ModeSwitch mode={mode} onChange={setMode} />
         <div className="ml-auto flex items-center gap-2">
-          <div className="hidden md:block">
-            <HeaderNav />
-          </div>
+          <HeaderNav />
           <ActionsCluster
             entriesCount={entries.length}
             onOpenHistory={() => setHistoryOpen(true)}
@@ -186,15 +239,25 @@ function Generator() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
         >
-          <div className="flex-1 overflow-y-auto min-h-0">
+          {/* Mobile-only Controls/Layers toggle (desktop uses the floating panel) */}
+          <div className="lg:hidden px-4 py-2.5 border-b border-[#EAECF0] shrink-0">
+            <SegmentedControl options={MOBILE_TABS} value={mobileTab} onChange={setMobileTab} />
+          </div>
+
+          {/* Layers view — mobile only, when its tab is active */}
+          <div className={`flex-1 overflow-y-auto min-h-0 p-3 ${mobileTab === 'layers' ? 'lg:hidden' : 'hidden'}`}>
+            <LayerList {...layerProps} />
+          </div>
+
+          {/* Controls view — always on desktop; on mobile when its tab is active */}
+          <div className={`flex-1 overflow-y-auto min-h-0 ${mobileTab === 'layers' ? 'hidden lg:block' : ''}`}>
             {isImages ? (
               <ImageControlPanel
                 config={comp.config}
                 update={comp.update}
                 addLayer={comp.addLayer}
-                removeLayer={comp.removeLayer}
                 updateLayer={comp.updateLayer}
-                reorderLayer={comp.reorderLayer}
+                selectedLayer={comp.selectedLayer}
                 onReset={comp.reset}
               />
             ) : (
@@ -204,10 +267,6 @@ function Generator() {
                 onReset={star.reset}
                 layers={star.config.layers}
                 selectedLayer={star.selectedLayer}
-                selectLayer={star.selectLayer}
-                duplicateLayer={star.duplicateLayer}
-                removeLayer={star.removeLayer}
-                reorderLayer={star.reorderLayer}
                 updateLayer={star.updateLayer}
               />
             )}
@@ -261,6 +320,13 @@ function Generator() {
               </motion.div>
             )}
           </div>
+
+          {/* Floating layers window — desktop (mobile uses the sidebar toggle) */}
+          {(isImages ? comp.config.layers.length > 0 : true) && (
+            <div className="absolute top-3 left-3 z-20 hidden lg:block">
+              <LayersPanel {...layerProps} />
+            </div>
+          )}
         </motion.section>
       </div>
 

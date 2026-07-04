@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { MoreHorizontal } from "lucide-react";
 import WhatsNewDialog from "@/components/WhatsNewDialog";
 import { hasUnseenChanges, markChangesSeen } from "@/lib/changelog";
 import { configToParams } from "@/lib/url-params";
@@ -22,8 +23,19 @@ export default function HeaderNav() {
   const [showTemplates, setShowTemplates] = useState(false);
   const [showWhatsNew, setShowWhatsNew] = useState(false);
   const [unseenChanges, setUnseenChanges] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handle(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handle);
+    return () => document.removeEventListener("mousedown", handle);
+  }, [menuOpen]);
 
   useEffect(() => {
     if (pathname !== "/") return;
@@ -96,34 +108,46 @@ export default function HeaderNav() {
     closeModal();
   }, [closeModal, router]);
 
+  const linkCls =
+    "px-2.5 py-1 text-[12px] text-[#6B7280] hover:text-[#111827] transition-colors font-medium rounded-md hover:bg-[#F3F4F6] cursor-pointer";
+
   return (
     <>
-      <nav className="flex items-center">
-        <button
-          onClick={() => setShowTemplates(true)}
-          className="px-2.5 py-1 text-[12px] text-[#6B7280] hover:text-[#111827] transition-colors font-medium rounded-md hover:bg-[#F3F4F6] cursor-pointer"
-        >
-          Templates
-        </button>
-        <Link
-          href="/about"
-          className="px-2.5 py-1 text-[12px] text-[#6B7280] hover:text-[#111827] transition-colors font-medium rounded-md hover:bg-[#F3F4F6]"
-        >
-          About
-        </Link>
-        <button
-          onClick={openWhatsNew}
-          className="relative px-2.5 py-1 text-[12px] text-[#6B7280] hover:text-[#111827] transition-colors font-medium rounded-md hover:bg-[#F3F4F6] cursor-pointer"
-        >
+      {/* Inline text nav — md and up */}
+      <nav className="hidden md:flex items-center">
+        <button onClick={() => setShowTemplates(true)} className={linkCls}>Templates</button>
+        <Link href="/about" className={linkCls}>About</Link>
+        <button onClick={openWhatsNew} className={`relative ${linkCls}`}>
           What&apos;s new
           {unseenChanges && (
-            <span
-              aria-hidden="true"
-              className="absolute top-0.5 right-1 w-[5px] h-[5px] rounded-full bg-[var(--nsg-accent)]"
-            />
+            <span aria-hidden="true" className="absolute top-0.5 right-1 w-[5px] h-[5px] rounded-full bg-[var(--nsg-accent)]" />
           )}
         </button>
       </nav>
+
+      {/* Compact overflow menu — below md */}
+      <div className="relative md:hidden" ref={menuRef}>
+        <button
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label="More"
+          className="relative flex items-center justify-center w-8 h-8 rounded-md text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors"
+        >
+          <MoreHorizontal className="w-4 h-4" />
+          {unseenChanges && (
+            <span aria-hidden="true" className="absolute top-1 right-1 w-[5px] h-[5px] rounded-full bg-[var(--nsg-accent)]" />
+          )}
+        </button>
+        {menuOpen && (
+          <div className="absolute top-full right-0 mt-1.5 w-40 bg-white rounded-lg shadow-lg border border-[#E5E7EB] overflow-hidden z-50 py-1">
+            <button onClick={() => { setMenuOpen(false); setShowTemplates(true); }} className="w-full text-left px-3 py-2 text-[13px] text-[#374151] hover:bg-[#F9FAFB]">Templates</button>
+            <Link href="/about" onClick={() => setMenuOpen(false)} className="block px-3 py-2 text-[13px] text-[#374151] hover:bg-[#F9FAFB]">About</Link>
+            <button onClick={() => { setMenuOpen(false); openWhatsNew(); }} className="w-full text-left px-3 py-2 text-[13px] text-[#374151] hover:bg-[#F9FAFB] flex items-center justify-between">
+              What&apos;s new
+              {unseenChanges && <span aria-hidden="true" className="w-[5px] h-[5px] rounded-full bg-[var(--nsg-accent)]" />}
+            </button>
+          </div>
+        )}
+      </div>
 
       <TemplatesModal
         isOpen={showTemplates}

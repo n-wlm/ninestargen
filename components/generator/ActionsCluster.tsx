@@ -89,7 +89,7 @@ export default function ActionsCluster({
           className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-semibold text-white bg-[var(--nsg-accent)] hover:bg-[var(--nsg-accent-strong)] transition-colors rounded-r-lg disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <Download className="w-3.5 h-3.5" />
-          <span>{loading ? 'Downloading…' : 'Download'}</span>
+          <span className="hidden sm:inline">{loading ? 'Downloading…' : 'Download'}</span>
           <ChevronDown className="w-3 h-3 -mr-0.5" />
         </button>
 

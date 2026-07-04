@@ -3,13 +3,40 @@ id: adrs
 title: Architecture decisions
 order: 50
 status: current
-last_updated: 2026-07-03
+last_updated: 2026-07-04
 owner: @naim
 linked_paths: lib/export.ts, lib/image-upload.ts, lib/history.ts, app/globals.css, app/GeneratorClient.tsx
 summary: The significant decisions behind the app and why they were made.
 ---
 
 Newest first.
+
+## ADR-008: Unified top bar + floating layers panel (layout redesign)
+
+**Status:** accepted
+
+> [!DECISION] On the home route the generator owns a full-width top bar (mode switch + document actions); the standalone `AppHeader` is suppressed there. Layers are a standalone floating panel (desktop) / sidebar toggle (mobile), the same in both modes.
+
+**Context** — the original chrome spread controls across the sidebar (mode
+switch, export panel) and canvas overlays (History, Share), and buried the layer
+list inside the property controls. The owner wanted the mode switch and the
+History/Share/Download actions consolidated into the (mostly empty) header, the
+canvas cleared, and layers surfaced as their own prominent, discoverable window —
+consistently across geometry and images.
+
+**Decision** — the mode lives in `GeneratorClient`, so the generator renders its
+own top bar on `/` (Wordmark + colored `ModeSwitch` + `HeaderNav` +
+`ActionsCluster`), and [SiteHeader](components/SiteHeader.tsx) hides the standalone
+`AppHeader` on `/` (other routes keep it, reusing the shared `Wordmark`/`HeaderNav`).
+Rather than lift mode into a cross-route context/store, the home page owning its
+bar keeps state local and adds no dependency. Layers render through one shared
+`LayerList` fed by a per-mode `layerProps` — in a floating `LayersPanel` on
+desktop and a Controls/Layers sidebar toggle on mobile.
+
+**Consequences** — the canvas is chrome-free and both modes share one layer
+surface; the trade-off is the home bar is client-rendered (a brief no-header
+paint before hydration) and the header/AppHeader split must stay in sync via the
+shared pieces. The old `ExportPanel`/`MobileExportFab`/`ShareButton` were removed.
 
 ## ADR-007: Geometry becomes a layer composition (mirroring images)
 

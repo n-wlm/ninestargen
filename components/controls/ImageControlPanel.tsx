@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Eye, EyeOff, ChevronDown, ChevronUp, ArrowUp, ArrowDown, Trash2, ImagePlus } from 'lucide-react';
+import { ImagePlus } from 'lucide-react';
 import SliderInput, { parsePercent } from './SliderInput';
 import { ColorControl } from './ColorControl';
-import { Section, SegmentedControl, Toggle, ConfirmButton } from './primitives';
+import { Section, SegmentedControl, Toggle, ConfirmButton, GroupLabel } from './primitives';
 import type { CompositionConfig, ImageLayer, SymmetryCount } from '@/types/composition';
 import { LAYER_LIMITS, MAX_LAYERS } from '@/types/composition';
 import { ACCEPT_ATTR, fileToLayer, UploadError } from '@/lib/image-upload';
@@ -13,9 +13,8 @@ interface ImageControlPanelProps {
   config: CompositionConfig;
   update: <K extends keyof CompositionConfig>(key: K, value: CompositionConfig[K]) => void;
   addLayer: (layer: ImageLayer) => void;
-  removeLayer: (id: string) => void;
   updateLayer: (id: string, partial: Partial<ImageLayer>) => void;
-  reorderLayer: (id: string, dir: -1 | 1) => void;
+  selectedLayer: ImageLayer | undefined;
   onReset: () => void;
 }
 
@@ -31,203 +30,110 @@ const OUTER_CONTAINERS: { value: CompositionConfig['outerContainer']; label: str
   { value: 'square', label: 'Square' },
 ];
 
-function LayerCard({
-  layer,
-  index,
-  total,
-  expanded,
-  onToggleExpand,
-  updateLayer,
-  removeLayer,
-  reorderLayer,
-}: {
-  layer: ImageLayer;
-  index: number; // display index (0 = front/top)
-  total: number;
-  expanded: boolean;
-  onToggleExpand: () => void;
-  updateLayer: (id: string, partial: Partial<ImageLayer>) => void;
-  removeLayer: (id: string) => void;
-  reorderLayer: (id: string, dir: -1 | 1) => void;
-}) {
+// The per-layer property controls for the SELECTED image layer — mirrors the
+// geometry ControlPanel's selected-layer pattern (the layer LIST is in the
+// floating LayersPanel).
+function LayerControls({ layer, updateLayer }: { layer: ImageLayer; updateLayer: (id: string, p: Partial<ImageLayer>) => void }) {
   return (
-    <div className="rounded-lg border border-[#EAECF0] overflow-hidden bg-white">
-      {/* Header row */}
-      <div className="flex items-center gap-2 px-2.5 py-2">
-        {/* Thumbnail */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={layer.src}
-          alt=""
-          className="w-8 h-8 rounded object-contain bg-[#F3F4F6] border border-black/5 shrink-0"
+    <>
+      <Section title="Arrangement">
+        <SegmentedControl
+          options={COUNT_OPTIONS}
+          value={String(layer.count)}
+          onChange={(v) => updateLayer(layer.id, { count: Number(v) as SymmetryCount })}
         />
-        <button
-          onClick={onToggleExpand}
-          className="flex-1 min-w-0 text-left flex items-center gap-1"
-          title={layer.name}
-        >
-          <span className="text-[13px] lg:text-[11px] font-medium text-[#374151] truncate">{layer.name}</span>
-          {expanded ? (
-            <ChevronUp className="w-3.5 h-3.5 text-[#9CA3AF] shrink-0" />
-          ) : (
-            <ChevronDown className="w-3.5 h-3.5 text-[#9CA3AF] shrink-0" />
-          )}
-        </button>
+        <Toggle label="Mirror" value={layer.mirror} onChange={(v) => updateLayer(layer.id, { mirror: v })} />
+        <SliderInput
+          label="Angle"
+          tooltip="Rotate the whole arrangement"
+          value={layer.angleOffset}
+          defaultValue={LAYER_LIMITS.angleOffset.default}
+          min={LAYER_LIMITS.angleOffset.min}
+          max={LAYER_LIMITS.angleOffset.max}
+          step={LAYER_LIMITS.angleOffset.step}
+          format={(v) => `${Math.round(v)}°`}
+          snap={Array.from({ length: layer.count * 2 + 1 }, (_, i) => (360 / (layer.count * 2)) * i)}
+          onChange={(v) => updateLayer(layer.id, { angleOffset: v })}
+          resetLabel="Set to default"
+        />
+      </Section>
 
-        {/* Reorder — arrows, distinct from the expand chevron.
-            List is shown reversed (top = front = end of array), so "up" = +1 in array order. */}
-        <div className="flex items-center">
-          <button
-            onClick={() => reorderLayer(layer.id, 1)}
-            disabled={index === 0}
-            title="Move forward"
-            className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[var(--nsg-accent)] hover:bg-[#F3F4F6] disabled:opacity-25 disabled:hover:text-[#9CA3AF] disabled:hover:bg-transparent transition-colors"
-          >
-            <ArrowUp className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => reorderLayer(layer.id, -1)}
-            disabled={index === total - 1}
-            title="Move back"
-            className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[var(--nsg-accent)] hover:bg-[#F3F4F6] disabled:opacity-25 disabled:hover:text-[#9CA3AF] disabled:hover:bg-transparent transition-colors"
-          >
-            <ArrowDown className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Visibility */}
-        <button
-          onClick={() => updateLayer(layer.id, { visible: !layer.visible })}
-          title={layer.visible ? 'Hide layer' : 'Show layer'}
-          className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[var(--nsg-accent)] hover:bg-[#F3F4F6] transition-colors"
-        >
-          {layer.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-        </button>
-
-        {/* Separator to set delete apart from the frequent actions */}
-        <span className="w-px h-4 bg-[#EAECF0] mx-0.5 shrink-0" aria-hidden="true" />
-
-        {/* Delete */}
-        <button
-          onClick={() => removeLayer(layer.id)}
-          title="Delete layer"
-          className="p-1.5 rounded-md text-[#9CA3AF] hover:text-[#EF4444] hover:bg-[#FEF2F2] transition-colors"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* Expanded controls */}
-      {expanded && (
-        <div className="px-3 pb-3.5 pt-1 flex flex-col gap-4 lg:gap-3.5 border-t border-[#F3F4F6]">
-          <div className="pt-3 flex flex-col gap-3">
-            <SegmentedControl
-              options={COUNT_OPTIONS}
-              value={String(layer.count)}
-              onChange={(v) => updateLayer(layer.id, { count: Number(v) as SymmetryCount })}
-            />
-            <Toggle
-              label="Mirror"
-              value={layer.mirror}
-              onChange={(v) => updateLayer(layer.id, { mirror: v })}
-            />
-          </div>
-          <SliderInput
-            label="Size"
-            tooltip="Size of the image (longest side, in canvas units)"
-            value={layer.scale}
-            defaultValue={LAYER_LIMITS.scale.default}
-            min={LAYER_LIMITS.scale.min}
-            max={LAYER_LIMITS.scale.max}
-            step={LAYER_LIMITS.scale.step}
-            onChange={(v) => updateLayer(layer.id, { scale: v })}
-          />
-          <SliderInput
-            label="Radius"
-            tooltip="Distance of each copy from the center"
-            value={layer.radius}
-            defaultValue={LAYER_LIMITS.radius.default}
-            min={LAYER_LIMITS.radius.min}
-            max={LAYER_LIMITS.radius.max}
-            step={LAYER_LIMITS.radius.step}
-            onChange={(v) => updateLayer(layer.id, { radius: v })}
-          />
-          <SliderInput
-            label="Spin"
-            tooltip="Rotate each copy around its own center"
-            value={layer.spin}
-            defaultValue={LAYER_LIMITS.spin.default}
-            min={LAYER_LIMITS.spin.min}
-            max={LAYER_LIMITS.spin.max}
-            step={LAYER_LIMITS.spin.step}
-            format={(v) => `${Math.round(v)}°`}
-            onChange={(v) => updateLayer(layer.id, { spin: v })}
-          />
-          <SliderInput
-            label="Angle"
-            tooltip="Rotate the whole arrangement"
-            value={layer.angleOffset}
-            defaultValue={LAYER_LIMITS.angleOffset.default}
-            min={LAYER_LIMITS.angleOffset.min}
-            max={LAYER_LIMITS.angleOffset.max}
-            step={LAYER_LIMITS.angleOffset.step}
-            format={(v) => `${Math.round(v)}°`}
-            snap={Array.from({ length: layer.count * 2 + 1 }, (_, i) => (360 / (layer.count * 2)) * i)}
-            onChange={(v) => updateLayer(layer.id, { angleOffset: v })}
-            resetLabel="Set to default"
-          />
-          <SliderInput
-            label="Offset X"
-            tooltip="Shift the image sideways within each copy (off-centre)"
-            value={layer.offsetX}
-            defaultValue={LAYER_LIMITS.offsetX.default}
-            min={LAYER_LIMITS.offsetX.min}
-            max={LAYER_LIMITS.offsetX.max}
-            step={LAYER_LIMITS.offsetX.step}
-            format={(v) => String(Math.round(v))}
-            onChange={(v) => updateLayer(layer.id, { offsetX: v })}
-          />
-          <SliderInput
-            label="Offset Y"
-            tooltip="Shift the image in/out (toward or away from the center)"
-            value={layer.offsetY}
-            defaultValue={LAYER_LIMITS.offsetY.default}
-            min={LAYER_LIMITS.offsetY.min}
-            max={LAYER_LIMITS.offsetY.max}
-            step={LAYER_LIMITS.offsetY.step}
-            format={(v) => String(Math.round(v))}
-            onChange={(v) => updateLayer(layer.id, { offsetY: v })}
-          />
-          <SliderInput
-            label="Opacity"
-            tooltip="Layer transparency"
-            value={layer.opacity}
-            defaultValue={LAYER_LIMITS.opacity.default}
-            min={LAYER_LIMITS.opacity.min}
-            max={LAYER_LIMITS.opacity.max}
-            step={LAYER_LIMITS.opacity.step}
-            format={(v) => `${Math.round(v * 100)}%`}
-            parse={parsePercent}
-            onChange={(v) => updateLayer(layer.id, { opacity: v })}
-          />
-        </div>
-      )}
-    </div>
+      <Section title="Transform">
+        <SliderInput
+          label="Size"
+          tooltip="Size of the image (longest side, in canvas units)"
+          value={layer.scale}
+          defaultValue={LAYER_LIMITS.scale.default}
+          min={LAYER_LIMITS.scale.min}
+          max={LAYER_LIMITS.scale.max}
+          step={LAYER_LIMITS.scale.step}
+          onChange={(v) => updateLayer(layer.id, { scale: v })}
+        />
+        <SliderInput
+          label="Radius"
+          tooltip="Distance of each copy from the center"
+          value={layer.radius}
+          defaultValue={LAYER_LIMITS.radius.default}
+          min={LAYER_LIMITS.radius.min}
+          max={LAYER_LIMITS.radius.max}
+          step={LAYER_LIMITS.radius.step}
+          onChange={(v) => updateLayer(layer.id, { radius: v })}
+        />
+        <SliderInput
+          label="Spin"
+          tooltip="Rotate each copy around its own center"
+          value={layer.spin}
+          defaultValue={LAYER_LIMITS.spin.default}
+          min={LAYER_LIMITS.spin.min}
+          max={LAYER_LIMITS.spin.max}
+          step={LAYER_LIMITS.spin.step}
+          format={(v) => `${Math.round(v)}°`}
+          onChange={(v) => updateLayer(layer.id, { spin: v })}
+        />
+        <SliderInput
+          label="Offset X"
+          tooltip="Shift the image sideways within each copy (off-centre)"
+          value={layer.offsetX}
+          defaultValue={LAYER_LIMITS.offsetX.default}
+          min={LAYER_LIMITS.offsetX.min}
+          max={LAYER_LIMITS.offsetX.max}
+          step={LAYER_LIMITS.offsetX.step}
+          format={(v) => String(Math.round(v))}
+          onChange={(v) => updateLayer(layer.id, { offsetX: v })}
+        />
+        <SliderInput
+          label="Offset Y"
+          tooltip="Shift the image in/out (toward or away from the center)"
+          value={layer.offsetY}
+          defaultValue={LAYER_LIMITS.offsetY.default}
+          min={LAYER_LIMITS.offsetY.min}
+          max={LAYER_LIMITS.offsetY.max}
+          step={LAYER_LIMITS.offsetY.step}
+          format={(v) => String(Math.round(v))}
+          onChange={(v) => updateLayer(layer.id, { offsetY: v })}
+        />
+        <SliderInput
+          label="Opacity"
+          tooltip="Layer transparency"
+          value={layer.opacity}
+          defaultValue={LAYER_LIMITS.opacity.default}
+          min={LAYER_LIMITS.opacity.min}
+          max={LAYER_LIMITS.opacity.max}
+          step={LAYER_LIMITS.opacity.step}
+          format={(v) => `${Math.round(v * 100)}%`}
+          parse={parsePercent}
+          onChange={(v) => updateLayer(layer.id, { opacity: v })}
+        />
+      </Section>
+    </>
   );
 }
 
 export default function ImageControlPanel({
-  config,
-  update,
-  addLayer,
-  removeLayer,
-  updateLayer,
-  reorderLayer,
-  onReset,
+  config, update, addLayer, updateLayer, selectedLayer, onReset,
 }: ImageControlPanelProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const atLimit = config.layers.length >= MAX_LAYERS;
   const hasLayers = config.layers.length > 0;
 
@@ -251,39 +157,29 @@ export default function ImageControlPanel({
     if (fileRef.current) fileRef.current.value = '';
   }
 
-  // The canvas empty-state CTA triggers this same file picker via a custom event.
+  // The canvas empty-state CTA and the floating panel's "+" trigger this picker.
   useEffect(() => {
     const open = () => fileRef.current?.click();
     window.addEventListener('nsg:add-image', open);
     return () => window.removeEventListener('nsg:add-image', open);
   }, []);
 
-  function toggleCollapse(id: string) {
-    setCollapsed((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
-
-  // Display front-to-back (last in array = front = top of list).
-  const ordered = [...config.layers].reverse();
-
   return (
     <div className="flex flex-col bg-white h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-4 h-11 border-b border-[#F3F4F6] shrink-0">
-        <span className="text-[12px] font-semibold text-[#111827] tracking-tight">Layers</span>
-        <ConfirmButton
-          label="Clear all"
-          message="Remove all layers? This can't be undone."
-          confirmLabel="Clear"
-          onConfirm={onReset}
-          destructive
-          align="center"
-          className="text-[11px] text-[#6B7280] hover:text-[var(--nsg-accent)] transition-colors font-medium"
-        />
+        <span className="text-[12px] font-semibold text-[#111827] tracking-tight">Controls</span>
+        {hasLayers && (
+          <ConfirmButton
+            label="Clear all"
+            message="Remove all layers? This can't be undone."
+            confirmLabel="Clear"
+            onConfirm={onReset}
+            destructive
+            align="center"
+            className="text-[11px] text-[#6B7280] hover:text-[var(--nsg-accent)] transition-colors font-medium"
+          />
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto">
@@ -304,7 +200,6 @@ export default function ImageControlPanel({
               atLimit
                 ? 'py-3 rounded-lg border-2 border-dashed border-[#E5E7EB] text-[#D1D5DB] cursor-not-allowed text-[13px] lg:text-[12px]'
                 : hasLayers
-                  // Demoted to a slim secondary button once a layer exists — keeps the layer stack the focus
                   ? 'py-2 rounded-md bg-[#F3F4F6] text-[#6B7280] hover:bg-[var(--nsg-accent-soft)] hover:text-[var(--nsg-accent)] text-[12px] lg:text-[11px]'
                   : 'py-3 rounded-lg border-2 border-dashed border-[var(--nsg-accent-ring)] text-[var(--nsg-accent)] hover:bg-[var(--nsg-accent-soft)] hover:border-[var(--nsg-accent-border)] text-[13px] lg:text-[12px]'
             }`}
@@ -313,26 +208,18 @@ export default function ImageControlPanel({
             {atLimit ? 'Layer limit reached' : 'Add image'}
           </button>
           {error && <p className="text-[12px] lg:text-[11px] text-[#EF4444] font-medium">{error}</p>}
+          {!hasLayers && (
+            <p className="text-[11px] text-[#9CA3AF] leading-relaxed">
+              Upload an image to start — it&apos;s repeated into a nine-fold mandala. Add more as layers.
+            </p>
+          )}
         </Section>
 
-        {/* LAYERS */}
-        {ordered.length > 0 && (
-          <div className="px-3 py-3 flex flex-col gap-2 border-b border-[#F3F4F6]">
-            {ordered.map((layer, i) => (
-              <LayerCard
-                key={layer.id}
-                layer={layer}
-                index={i}
-                total={ordered.length}
-                expanded={!collapsed.has(layer.id)}
-                onToggleExpand={() => toggleCollapse(layer.id)}
-                updateLayer={updateLayer}
-                removeLayer={removeLayer}
-                reorderLayer={reorderLayer}
-              />
-            ))}
-          </div>
-        )}
+        {/* SELECTED LAYER — arrangement + transform */}
+        {selectedLayer && <LayerControls layer={selectedLayer} updateLayer={updateLayer} />}
+
+        {/* CANVAS — composition-level */}
+        <GroupLabel label="Canvas" />
 
         {/* BACKGROUND */}
         <Section title="Background">

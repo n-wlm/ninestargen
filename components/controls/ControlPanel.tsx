@@ -1,37 +1,25 @@
 'use client';
 
-import { Lightbulb, Plus } from 'lucide-react';
+import { Lightbulb } from 'lucide-react';
 import SliderInput, { parsePercent } from './SliderInput';
 import { ColorControl, GradientBuilder } from './ColorControl';
 import { Section, SegmentedControl, ConfirmButton, GroupLabel } from './primitives';
-import LayerList from './LayerList';
 import StarPreview from '@/components/StarPreview';
 import type { StarConfig, StarType } from '@/types/star';
 import { DEFAULT_CONFIG, STAR_TYPE_LABELS, STAR_TYPES_ORDERED } from '@/types/star';
 import { PALETTES } from '@/lib/color-palettes';
-import {
-  DEFAULT_GEOMETRY_COMPOSITION,
-  configFromLayer,
-  MAX_GEOMETRY_LAYERS,
-  type GeometryLayer,
-} from '@/types/geometry';
+import type { GeometryLayer } from '@/types/geometry';
 
 interface ControlPanelProps {
   config: StarConfig;
   update: <K extends keyof StarConfig>(key: K, value: StarConfig[K]) => void;
   onReset: () => void;
-  // Layer composition (the sections below the list edit the selected layer).
+  // The property sections below edit the selected layer; the layer LIST itself
+  // lives in the floating LayersPanel over the canvas.
   layers: GeometryLayer[];
   selectedLayer: GeometryLayer;
-  selectLayer: (id: string) => void;
-  duplicateLayer: (id: string) => void;
-  removeLayer: (id: string) => void;
-  reorderLayer: (id: string, dir: -1 | 1) => void;
   updateLayer: (id: string, partial: Partial<GeometryLayer>) => void;
 }
-
-// Neutral canvas for layer thumbnails — just the star shape, no bg/container.
-const THUMB_CANVAS = { ...DEFAULT_GEOMETRY_COMPOSITION, bgColor: 'transparent', outerContainer: 'none' as const };
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
@@ -133,11 +121,8 @@ const NO_PETAL = new Set(['9-2', '9-4', '3-triangles', 'spike', 'kite']);
 
 export default function ControlPanel({
   config, update, onReset,
-  layers, selectedLayer, selectLayer, duplicateLayer, removeLayer, reorderLayer, updateLayer,
+  layers, selectedLayer, updateLayer,
 }: ControlPanelProps) {
-  // "+ Layer" clones the current star — stacking almost always starts from
-  // "same shape, tweaked", and it makes the first layer instantly rewarding.
-  const addLayer = () => duplicateLayer(selectedLayer.id);
   const t = config.starType;
   const D = DEFAULT_CONFIG;
   const multiLayer = layers.length > 1;
@@ -147,58 +132,19 @@ export default function ControlPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-4 h-11 border-b border-[#F3F4F6] shrink-0">
         <span className="text-[12px] font-semibold text-[#111827] tracking-tight">Controls</span>
-        <div className="flex items-center gap-3">
-          {/* Single-layer: a quiet way to discover layering without ever showing
-              the concept to someone who just wants one star. */}
-          {!multiLayer && (
-            <button
-              onClick={addLayer}
-              className="flex items-center gap-1 text-[11px] text-[#9CA3AF] hover:text-[var(--nsg-accent)] transition-colors font-medium"
-            >
-              <Plus className="w-3 h-3" />
-              Layer
-            </button>
-          )}
-          <ConfirmButton
-            label="Reset all"
-            message="Reset all settings to their defaults?"
-            confirmLabel="Reset"
-            onConfirm={onReset}
-            destructive
-            align="center"
-            className="text-[11px] text-[#6B7280] hover:text-[var(--nsg-accent)] transition-colors font-medium"
-          />
-        </div>
+        <ConfirmButton
+          label="Reset all"
+          message="Reset all settings to their defaults?"
+          confirmLabel="Reset"
+          onConfirm={onReset}
+          destructive
+          align="center"
+          className="text-[11px] text-[#6B7280] hover:text-[var(--nsg-accent)] transition-colors font-medium"
+        />
       </div>
 
-      {/* Scrollable content */}
+      {/* Scrollable content — the layer list lives in the floating LayersPanel */}
       <div className="flex-1 overflow-y-auto">
-
-        {/* LAYERS — only once there's more than one star */}
-        {multiLayer && (
-          <Section title="Layers">
-            <LayerList
-              layers={layers}
-              selectedId={selectedLayer.id}
-              max={MAX_GEOMETRY_LAYERS}
-              addLabel="Add layer"
-              maxHint={`Layer limit reached (${MAX_GEOMETRY_LAYERS}).`}
-              renderThumb={(id) => {
-                const layer = layers.find((l) => l.id === id);
-                return layer ? <StarPreview config={configFromLayer(layer, THUMB_CANVAS)} className="w-full h-full" /> : null;
-              }}
-              onSelect={selectLayer}
-              onToggleVisible={(id) => {
-                const layer = layers.find((l) => l.id === id);
-                if (layer) updateLayer(id, { visible: !layer.visible });
-              }}
-              onReorder={reorderLayer}
-              onDuplicate={duplicateLayer}
-              onRemove={removeLayer}
-              onAdd={addLayer}
-            />
-          </Section>
-        )}
 
         {/* STAR TYPE */}
         <Section title="Type">

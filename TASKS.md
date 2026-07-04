@@ -16,10 +16,10 @@
 | 3 | Template-Kuration | `feature/template-curation` | ⏸ wartet auf Owner-Auswahl |
 | 4 | Geometry-Layer (Modell/URL/UI) | `feature/geometry-layers` | ✅ Code fertig, ⏳ Live-Klick-Test offen |
 | R0 | Farben 20→30 + Pastell | `feature/layout-redesign` | ✅ committet |
-| R1 | Unified Header | `feature/layout-redesign` | ⬜ **nächster Schritt** |
-| R2 | Schwebendes Layer-Fenster (beide Modi) | `feature/layout-redesign` | ⬜ offen |
-| R3 | Mobile-Layout | `feature/layout-redesign` | ⬜ offen |
-| R4 | Doku + Template-Finalisierung | `feature/layout-redesign` | ⬜ offen |
+| R1 | Unified Header | `feature/layout-redesign` | ✅ committet |
+| R2 | Schwebendes Layer-Fenster (beide Modi) | `feature/layout-redesign` | ✅ committet |
+| R3 | Mobile-Layout (Controls/Layers-Toggle, ⋯-Menü) | `feature/layout-redesign` | ✅ committet |
+| R4 | Doku-Kapitel + Template-Finalisierung | `feature/layout-redesign` | ⬜ **nächster Schritt** |
 
 Branches stacken in dieser Reihenfolge (jeder baut auf dem vorigen auf); Naim pusht + öffnet PRs.
 
