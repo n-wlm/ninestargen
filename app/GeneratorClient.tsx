@@ -18,6 +18,7 @@ import ModeSwitch from '@/components/generator/ModeSwitch';
 import ActionsCluster from '@/components/generator/ActionsCluster';
 import SaveDesignModal from '@/components/SaveDesignModal';
 import HistoryPanel from '@/components/HistoryPanel';
+import { PerfRegion } from '@/components/dev/Perf';
 import { useStarComposition } from '@/hooks/useStarComposition';
 import { useComposition } from '@/hooks/useComposition';
 import { useUrlSync } from '@/hooks/useUrlSync';
@@ -215,6 +216,7 @@ function Generator() {
   return (
     <div className="flex flex-col flex-1 min-h-0" style={isImages ? IMAGES_ACCENT : undefined}>
       {/* Unified top bar: identity · mode · app nav · document actions */}
+      <PerfRegion id="header">
       <TopBar>
         <Wordmark />
         <ModeSwitch mode={mode} onChange={setMode} />
@@ -228,6 +230,7 @@ function Generator() {
           />
         </div>
       </TopBar>
+      </PerfRegion>
 
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
         {/* Controls sidebar */}
@@ -249,6 +252,7 @@ function Generator() {
 
           {/* Controls view — always on desktop; on mobile when its tab is active */}
           <div className={`flex-1 overflow-y-auto min-h-0 ${mobileTab === 'layers' ? 'hidden lg:block' : ''}`}>
+            <PerfRegion id="sidebar">
             {isImages ? (
               <ImageControlPanel
                 config={comp.config}
@@ -268,6 +272,7 @@ function Generator() {
                 updateLayer={star.updateLayer}
               />
             )}
+            </PerfRegion>
           </div>
         </motion.aside>
 
@@ -288,6 +293,7 @@ function Generator() {
 
           {/* Preview */}
           <div className="relative z-10 w-full h-full flex items-center justify-center p-5 lg:p-14 [container-type:size]">
+            <PerfRegion id="preview">
             {isImages && comp.config.layers.length === 0 ? (
               <ImageEmptyState />
             ) : (
@@ -317,12 +323,15 @@ function Generator() {
                 </PreviewErrorBoundary>
               </motion.div>
             )}
+            </PerfRegion>
           </div>
 
           {/* Floating layers window — always shown (images add their first image
               here too); desktop only, mobile uses the sidebar Layers toggle. */}
           <div className="absolute top-3 left-3 z-20 hidden lg:block">
-            <LayersPanel {...layerProps} />
+            <PerfRegion id="layersPanel">
+              <LayersPanel {...layerProps} />
+            </PerfRegion>
           </div>
         </motion.section>
       </div>
