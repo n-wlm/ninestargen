@@ -2,7 +2,7 @@
 
 import { memo, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
-import { History, Share2, Download, ChevronDown, Check } from 'lucide-react';
+import { FolderOpen, Share2, Download, ChevronDown, Check, X } from 'lucide-react';
 import { useExport, RESOLUTIONS, type ExportFormat } from '@/hooks/useExport';
 import ExportToast from '@/components/ExportToast';
 import { copyText } from '@/lib/clipboard';
@@ -17,7 +17,11 @@ interface Props {
   onSize: (w: number, h: number) => void;
   filename: string;
   onDownloaded: (format: ExportFormat) => void;
+  getMetadata?: () => string | undefined;
   disabled?: boolean;
+  // One-time first-visit nudge under the Projects button.
+  showProjectsHint?: boolean;
+  onDismissHint?: () => void;
 }
 
 const FORMATS: { id: ExportFormat; label: string; desc: string; recommended?: boolean }[] = [
@@ -29,9 +33,10 @@ const FORMATS: { id: ExportFormat; label: string; desc: string; recommended?: bo
 // History · Share · Download, bundled into one container in the header.
 function ActionsCluster({
   entriesCount, onOpenHistory, isImages,
-  svgRef, exportWidth, exportHeight, onSize, filename, onDownloaded, disabled,
+  svgRef, exportWidth, exportHeight, onSize, filename, onDownloaded, getMetadata, disabled,
+  showProjectsHint, onDismissHint,
 }: Props) {
-  const { loading, toast, showToast, download } = useExport({ svgRef, exportWidth, exportHeight, filename, onDownloaded });
+  const { loading, toast, showToast, download } = useExport({ svgRef, exportWidth, exportHeight, filename, onDownloaded, getMetadata });
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -58,16 +63,48 @@ function ActionsCluster({
   const seg = 'flex items-center gap-1.5 px-2 sm:px-2.5 lg:px-3 h-full text-[12px] lg:text-[13px] font-medium text-[#6B7280] hover:text-[#111827] hover:bg-[#F9FAFB] transition-colors whitespace-nowrap';
 
   return (
-    <div className="flex items-stretch h-8 lg:h-9 border border-[#E5E7EB] rounded-lg overflow-visible bg-white">
-      <button onClick={onOpenHistory} className={`${seg} rounded-l-lg`} title="History">
-        <History className="w-4 h-4" />
-        <span className="hidden min-[720px]:inline">History</span>
+    <div className="relative flex items-stretch h-8 lg:h-9 border border-[#E5E7EB] rounded-lg overflow-visible bg-white">
+      <button
+        onClick={() => { onDismissHint?.(); onOpenHistory(); }}
+        className={`${seg} rounded-l-lg`}
+        title="Projects — restore a design or reopen a recent one"
+      >
+        <FolderOpen className="w-4 h-4" />
+        <span className="hidden min-[720px]:inline">Projects</span>
         {entriesCount > 0 && (
           <span className="ml-0.5 px-1.5 rounded-full bg-[var(--nsg-accent-soft)] text-[var(--nsg-accent)] text-[10px] font-semibold">
             {entriesCount}
           </span>
         )}
       </button>
+
+      {/* First-visit nudge, anchored under the Projects button (leftmost). */}
+      <AnimatePresence>
+        {showProjectsHint && (
+          <motion.div
+            className="absolute top-full left-0 mt-2.5 w-60 z-[55]"
+            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.97 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <span className="absolute -top-1 left-5 w-2.5 h-2.5 rotate-45 bg-[var(--nsg-accent)]" />
+            <div className="relative rounded-xl bg-[var(--nsg-accent)] text-white shadow-xl p-3 pr-8">
+              <p className="text-[12.5px] font-semibold leading-tight">Continue where you left off</p>
+              <p className="text-[11.5px] leading-snug text-white/85 mt-1">
+                Reopen a recent design, or restore one from a file you downloaded.
+              </p>
+              <button
+                onClick={onDismissHint}
+                aria-label="Dismiss"
+                className="absolute top-2 right-2 p-0.5 rounded-md text-white/70 hover:text-white hover:bg-white/15 transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {!isImages && (
         <>

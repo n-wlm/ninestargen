@@ -3,13 +3,45 @@ id: adrs
 title: Architecture decisions
 order: 50
 status: current
-last_updated: 2026-07-04
+last_updated: 2026-07-06
 owner: @naim
-linked_paths: lib/export.ts, lib/image-upload.ts, lib/history.ts, app/globals.css, app/GeneratorClient.tsx
+linked_paths: lib/export.ts, lib/project-metadata.ts, lib/image-upload.ts, lib/history.ts, app/globals.css, app/GeneratorClient.tsx
 summary: The significant decisions behind the app and why they were made.
 ---
 
 Newest first.
+
+## ADR-009: Downloaded files are restore points — embed the share link, don't reconstruct from pixels
+
+**Status:** accepted
+
+> [!DECISION] Geometry exports embed their shareable link in the file's metadata (SVG `<metadata>`, PNG `tEXt`, JPEG `COM`) using the *same* codec as the URL. Re-uploading rebuilds the design from that embedded link, not from the image pixels. Geometry only.
+
+**Context** — a downloaded PNG/SVG/JPG was a dead end: the design lived in the URL
+but the file couldn't get you back to editing. The owner wanted files to be
+re-uploadable, and was explicit that the restore must come from **the embedded
+instructions, not a pixel-level reconstruction**, and that the embedded standard
+stay **consistent with the URL**.
+
+**Decision** — one codec, both directions. The embedded payload's meaningful
+content is the exact query string `compositionToParams` writes to the URL, and
+`paramsToComposition` reads it back — so file and link are byte-identical by
+construction (no second serialization to drift). A thin JSON wrapper
+(`{app,v,url}`) adds a detection tag + version. The `url` is computed from the
+**live composition** at export time, not `window.location.href`, to dodge the URL
+debounce. Embedding is hand-rolled per container (no dependency): SVG metadata
+element, PNG `tEXt` chunk with an in-house CRC-32, JPEG `COM` marker — all pure
+`ArrayBuffer`/string work, so it behaves identically on mobile. Images mode is
+excluded: image designs aren't link-encodable (data URLs too big), matching the
+existing share behaviour.
+
+**Consequences** — the shareable-link standard now has exactly one owner
+([lib/url-params.ts](lib/url-params.ts)); any change there flows to both URL and
+files for free, and a round-trip harness guards it. Restore is inherently
+Geometry-only. Metadata can be stripped by pipelines that re-encode a raster (e.g.
+picking from the iOS Photos library) — accepted and surfaced with a friendly "no
+design found" message; SVG (plain text) is the robust path. See
+[lib/project-metadata.ts](lib/project-metadata.ts) and the **Workflows** section.
 
 ## ADR-008: Unified top bar + floating layers panel (layout redesign)
 

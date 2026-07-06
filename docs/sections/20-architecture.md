@@ -3,9 +3,9 @@ id: architecture
 title: Architecture
 order: 20
 status: current
-last_updated: 2026-07-04
+last_updated: 2026-07-06
 owner: @naim
-linked_paths: app/GeneratorClient.tsx, components/, hooks/, lib/export.ts, components/ui/slider.tsx
+linked_paths: app/GeneratorClient.tsx, components/, hooks/, lib/export.ts, lib/project-metadata.ts, components/ui/slider.tsx
 summary: How the editor shell, the two render paths, state, and the shared export pipeline fit together.
 ---
 
@@ -36,7 +36,7 @@ flowchart TD
   GC[GeneratorClient] --> TB[Top bar: ModeSwitch · HeaderNav · ActionsCluster]
   GC -->|geometry| CP[ControlPanel] --> EB[PreviewErrorBoundary] --> SP[StarPreview svg]
   GC -->|images| ICP[ImageControlPanel] --> EB --> IP[ImagePreview svg]
-  TB --> AC[ActionsCluster: History · Share · Download]
+  TB --> AC[ActionsCluster: Projects · Share · Download]
   AC -.shared logic.-> UE[useExport + ExportToast]
   GC --> SM[SaveDesignModal]
   GC --> HP[HistoryPanel]
@@ -55,10 +55,12 @@ About, the "What's new" dialog — [WhatsNewDialog](components/WhatsNewDialog.ts
 fed by [lib/changelog.ts](lib/changelog.ts)). `ModeSwitch`
 ([components/generator/](components/generator/ModeSwitch.tsx)) is the mode
 control (lifted out of the sidebar); its active pill is accent-filled so it
-shows and drives the indigo/teal theme. `ActionsCluster` bundles History · Share
+shows and drives the indigo/teal theme. `ActionsCluster` bundles Projects · Share
 · Download into one header container (replacing the former canvas overlays,
 sidebar export panel, and mobile FAB — one export path via
-[useExport](hooks/useExport.ts)). The canvas is now free of chrome. Control
+[useExport](hooks/useExport.ts)). The **Projects** button opens the panel that
+both lists download history and restores a design from an uploaded file; a
+one-time first-visit nudge appears beneath it. The canvas is now free of chrome. Control
 panels draw color input from the shared `ColorControl`, whose swatch popover is
 built on [ui/popover.tsx](components/ui/popover.tsx) (Base UI).
 
@@ -108,6 +110,16 @@ Everything is **SVG**, on a fixed `600×600` viewBox centred at `(300,300)`.
   `svgRef`. SVG is downloaded directly (self-contained, images inlined); PNG/JPG
   are drawn onto a canvas at the chosen resolution. Because uploaded images are
   **data URLs**, the canvas is never tainted (see ADR-002).
+- **Embedded restore metadata (geometry)**: geometry exports carry their own
+  shareable link inside the file's metadata, so a downloaded file is a restore
+  point — re-uploading rebuilds the design **from the embedded link, not the
+  pixels**. [lib/project-metadata.ts](lib/project-metadata.ts) owns one codec used
+  in both directions: the payload's meaningful content is the exact same query
+  string `compositionToParams` writes to the URL, so URL and file are identical by
+  construction. It embeds per container — SVG `<metadata>`, PNG `tEXt` chunk (with
+  hand-rolled CRC-32), JPEG `COM` marker — and `extractProjectFromFile()` reads it
+  back, then `paramsToComposition` reconstructs the layers (see ADR-009). Images
+  mode carries no metadata (image designs aren't link-encodable).
 
 ## State
 

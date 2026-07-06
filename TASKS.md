@@ -1,6 +1,23 @@
 # TASKS.md — Source of Truth
 
 ## Aktuelles Ziel
+**Restore-from-file (branch `feature/restore-from-file`, 2026-07-06)** — ✅ Code fertig, ⏳ Live-Pass offen.
+Downloadete Geometry-Dateien sind wieder hochladbar → Design wird aus im Bild eingebetteten
+Metadaten rekonstruiert (nicht aus Pixeln), im **selben Standard wie die URL**.
+- `lib/project-metadata.ts` (neu): eine Codec-Quelle. Payload = JSON-Wrapper um die
+  `compositionToParams`-Query; Einbettung SVG `<metadata>` / PNG `tEXt` (eigene CRC-32) /
+  JPEG `COM`; `extractProjectFromFile` → `{ok|reason}`. Nur Geometry (Bilder nicht link-kodierbar).
+- `lib/export.ts` + `useExport`: `getMetadata`-Thunk (lazy, memo-stabil) fädelt den Payload ein.
+- `HistoryPanel` → **„Projects"**: Restore-Dropzone + Erklärtext oben, Verlauf darunter;
+  Header-Button „History"→„Projects" (Ordner-Icon); einmaliger Erst-Hinweis (`nsg:projects-hint-seen`).
+- Verifiziert: tsc ✓ lint ✓ build ✓; Node-Round-Trip-Harness (alle 3 Formate identisch,
+  Negativfälle, „embedded query === compositionToParams"). Doku: ADR-009 + architecture/
+  data-model/workflows/ui-design/changelog, keystonedoc 100 % Health.
+- **Offen (Naim, echter Browser/Mobile):** echter Download→Reupload je Format; iOS Photos-vs-Files
+  Metadaten-Stripping; Panel-Interaktion (Preview-Tab hier backgrounded → nur SSR/Harness).
+  Naim pusht + öffnet PR.
+
+## Ziel davor
 **Feature-Ausbau 2026-07** — zwei aufeinander aufbauende Arbeitsströme:
 1. **Feature-Stack** (Plan `eager-meandering-meteor.md`, freigegeben 2026-07-03):
    Farbauswahl v2, „What's new", Template-Kuration, Geometry-Layer. → weitgehend fertig.

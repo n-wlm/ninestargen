@@ -3,7 +3,7 @@ id: ui-design
 title: UI design
 order: 60
 status: current
-last_updated: 2026-07-04
+last_updated: 2026-07-06
 owner: @naim
 linked_paths: components/controls/, components/generator/, components/header/, components/ui/popover.tsx, app/globals.css, components/SaveDesignModal.tsx, components/HistoryPanel.tsx, components/ImageEmptyState.tsx, components/WhatsNewDialog.tsx, lib/clipboard.ts, lib/color-palettes.ts, lib/recent-colors.ts
 summary: Design language, the accent-variable system, control conventions, and accessibility notes.
@@ -109,13 +109,20 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   as the same system (their right side is an accent "Open editor" CTA instead of
   the mode switch + actions). The home bar holds logo + colored `ModeSwitch`
   (accent-filled active pill, drives indigo/teal) + app nav (Templates, About,
-  What's new) + an `ActionsCluster` bundling History · **Share Design** ·
+  What's new) + an `ActionsCluster` bundling Projects · **Share Design** ·
   Download. It replaces the old sidebar mode switch, sidebar export panel, mobile
   export FAB, and canvas overlays.
-- **ActionsCluster**: **Share Design** copies the full design link and fires a
-  toast ("Design link copied to clipboard"); the **Download** button is the
-  prominent accent primary, and its menu lists PNG/SVG/JPG as clear bordered
-  buttons (each with a download icon) so it's obvious a click downloads.
+- **ActionsCluster**: **Projects** (folder icon, with a count badge of saved
+  designs) opens the panel to reopen a recent download or restore from a file;
+  **Share Design** copies the full design link and fires a toast ("Design link
+  copied to clipboard"); the **Download** button is the prominent accent primary,
+  and its menu lists PNG/SVG/JPG as clear bordered buttons (each with a download
+  icon) so it's obvious a click downloads.
+- **First-visit Projects nudge**: on a fresh visit (no URL params → not a shared
+  link), a small accent popover with an up-arrow appears under the Projects button
+  after ~1.2s — "Continue where you left off. Reopen a recent design, or restore
+  one from a file you downloaded." Shown once (localStorage `nsg:projects-hint-seen`),
+  auto-hides after ~8s, and dismisses on click or opening the panel.
 - **Canvas**: square preview via container-query units
   (`w-[min(100cqw,100cqh)] aspect-square`), now **free of overlays** (actions
   live in the header); `ImageEmptyState` explains the mode when no image is
@@ -124,7 +131,7 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
 - **Responsive**: desktop is a side-by-side sidebar + canvas (≥`lg`); below that
   it stacks (canvas on top, controls below). The header nav (Templates / About /
   What's new) collapses into a `⋯` overflow menu **below `lg`** — so tablet
-  widths use it too, otherwise the inline links push History · Share · Download
+  widths use it too, otherwise the inline links push Projects · Share · Download
   into a second line (the action labels are also `whitespace-nowrap`). The
   wordmark drops to just the logo, and the sidebar gains the Controls/Layers
   toggle (the desktop floating layers panel is hidden).
@@ -133,7 +140,7 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   caused the Download button to overflow in the 640–700px band): Download label
   ≥ ~360px, **`ModeSwitch` labels ≥ 480px** (`Spline` — a flowing curve — for
   geometry, `Images` for images, ~40px tap target + `aria-label` below that),
-  **History / Share labels ≥ 720px**, and the **wordmark text ≥ `lg`**. Keeping
+  **Projects / Share labels ≥ 720px**, and the **wordmark text ≥ `lg`**. Keeping
   the mode labels down to 480px also fills the mid-width middle gap. Below ~360px
   the Download label itself drops to the icon + caret; mobile bar gaps/padding
   are a touch tighter. Verified no header overflow across 360–1280px.
@@ -144,8 +151,12 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   Desktop is unaffected (it always shows the controls next to the floating panel).
   The centered confirm popover is clamped to the viewport so it never runs
   off-screen on narrow widths.
-- **Modals**: `SaveDesignModal` (post-download) and `HistoryPanel` — white
-  rounded cards over a blurred backdrop, matching the export dropdown style.
+- **Modals**: `SaveDesignModal` (post-download) and the **Projects** panel
+  (`HistoryPanel` — titled "Projects": a "Restore from a file" dropzone +
+  explainer on top, the "Recent" download list below) — white rounded cards over a
+  blurred backdrop, matching the export dropdown style. The dropzone is a dashed
+  click-or-drag target; import failures show an inline amber note keyed to the
+  reason (no-data / unreadable / unsupported).
   A rounded `overflow-hidden` card that also fills a corner with colour (e.g.
   `TemplatesModal`'s gradient header) must use a **`ring-1` outline, not a
   `border`** — a hairline `border` on such a card leaves a faint light seam at

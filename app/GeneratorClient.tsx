@@ -22,6 +22,7 @@ import { useStarComposition } from '@/hooks/useStarComposition';
 import { useComposition } from '@/hooks/useComposition';
 import { useUrlSync } from '@/hooks/useUrlSync';
 import { addHistory, loadHistory, removeHistory, clearHistory, type HistoryEntry } from '@/lib/history';
+import { buildProjectPayload } from '@/lib/project-metadata';
 import type { StarConfig } from '@/types/star';
 import { MAX_LAYERS, type CompositionConfig } from '@/types/composition';
 import {
@@ -156,6 +157,42 @@ function Generator() {
 
   const onOpenHistory = useCallback(() => setHistoryOpen(true), []);
 
+  // Embed the shareable link in exported files (geometry only). A thunk reading
+  // the ref keeps it lazy + memo-stable, and immune to the URL-sync debounce.
+  const getGeometryMetadata = useCallback(() => buildProjectPayload(starConfigRef.current), []);
+
+  // Restore a design from an uploaded file (rebuilt from embedded metadata).
+  const restoreProject = useCallback(
+    (comp: GeometryComposition) => {
+      setStarComposition(comp);
+      setMode('geometry');
+      setSnapKey((k) => k + 1);
+      setHistoryOpen(false);
+    },
+    [setStarComposition],
+  );
+
+  // First-visit nudge under the Projects button — shown once, and only on a
+  // fresh visit (no URL params → not someone opening a shared link).
+  const [projectsHint, setProjectsHint] = useState(false);
+  const dismissHint = useCallback(() => setProjectsHint(false), []);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const seen = localStorage.getItem('nsg:projects-hint-seen');
+      const fresh = window.location.search.replace(/^\?/, '').length === 0;
+      if (seen || !fresh) return;
+      const show = setTimeout(() => {
+        setProjectsHint(true);
+        try { localStorage.setItem('nsg:projects-hint-seen', '1'); } catch { /* ignore */ }
+      }, 1200);
+      const hide = setTimeout(() => setProjectsHint(false), 9200);
+      return () => { clearTimeout(show); clearTimeout(hide); };
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   function restore(entry: HistoryEntry) {
     if (entry.mode === 'geometry') {
       setStarComposition(asComposition(entry.config as StarConfig | GeometryComposition));
@@ -188,10 +225,11 @@ function Generator() {
             onSize: (w: number, h: number) => { updateCanvas('exportWidth', w); updateCanvas('exportHeight', h); },
             filename: 'star',
             onDownloaded: handleDownloaded,
+            getMetadata: getGeometryMetadata,
           },
     // Value deps (numbers/bools) stay stable across slider ticks; callbacks are stable.
     [isImages, comp.config.exportWidth, comp.config.exportHeight, comp.config.layers.length,
-     star.config.exportWidth, star.config.exportHeight, compUpdate, updateCanvas, handleDownloaded],
+     star.config.exportWidth, star.config.exportHeight, compUpdate, updateCanvas, handleDownloaded, getGeometryMetadata],
   );
 
   // One layer-surface prop set per mode, shared by the floating LayersPanel
@@ -260,6 +298,8 @@ function Generator() {
             entriesCount={entries.length}
             onOpenHistory={onOpenHistory}
             isImages={isImages}
+            showProjectsHint={projectsHint}
+            onDismissHint={dismissHint}
             {...exportProps}
           />
         </div>
@@ -380,6 +420,7 @@ function Generator() {
         entries={entries}
         onClose={() => setHistoryOpen(false)}
         onRestore={restore}
+        onRestoreProject={restoreProject}
         onDelete={(id) => setEntries(removeHistory(id))}
         onClear={() => setEntries(clearHistory())}
       />

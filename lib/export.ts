@@ -1,6 +1,13 @@
-export async function exportSVG(svgEl: SVGSVGElement, filename = 'star.svg') {
+import {
+  embedProjectInSvg,
+  embedProjectInPngBytes,
+  embedProjectInJpegBytes,
+} from '@/lib/project-metadata';
+
+export async function exportSVG(svgEl: SVGSVGElement, filename = 'star.svg', metadata?: string) {
   const serializer = new XMLSerializer();
-  const svgStr = serializer.serializeToString(svgEl);
+  let svgStr = serializer.serializeToString(svgEl);
+  if (metadata) svgStr = embedProjectInSvg(svgStr, metadata);
   const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
   triggerDownload(URL.createObjectURL(blob), filename);
 }
@@ -11,6 +18,7 @@ export async function exportRaster(
   width: number,
   height: number,
   filename?: string,
+  metadata?: string,
 ) {
   const serializer = new XMLSerializer();
   const svgStr = serializer.serializeToString(svgEl);
@@ -34,11 +42,23 @@ export async function exportRaster(
       URL.revokeObjectURL(url);
 
       canvas.toBlob(
-        (blob) => {
+        async (blob) => {
           if (!blob) { reject(new Error('Canvas export failed')); return; }
-          const name = filename ?? `star.${format === 'jpeg' ? 'jpg' : 'png'}`;
-          triggerDownload(URL.createObjectURL(blob), name);
-          resolve();
+          try {
+            let out = blob;
+            if (metadata) {
+              const bytes = new Uint8Array(await blob.arrayBuffer());
+              const embedded = format === 'jpeg'
+                ? embedProjectInJpegBytes(bytes, metadata)
+                : embedProjectInPngBytes(bytes, metadata);
+              out = new Blob([new Uint8Array(embedded)], { type: blob.type });
+            }
+            const name = filename ?? `star.${format === 'jpeg' ? 'jpg' : 'png'}`;
+            triggerDownload(URL.createObjectURL(out), name);
+            resolve();
+          } catch (err) {
+            reject(err);
+          }
         },
         format === 'jpeg' ? 'image/jpeg' : 'image/png',
         0.95,

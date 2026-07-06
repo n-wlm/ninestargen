@@ -24,10 +24,13 @@ interface UseExportOptions {
   exportHeight: number;
   filename?: string;
   onDownloaded?: (format: ExportFormat) => void;
+  // Lazily produces the metadata payload embedded in the file (geometry only).
+  // A thunk (not a string) keeps it out of the memo deps and reads live state.
+  getMetadata?: () => string | undefined;
 }
 
 // Download + toast logic shared by both export UIs (desktop panel, mobile sheet).
-export function useExport({ svgRef, exportWidth, exportHeight, filename = 'star', onDownloaded }: UseExportOptions) {
+export function useExport({ svgRef, exportWidth, exportHeight, filename = 'star', onDownloaded, getMetadata }: UseExportOptions) {
   const [loading, setLoading] = useState<ExportFormat | null>(null);
   const [toast, setToast] = useState<ExportToastState | null>(null);
   const toastCounter = useRef(0);
@@ -43,10 +46,11 @@ export function useExport({ svgRef, exportWidth, exportHeight, filename = 'star'
     if (!svgRef.current || loading) return;
     setLoading(format);
     try {
+      const metadata = getMetadata?.();
       if (format === 'svg') {
-        exportSVG(svgRef.current, `${filename}.svg`);
+        exportSVG(svgRef.current, `${filename}.svg`, metadata);
       } else {
-        await exportRaster(svgRef.current, format, exportWidth, exportHeight, `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`);
+        await exportRaster(svgRef.current, format, exportWidth, exportHeight, `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`, metadata);
       }
       showToast(`Downloaded as ${format === 'jpeg' ? 'JPG' : format.toUpperCase()}`);
       onDownloaded?.(format);

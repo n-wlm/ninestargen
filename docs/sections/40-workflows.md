@@ -3,10 +3,10 @@ id: workflows
 title: Workflows
 order: 40
 status: current
-last_updated: 2026-07-04
+last_updated: 2026-07-06
 owner: @naim
-linked_paths: lib/image-upload.ts, lib/export.ts, lib/history.ts, components/ImagePreview.tsx, hooks/useComposition.ts
-summary: The key end-to-end flows — image upload to mandala, export, save & restore.
+linked_paths: lib/image-upload.ts, lib/export.ts, lib/project-metadata.ts, lib/history.ts, components/ImagePreview.tsx, components/HistoryPanel.tsx, hooks/useComposition.ts
+summary: The key end-to-end flows — image upload to mandala, export, save & restore (from history or an uploaded file).
 ---
 
 ## Image upload → nine-fold mandala
@@ -44,23 +44,32 @@ sequenceDiagram
   participant EX as lib/export
   participant GC as GeneratorClient
   U->>EP: choose size + format
-  EP->>EX: exportSVG / exportRaster(svgRef, …)
+  EP->>EX: exportSVG / exportRaster(svgRef, …, metadata)
+  Note over EP: metadata = buildProjectPayload(live composition) — geometry only
   EX->>EX: serialise <svg>; SVG direct, or draw to canvas → PNG/JPG
-  EX-->>U: file download
+  EX->>EX: embed payload (SVG <metadata> / PNG tEXt / JPEG COM)
+  EX-->>U: file download (with embedded restore link)
   EP->>GC: onDownloaded(format)
   GC->>GC: addHistory(snapshot) + open SaveDesignModal
 ```
 
 Download is disabled in images mode when there are no layers (nothing to
-export). Geometry exports use `window.location.href` as the shareable link.
+export). Geometry exports embed the shareable link in the file's metadata via
+[lib/project-metadata.ts](lib/project-metadata.ts) (a thunk `getMetadata` keeps it
+lazy + memo-stable), so the file itself is a restore point — see the next flow.
+The `SaveDesignModal` link + Share still use `window.location.href`.
 
-## Save & restore from history
+## Projects panel — restore from history or from a file
+
+The **Projects** panel (`HistoryPanel`, opened from the header) has two ways back
+into a design: restore a recent **download** (history, below), or **upload a file**
+you exported earlier.
 
 ```mermaid
 sequenceDiagram
   participant GC as GeneratorClient
   participant H as lib/history (localStorage)
-  participant HP as HistoryPanel
+  participant HP as Projects panel (HistoryPanel)
   GC->>H: addHistory({mode, format, config, link?})
   Note over H: newest-first, dedupe vs last, cap 12, quota-trim
   HP->>H: loadHistory() on open
@@ -73,6 +82,34 @@ the actual layers back — the user can keep editing it in the same browser.
 Geometry snapshots may be either shape (a legacy flat `StarConfig` or a
 `GeometryComposition`); `asComposition()` normalizes both back into the live
 layer state on restore.
+
+### Restore from an uploaded file
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant HP as Projects panel
+  participant PM as lib/project-metadata
+  participant GC as GeneratorClient
+  U->>HP: drop / pick an SVG · PNG · JPG
+  HP->>PM: extractProjectFromFile(file)
+  PM->>PM: read container (SVG text / PNG tEXt / JPEG COM) → payload
+  PM->>PM: parseProjectPayload → paramsToComposition
+  alt embedded design found
+    PM-->>HP: { ok:true, composition }
+    HP->>GC: onRestoreProject(composition)
+    GC->>GC: setStarComposition + setMode('geometry') + close panel (URL re-syncs → shareable again)
+  else no payload / unreadable / wrong type
+    PM-->>HP: { ok:false, reason }
+    HP->>U: inline message (no-data / unreadable / unsupported)
+  end
+```
+
+The file is only a **carrier for the link** — the design is rebuilt from the
+embedded query string (same codec as the URL), never traced from the pixels.
+Restoring re-runs `useUrlSync`, so the restored design is immediately shareable
+again. Only Geometry files carry this data; image mandalas can't be restored this
+way (they'd need their multi-MB data URLs, which don't fit).
 
 ## Layers (both modes, same surface)
 

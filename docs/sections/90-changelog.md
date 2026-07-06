@@ -12,6 +12,28 @@ summary: A running log of documentation updates, newest first.
 Append one entry per documentation update, newest first. Each records the date,
 the sections touched, and a one-line summary.
 
+## 2026-07-06
+
+- Restore geometry designs from an exported file (branch
+  `feature/restore-from-file`): downloaded files are now restore points. Geometry
+  exports embed their shareable link in the file's metadata using the **same
+  codec as the URL** (`compositionToParams`/`paramsToComposition`) — new
+  [lib/project-metadata.ts](lib/project-metadata.ts) writes SVG `<metadata>`, a PNG
+  `tEXt` chunk (in-house CRC-32), and a JPEG `COM` marker, and reads them back into
+  a composition (no pixel reconstruction). `lib/export.ts` + `useExport` thread a
+  lazy `getMetadata` thunk (geometry only). The header **History → Projects** button
+  (folder icon) opens a panel with a drag/click **Restore from a file** dropzone +
+  explainer above the recent-downloads list; a one-time first-visit nudge
+  (`nsg:projects-hint-seen`) invites returning users to continue. Import failures
+  show inline reasons (no-data / unreadable / unsupported). Verified: tsc ✓ lint ✓
+  build ✓ + a Node round-trip harness embedding→extracting a multi-layer
+  composition across all three formats (identical) and asserting the embedded query
+  equals `compositionToParams` (one standard). Live download→reupload + mobile
+  (incl. iOS Photos-vs-Files metadata stripping) is the owner's real-browser pass —
+  the preview tab is backgrounded here. Added ADR-009; updated architecture,
+  data-model (embedded-payload + localStorage key), workflows (restore flow),
+  ui-design.
+
 ## 2026-07-04
 
 - Mid-width header overflow (branch `chore/perf-audit`): in the 640–700px band
