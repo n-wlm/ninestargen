@@ -122,7 +122,10 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   link), a small accent popover with an up-arrow appears under the Projects button
   after ~1.2s — "Continue where you left off. Reopen a recent design, or restore
   one from a file you downloaded." Shown once (localStorage `nsg:projects-hint-seen`),
-  auto-hides after ~8s, and dismisses on click or opening the panel.
+  auto-hides after ~8s, and dismisses on click or opening the panel. Deliberately
+  **`z-30`** — a fresh first visit is also when the templates modal auto-opens
+  (`z-50`), so the nudge must sit behind it (and behind every other modal, `z-50`
+  through `z-65`), never covering an already-open window.
 - **Canvas**: square preview via container-query units
   (`w-[min(100cqw,100cqh)] aspect-square`), now **free of overlays** (actions
   live in the header); `ImageEmptyState` explains the mode when no image is

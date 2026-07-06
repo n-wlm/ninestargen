@@ -14,6 +14,14 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-06
 
+- Fix: first-visit Projects nudge appeared **in front of** the auto-opened
+  templates modal on a fresh visit (branch `feature/restore-from-file`,
+  owner-reported on mobile) — the nudge popover was `z-[55]`, above the
+  templates modal's `z-50`. Every real modal in the app stacks `z-50`
+  (Templates) through `z-70` (nested confirm popovers), so dropped the nudge to
+  `z-30`, comfortably behind all of them. Confirmed no ancestor of the header
+  (`TopBar`, the root layout) creates its own stacking context, so the plain
+  `z-30` vs `z-50` comparison holds. Updated ui-design.
 - Projects panel polish + changelog scroll fix, owner feedback (branch
   `feature/restore-from-file`): (1) the "Restore from a file" upload area is now
   hidden in **Images** mode (`HistoryPanel` takes an `isImages` prop) — the panel

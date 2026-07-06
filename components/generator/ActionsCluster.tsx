@@ -78,11 +78,15 @@ function ActionsCluster({
         )}
       </button>
 
-      {/* First-visit nudge, anchored under the Projects button (leftmost). */}
+      {/* First-visit nudge, anchored under the Projects button (leftmost).
+          z-30 keeps it behind every modal (Templates z-50, History/Save/
+          WhatsNew/About z-60, RestoreConfirm z-65) — on a first visit the
+          Templates modal auto-opens, and the hint must sit behind it, not
+          in front. */}
       <AnimatePresence>
         {showProjectsHint && (
           <motion.div
-            className="absolute top-full left-0 mt-2.5 w-60 z-[55]"
+            className="absolute top-full left-0 mt-2.5 w-60 z-30"
             initial={{ opacity: 0, y: -6, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.97 }}
