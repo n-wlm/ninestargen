@@ -9,7 +9,7 @@
 // On each user-visible release: bump APP_VERSION to match and add a CHANGELOG
 // entry below (newest first). The header shows a dot while the visitor's last
 // seen version is older than APP_VERSION.
-export const APP_VERSION = '1.2.0';
+export const APP_VERSION = '1.3.0';
 
 export interface ChangelogEntry {
   version: string;
@@ -21,6 +21,16 @@ export interface ChangelogEntry {
 // Newest first — CHANGELOG[0] is the current release (shown expanded in the
 // dialog; the rest sit behind "Show full changelog").
 export const CHANGELOG: ChangelogEntry[] = [
+  {
+    version: '1.3.0',
+    date: '2026-07-06',
+    title: 'Reopen a design from a downloaded file',
+    items: [
+      'Your downloaded geometry files are now restore points — drop a PNG, SVG or JPG back in to pick up editing exactly where you left off.',
+      'The design is rebuilt from settings saved inside the file, the same ones your shareable link carries — never guessed from the image.',
+      'History is now the Projects panel: restore from a file up top, your recent downloads below.',
+    ],
+  },
   {
     version: '1.2.0',
     date: '2026-07-04',
