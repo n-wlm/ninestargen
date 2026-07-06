@@ -14,6 +14,18 @@ the sections touched, and a one-line summary.
 
 ## 2026-07-06
 
+- Projects panel polish + changelog scroll fix, owner feedback (branch
+  `feature/restore-from-file`): (1) the "Restore from a file" upload area is now
+  hidden in **Images** mode (`HistoryPanel` takes an `isImages` prop) — the panel
+  no longer looks identical across modes, since image designs can't be restored
+  from a file anyway. (2) Trimmed the panel copy throughout — shorter explainer,
+  shorter footer ("Saved only in this browser, never uploaded…"), shorter import
+  errors, and removed all em-dashes. (3) Fixed the "What's new" dialog: expanding
+  "Show full changelog" used an animated height + `overflow-hidden` that clipped
+  the content and blocked scrolling; switched to an opacity-only reveal so the
+  dialog scrolls to the earlier entries. Verified via preview DOM checks (restore
+  section present in geometry, gone in images) + gates green. Updated workflows +
+  ui-design.
 - Restore geometry designs from an exported file (branch
   `feature/restore-from-file`): downloaded files are now restore points. Geometry
   exports embed their shareable link in the file's metadata using the **same

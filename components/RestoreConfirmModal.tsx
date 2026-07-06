@@ -50,8 +50,8 @@ export default function RestoreConfirmModal({ open, onConfirm, onCancel }: Props
               </button>
             </div>
             <p className="text-[12.5px] text-[#6B7280] leading-relaxed mb-4 pl-7">
-              Restoring will replace what&apos;s currently open in the editor — anything you
-              haven&apos;t downloaded yet will be lost.
+              This replaces what&apos;s open in the editor. Anything you haven&apos;t downloaded
+              yet will be lost.
             </p>
             <div className="flex gap-2">
               <button

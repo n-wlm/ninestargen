@@ -79,15 +79,18 @@ export default function WhatsNewDialog({ open, onClose }: Props) {
                     <ChevronDown className={`w-3 h-3 transition-transform ${expanded ? 'rotate-180' : ''}`} />
                   </button>
 
+                  {/* Opacity-only reveal: the content takes its natural height so
+                      the scroll container above can scroll to reach it (animating
+                      height + overflow-hidden clipped it and blocked scrolling). */}
                   <AnimatePresence initial={false}>
                     {expanded && (
                       <motion.div
                         key="earlier"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.22, ease: 'easeOut' }}
-                        className="flex flex-col gap-5 overflow-hidden"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.18, ease: 'easeOut' }}
+                        className="flex flex-col gap-5"
                       >
                         <div className="h-px bg-[#F3F4F6]" />
                         {earlier.map((entry) => (

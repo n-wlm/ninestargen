@@ -456,6 +456,7 @@ function Generator() {
       <HistoryPanel
         open={historyOpen}
         entries={entries}
+        isImages={isImages}
         onClose={() => setHistoryOpen(false)}
         onRestore={restore}
         onRestoreProject={restoreProject}

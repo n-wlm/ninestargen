@@ -152,14 +152,16 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   The centered confirm popover is clamped to the viewport so it never runs
   off-screen on narrow widths.
 - **Modals**: `SaveDesignModal` (post-download) and the **Projects** panel
-  (`HistoryPanel` — titled "Projects": a "Restore from a file" dropzone +
-  explainer on top, the "Recent" download list below) — white rounded cards over a
-  blurred backdrop, matching the export dropdown style. The dropzone is a dashed
-  click-or-drag target; import failures show an inline amber note keyed to the
-  reason (no-data / unreadable / unsupported). Because only files downloaded on
-  or after 6 July 2026 (this feature's launch) carry the embedded data, a muted
-  caption under the dropzone and the no-data message both say so — an older
-  download reads as an expected limitation, not a bug.
+  (`HistoryPanel`, titled "Projects") — white rounded cards over a blurred
+  backdrop, matching the export dropdown style. The Projects panel shows a
+  "Restore from a file" dropzone + a short caption on top **only in Geometry mode**
+  (images can't be rebuilt from a link, so the upload area is hidden there — the
+  panel is then just the "Recent" download list, so the two modes don't look
+  identical). The dropzone is a dashed click-or-drag target; import failures show
+  an inline amber note keyed to the reason (no-data / unreadable / unsupported).
+  Copy is kept short and dash-free; the caption and the no-data message both note
+  that only files downloaded on or after 6 Jul 2026 (this feature's launch) can be
+  restored, so an older download reads as an expected limitation, not a bug.
   A rounded `overflow-hidden` card that also fills a corner with colour (e.g.
   `TemplatesModal`'s gradient header) must use a **`ring-1` outline, not a
   `border`** — a hairline `border` on such a card leaves a faint light seam at
@@ -188,9 +190,12 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   visitor's `nsg:version-seen`. Clicking opens `WhatsNewDialog` (HistoryPanel
   modal pattern) and marks the version seen. The dialog shows **only the current
   release** (`CHANGELOG[0]`) expanded; a subtle "Show full changelog" toggle
-  reveals the earlier entries below it (animated height, resets on close). True
-  first visits are silently marked seen — the auto-opened templates modal is the
-  only attention-grabber a new visitor gets.
+  reveals the earlier entries below it (opacity-only reveal, resets on close).
+  The reveal deliberately does **not** animate height: an animated height plus
+  `overflow-hidden` clipped the expanded list and blocked the dialog's scroll
+  container, so the earlier entries take their natural height and the container
+  scrolls to reach them. True first visits are silently marked seen; the
+  auto-opened templates modal is the only attention-grabber a new visitor gets.
 - **Versioning** — `MAJOR.FEATURE.PATCH`, kept in `lib/changelog.ts`:
   **MAJOR** (1st) = sweeping overhauls that redefine the app; **FEATURE** (2nd) =
   a notable new capability (a mode, a system, a redesign); **PATCH** (3rd) =

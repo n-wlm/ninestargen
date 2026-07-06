@@ -16,6 +16,8 @@ import { asComposition, type GeometryComposition } from '@/types/geometry';
 interface Props {
   open: boolean;
   entries: HistoryEntry[];
+  // Images mode can't be restored from a file, so the upload area is hidden there.
+  isImages: boolean;
   onClose: () => void;
   onRestore: (entry: HistoryEntry) => void;
   onRestoreProject: (comp: GeometryComposition) => void;
@@ -24,9 +26,8 @@ interface Props {
 }
 
 const IMPORT_MESSAGES: Record<'no-data' | 'unreadable' | 'unsupported', string> = {
-  'no-data':
-    'No ninestargen design found in this file. Only files downloaded from Geometry mode on or after 6 July 2026 carry the settings needed to restore — an older download won’t work.',
-  unreadable: 'Couldn’t read that file — is it a valid image?',
+  'no-data': 'No saved design found in this file. Only files downloaded here on or after 6 Jul 2026 can be restored.',
+  unreadable: 'Couldn’t read that file. Is it a valid image?',
   unsupported: 'Please choose an SVG, PNG or JPG file.',
 };
 
@@ -59,7 +60,7 @@ function Thumb({ entry }: { entry: HistoryEntry }) {
 }
 
 export default function HistoryPanel({
-  open, entries, onClose, onRestore, onRestoreProject, onDelete, onClear,
+  open, entries, isImages, onClose, onRestore, onRestoreProject, onDelete, onClear,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -117,56 +118,53 @@ export default function HistoryPanel({
               </button>
             </div>
 
-            {/* Restore from a file */}
-            <div className="px-5 pt-4 pb-3 border-b border-[#F3F4F6] shrink-0">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-[#9CA3AF] mb-2">
-                Restore from a file
-              </p>
-              <input
-                ref={fileRef}
-                type="file"
-                accept={ACCEPT_ATTR}
-                className="hidden"
-                onChange={(e) => handleFile(e.target.files?.[0])}
-              />
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                onDragLeave={() => setDragging(false)}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  setDragging(false);
-                  handleFile(e.dataTransfer.files?.[0]);
-                }}
-                className={`w-full flex flex-col items-center justify-center gap-1.5 px-4 py-5 rounded-xl border border-dashed transition-colors text-center ${
-                  dragging
-                    ? 'border-[var(--nsg-accent)] bg-[var(--nsg-accent-soft)]'
-                    : 'border-[#D8DCE3] hover:border-[var(--nsg-accent-ring)] hover:bg-[#F9FAFB]'
-                }`}
-              >
-                <UploadCloud className={`w-5 h-5 ${dragging ? 'text-[var(--nsg-accent)]' : 'text-[#9CA3AF]'}`} />
-                <span className="text-[12.5px] font-medium text-[#374151]">
-                  {busy ? 'Reading…' : 'Drop a file or click to choose'}
-                </span>
-                <span className="text-[11px] text-[#9CA3AF]">SVG, PNG or JPG</span>
-              </button>
-              <p className="text-[11px] text-[#6B7280] leading-relaxed mt-2">
-                Open a file you downloaded from <span className="font-medium text-[#374151]">Geometry</span> mode —
-                ninestargen reads the design settings saved inside it and rebuilds it. Image mandalas can’t
-                be restored this way.
-              </p>
-              <p className="text-[10.5px] text-[#9CA3AF] leading-relaxed mt-1.5">
-                Works with files downloaded on or after 6 July 2026 — earlier downloads don’t carry
-                this data.
-              </p>
-              {error && (
-                <div className="mt-2 flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
-                  <AlertCircle className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
-                  <p className="text-[11.5px] text-amber-800 leading-snug">{error}</p>
-                </div>
-              )}
-            </div>
+            {/* Restore from a file — geometry only (images can't be rebuilt from a link) */}
+            {!isImages && (
+              <div className="px-5 pt-4 pb-3 border-b border-[#F3F4F6] shrink-0">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-[#9CA3AF] mb-2">
+                  Restore from a file
+                </p>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept={ACCEPT_ATTR}
+                  className="hidden"
+                  onChange={(e) => handleFile(e.target.files?.[0])}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setDragging(false);
+                    handleFile(e.dataTransfer.files?.[0]);
+                  }}
+                  className={`w-full flex flex-col items-center justify-center gap-1.5 px-4 py-4 rounded-xl border border-dashed transition-colors text-center ${
+                    dragging
+                      ? 'border-[var(--nsg-accent)] bg-[var(--nsg-accent-soft)]'
+                      : 'border-[#D8DCE3] hover:border-[var(--nsg-accent-ring)] hover:bg-[#F9FAFB]'
+                  }`}
+                >
+                  <UploadCloud className={`w-5 h-5 ${dragging ? 'text-[var(--nsg-accent)]' : 'text-[#9CA3AF]'}`} />
+                  <span className="text-[12.5px] font-medium text-[#374151]">
+                    {busy ? 'Reading…' : 'Drop a file or click to choose'}
+                  </span>
+                  <span className="text-[11px] text-[#9CA3AF]">SVG, PNG or JPG</span>
+                </button>
+                <p className="text-[11px] text-[#6B7280] leading-relaxed mt-2">
+                  Open a file you downloaded here to keep editing it. Only files saved on or after
+                  6 Jul 2026 can be restored.
+                </p>
+                {error && (
+                  <div className="mt-2 flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-600 mt-0.5 shrink-0" />
+                    <p className="text-[11.5px] text-amber-800 leading-snug">{error}</p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Recent downloads */}
             <p className="px-5 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-[#9CA3AF] shrink-0">
@@ -218,8 +216,7 @@ export default function HistoryPanel({
             {/* Footer — privacy note + clear */}
             <div className="px-5 py-3 border-t border-[#F3F4F6] shrink-0 flex items-center justify-between gap-3">
               <p className="text-[10.5px] text-[#9CA3AF] leading-snug flex-1">
-                Saved only in this browser — never uploaded or shared with anyone. Clearing your
-                browser data removes them.
+                Saved only in this browser, never uploaded. Clearing browser data removes them.
               </p>
               {entries.length > 0 && (
                 <ConfirmButton

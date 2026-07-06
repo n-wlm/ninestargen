@@ -63,7 +63,9 @@ The `SaveDesignModal` link + Share still use `window.location.href`.
 
 The **Projects** panel (`HistoryPanel`, opened from the header) has two ways back
 into a design: restore a recent **download** (history, below), or **upload a file**
-you exported earlier.
+you exported earlier. The upload area is shown **only in Geometry mode** (`isImages`
+gates it off) since image mandalas can't be rebuilt from a link — in Images mode the
+panel is just the recent-downloads list.
 
 ```mermaid
 sequenceDiagram
