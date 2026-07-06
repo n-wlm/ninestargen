@@ -25,7 +25,7 @@ interface Props {
 
 const IMPORT_MESSAGES: Record<'no-data' | 'unreadable' | 'unsupported', string> = {
   'no-data':
-    'No ninestargen design found in this file. Only files you downloaded from Geometry mode carry the settings needed to restore.',
+    'No ninestargen design found in this file. Only files downloaded from Geometry mode on or after 6 July 2026 carry the settings needed to restore — an older download won’t work.',
   unreadable: 'Couldn’t read that file — is it a valid image?',
   unsupported: 'Please choose an SVG, PNG or JPG file.',
 };
@@ -155,6 +155,10 @@ export default function HistoryPanel({
                 Open a file you downloaded from <span className="font-medium text-[#374151]">Geometry</span> mode —
                 ninestargen reads the design settings saved inside it and rebuilds it. Image mandalas can’t
                 be restored this way.
+              </p>
+              <p className="text-[10.5px] text-[#9CA3AF] leading-relaxed mt-1.5">
+                Works with files downloaded on or after 6 July 2026 — earlier downloads don’t carry
+                this data.
               </p>
               {error && (
                 <div className="mt-2 flex items-start gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200">
