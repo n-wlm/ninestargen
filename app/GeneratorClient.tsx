@@ -18,16 +18,18 @@ import ModeSwitch from '@/components/generator/ModeSwitch';
 import ActionsCluster from '@/components/generator/ActionsCluster';
 import SaveDesignModal from '@/components/SaveDesignModal';
 import HistoryPanel from '@/components/HistoryPanel';
+import RestoreConfirmModal from '@/components/RestoreConfirmModal';
 import { useStarComposition } from '@/hooks/useStarComposition';
 import { useComposition } from '@/hooks/useComposition';
 import { useUrlSync } from '@/hooks/useUrlSync';
 import { addHistory, loadHistory, removeHistory, clearHistory, type HistoryEntry } from '@/lib/history';
 import { buildProjectPayload } from '@/lib/project-metadata';
 import type { StarConfig } from '@/types/star';
-import { MAX_LAYERS, type CompositionConfig } from '@/types/composition';
+import { MAX_LAYERS, isDefaultComposition, type CompositionConfig } from '@/types/composition';
 import {
   asComposition,
   configFromLayer,
+  isDefaultGeometryComposition,
   isGeometryCanvasKey,
   MAX_GEOMETRY_LAYERS,
   type GeometryComposition,
@@ -161,16 +163,13 @@ function Generator() {
   // the ref keeps it lazy + memo-stable, and immune to the URL-sync debounce.
   const getGeometryMetadata = useCallback(() => buildProjectPayload(starConfigRef.current), []);
 
-  // Restore a design from an uploaded file (rebuilt from embedded metadata).
-  const restoreProject = useCallback(
-    (comp: GeometryComposition) => {
-      setStarComposition(comp);
-      setMode('geometry');
-      setSnapKey((k) => k + 1);
-      setHistoryOpen(false);
-    },
-    [setStarComposition],
-  );
+  // Restoring (from history or an uploaded file) overwrites whichever mode's
+  // design it targets — if that design isn't still the untouched default, ask
+  // first so in-progress work isn't discarded by a stray click.
+  type PendingRestore =
+    | { kind: 'entry'; entry: HistoryEntry }
+    | { kind: 'project'; composition: GeometryComposition };
+  const [pendingRestore, setPendingRestore] = useState<PendingRestore | null>(null);
 
   // First-visit nudge under the Projects button — shown once, and only on a
   // fresh visit (no URL params → not someone opening a shared link).
@@ -193,7 +192,7 @@ function Generator() {
     }
   }, []);
 
-  function restore(entry: HistoryEntry) {
+  function applyRestoreEntry(entry: HistoryEntry) {
     if (entry.mode === 'geometry') {
       setStarComposition(asComposition(entry.config as StarConfig | GeometryComposition));
       setMode('geometry');
@@ -203,6 +202,45 @@ function Generator() {
     }
     setSnapKey((k) => k + 1);
     setHistoryOpen(false);
+    setPendingRestore(null);
+  }
+
+  function applyRestoreProject(composition: GeometryComposition) {
+    setStarComposition(composition);
+    setMode('geometry');
+    setSnapKey((k) => k + 1);
+    setHistoryOpen(false);
+    setPendingRestore(null);
+  }
+
+  // Restore a saved history entry — asks first unless the design it would
+  // overwrite (geometry or images, matching the entry's mode) is still default.
+  function restore(entry: HistoryEntry) {
+    const wouldDiscardWork =
+      entry.mode === 'geometry' ? !isDefaultGeometryComposition(star.config) : !isDefaultComposition(comp.config);
+    if (wouldDiscardWork) {
+      setHistoryOpen(false);
+      setPendingRestore({ kind: 'entry', entry });
+      return;
+    }
+    applyRestoreEntry(entry);
+  }
+
+  // Restore a design from an uploaded file (rebuilt from embedded metadata) —
+  // always targets geometry, so only the geometry design is at risk.
+  function restoreProject(composition: GeometryComposition) {
+    if (!isDefaultGeometryComposition(star.config)) {
+      setHistoryOpen(false);
+      setPendingRestore({ kind: 'project', composition });
+      return;
+    }
+    applyRestoreProject(composition);
+  }
+
+  function confirmPendingRestore() {
+    if (!pendingRestore) return;
+    if (pendingRestore.kind === 'entry') applyRestoreEntry(pendingRestore.entry);
+    else applyRestoreProject(pendingRestore.composition);
   }
 
   const compUpdate = comp.update;
@@ -423,6 +461,13 @@ function Generator() {
         onRestoreProject={restoreProject}
         onDelete={(id) => setEntries(removeHistory(id))}
         onClear={() => setEntries(clearHistory())}
+      />
+
+      {/* Guards a restore that would overwrite an in-progress (non-default) design */}
+      <RestoreConfirmModal
+        open={pendingRestore !== null}
+        onConfirm={confirmPendingRestore}
+        onCancel={() => setPendingRestore(null)}
       />
     </div>
   );

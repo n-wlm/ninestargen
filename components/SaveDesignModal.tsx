@@ -74,7 +74,9 @@ export default function SaveDesignModal({ open, mode, link, format, storageWarni
                 </p>
                 <p className="text-[12.5px] text-[#6B7280] leading-relaxed mb-2">
                   This design lives entirely in its link — bookmark or copy it to come back. It&apos;s
-                  also saved in your history.
+                  also saved in your history, and the file you just downloaded works too: upload it
+                  again anytime via <span className="font-medium text-[#374151]">Projects</span> to
+                  pick up right where you left off.
                 </p>
                 <button
                   onClick={copy}

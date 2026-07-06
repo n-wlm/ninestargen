@@ -82,6 +82,11 @@ generated stars, mirroring the images layer model.
   layer this is identical to the pre-layer behaviour). Each rendered layer gets
   **its own gradient/filter ids** (via `useId`) so stacked gradients/effects
   never cross-bleed. Hidden layers skip rendering (and their defs) entirely.
+- **`isDefaultGeometryComposition(comp)`** (and its images twin
+  **`isDefaultComposition(comp)`** in [types/composition.ts](types/composition.ts))
+  report whether a composition is still the untouched starting design — every
+  field equal to the defaults **except** layer `id`/`name`. Used to skip the
+  restore-confirmation prompt (see Workflows) when there's genuinely nothing to lose.
 
 > [!NOTE]
 > **URL scheme (multi-layer).** Canvas fields use bare short keys (`bg`, `oc`,

@@ -94,6 +94,22 @@ export function makeLayer(
   };
 }
 
+// True when the composition is still the untouched starting design (no image
+// layers, default canvas) — used to skip the "replace current design?"
+// confirmation when there's nothing of the user's to lose.
+export function isDefaultComposition(comp: CompositionConfig): boolean {
+  if (comp.layers.length !== 0) return false;
+  return (
+    comp.bgColor === DEFAULT_COMPOSITION.bgColor &&
+    comp.outerContainer === DEFAULT_COMPOSITION.outerContainer &&
+    comp.outerContainerPadding === DEFAULT_COMPOSITION.outerContainerPadding &&
+    comp.outerContainerColor === DEFAULT_COMPOSITION.outerContainerColor &&
+    comp.outerContainerFill === DEFAULT_COMPOSITION.outerContainerFill &&
+    comp.exportWidth === DEFAULT_COMPOSITION.exportWidth &&
+    comp.exportHeight === DEFAULT_COMPOSITION.exportHeight
+  );
+}
+
 const numOr = (v: unknown, fallback: number): number =>
   typeof v === 'number' && Number.isFinite(v) ? v : fallback;
 

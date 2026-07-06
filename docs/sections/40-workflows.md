@@ -5,8 +5,8 @@ order: 40
 status: current
 last_updated: 2026-07-06
 owner: @naim
-linked_paths: lib/image-upload.ts, lib/export.ts, lib/project-metadata.ts, lib/history.ts, components/ImagePreview.tsx, components/HistoryPanel.tsx, hooks/useComposition.ts
-summary: The key end-to-end flows — image upload to mandala, export, save & restore (from history or an uploaded file).
+linked_paths: lib/image-upload.ts, lib/export.ts, lib/project-metadata.ts, lib/history.ts, components/ImagePreview.tsx, components/HistoryPanel.tsx, components/RestoreConfirmModal.tsx, types/geometry.ts, types/composition.ts, hooks/useComposition.ts
+summary: The key end-to-end flows — image upload to mandala, export, save & restore (from history or an uploaded file), guarded against accidental overwrite.
 ---
 
 ## Image upload → nine-fold mandala
@@ -74,6 +74,7 @@ sequenceDiagram
   Note over H: newest-first, dedupe vs last, cap 12, quota-trim
   HP->>H: loadHistory() on open
   HP->>GC: onRestore(entry)
+  GC->>GC: guarded — see "Guarding against accidental overwrite" below
   GC->>GC: geometry → setStarComposition(asComposition); images → comp.setConfig + setMode('images')
 ```
 
@@ -110,6 +111,36 @@ embedded query string (same codec as the URL), never traced from the pixels.
 Restoring re-runs `useUrlSync`, so the restored design is immediately shareable
 again. Only Geometry files carry this data; image mandalas can't be restored this
 way (they'd need their multi-MB data URLs, which don't fit).
+
+### Guarding against accidental overwrite
+
+Both restore paths (a history entry or an uploaded file) replace whatever design
+is currently open in that mode — so `GeneratorClient` checks first whether doing
+so would actually discard something:
+
+```mermaid
+sequenceDiagram
+  participant GC as GeneratorClient
+  participant RCM as RestoreConfirmModal
+  Note over GC: restore(entry) / restoreProject(composition)
+  GC->>GC: isDefaultGeometryComposition(star.config) / isDefaultComposition(comp.config)
+  alt current design is still the untouched default
+    GC->>GC: apply immediately — nothing to lose
+  else current design has been customized
+    GC->>RCM: open, holding the pending entry/composition
+    RCM->>GC: onConfirm → apply the pending restore
+    RCM->>GC: onCancel → discard the pending restore, stay on the current design
+  end
+```
+
+[`isDefaultGeometryComposition`](types/geometry.ts) /
+[`isDefaultComposition`](types/composition.ts) compare every field **except**
+layer `id`/`name` (internal identifiers, not user-visible design) against
+`DEFAULT_GEOMETRY_COMPOSITION`/`DEFAULT_COMPOSITION` — so a composition reloaded
+from a URL or file with fresh ids still reads as "default" if every value
+matches. The check runs against whichever mode the target entry/file belongs to,
+not the mode currently on screen, since switching modes doesn't touch the other
+mode's state.
 
 ## Layers (both modes, same surface)
 

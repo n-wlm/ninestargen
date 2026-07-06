@@ -153,3 +153,22 @@ export function configFromLayer(layer: GeometryLayer, comp: GeometryComposition)
 export function isGeometryCanvasKey(key: string): key is CanvasKey {
   return (GEOMETRY_CANVAS_KEYS as readonly string[]).includes(key);
 }
+
+// True when the composition is still the untouched starting design (one
+// default layer, default canvas) — used to skip the "replace current design?"
+// confirmation when there's nothing of the user's to lose. Compares every
+// field except `id`/`name` (internal identifiers, not user-visible design).
+export function isDefaultGeometryComposition(comp: GeometryComposition): boolean {
+  if (comp.layers.length !== 1) return false;
+  const layer = comp.layers[0];
+  const def = DEFAULT_GEOMETRY_LAYER;
+  const shapeMatches = STAR_SHAPE_KEYS.every((key) => {
+    const val = layer[key];
+    const defVal = def[key];
+    return Array.isArray(val) ? JSON.stringify(val) === JSON.stringify(defVal) : val === defVal;
+  });
+  if (!shapeMatches) return false;
+  if (layer.visible !== def.visible || layer.opacity !== def.opacity) return false;
+  if (layer.offsetX !== def.offsetX || layer.offsetY !== def.offsetY) return false;
+  return GEOMETRY_CANVAS_KEYS.every((key) => comp[key] === DEFAULT_GEOMETRY_COMPOSITION[key]);
+}

@@ -5,7 +5,7 @@ order: 60
 status: current
 last_updated: 2026-07-06
 owner: @naim
-linked_paths: components/controls/, components/generator/, components/header/, components/ui/popover.tsx, app/globals.css, components/SaveDesignModal.tsx, components/HistoryPanel.tsx, components/ImageEmptyState.tsx, components/WhatsNewDialog.tsx, lib/clipboard.ts, lib/color-palettes.ts, lib/recent-colors.ts
+linked_paths: components/controls/, components/generator/, components/header/, components/ui/popover.tsx, app/globals.css, components/SaveDesignModal.tsx, components/HistoryPanel.tsx, components/RestoreConfirmModal.tsx, components/ImageEmptyState.tsx, components/WhatsNewDialog.tsx, lib/clipboard.ts, lib/color-palettes.ts, lib/recent-colors.ts
 summary: Design language, the accent-variable system, control conventions, and accessibility notes.
 ---
 
@@ -167,7 +167,14 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   whereas a ring is a box-shadow that follows the radius crisply.
   `SaveDesignModal` leads with a green check + "{FORMAT} downloaded" so it's
   clear the file already saved; the link/history is framed as an optional
-  "keep editing later" step.
+  "keep editing later" step — for geometry, that copy also names the file
+  itself as a second way back in ("upload it again anytime via Projects"),
+  since the download now doubles as a restore point.
+- **RestoreConfirmModal**: a small amber-accented confirmation (same card style
+  as `SaveDesignModal`) gates any restore — from history or an uploaded file —
+  that would overwrite a design already in progress. Skipped silently when the
+  design being replaced is still the untouched default (nothing to lose), so it
+  never nags on a fresh visit or an empty canvas.
 - **Clipboard**: Share / copy-link actions go through [lib/clipboard.ts](lib/clipboard.ts)
   (`copyText`), which falls back to `document.execCommand('copy')` when the async
   Clipboard API is unavailable (insecure/sandboxed contexts).

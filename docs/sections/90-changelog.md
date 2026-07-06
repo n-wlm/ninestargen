@@ -36,6 +36,21 @@ the sections touched, and a one-line summary.
   the preview tab is backgrounded here. Added ADR-009; updated architecture,
   data-model (embedded-payload + localStorage key), workflows (restore flow),
   ui-design.
+- Restore-from-file follow-up, owner feedback (branch `feature/restore-from-file`):
+  (1) `SaveDesignModal`'s geometry "keep editing later" copy now also names the
+  downloaded file itself as a way back in ("upload it again anytime via
+  Projects"), not just the link. (2) Restoring — from history **or** an uploaded
+  file — no longer silently overwrites work in progress: new
+  `isDefaultGeometryComposition`/`isDefaultComposition`
+  ([types/geometry.ts](types/geometry.ts)/[types/composition.ts](types/composition.ts))
+  detect whether the design about to be replaced is still the untouched default
+  (every field equal to defaults except layer `id`/`name`), and a new
+  `RestoreConfirmModal` gates the restore only when it would actually discard
+  something. Verified: tsc ✓ lint ✓ build ✓ + a Node harness asserting the
+  default-detection on both untouched/customized geometry and images
+  compositions (including a composition with fresh ids but identical values, to
+  confirm it still reads as default). Updated workflows (new "Guarding against
+  accidental overwrite" subsection) + data-model + ui-design.
 
 ## 2026-07-04
 

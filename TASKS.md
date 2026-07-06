@@ -13,9 +13,19 @@ Metadaten rekonstruiert (nicht aus Pixeln), im **selben Standard wie die URL**.
 - Verifiziert: tsc ✓ lint ✓ build ✓; Node-Round-Trip-Harness (alle 3 Formate identisch,
   Negativfälle, „embedded query === compositionToParams"). Doku: ADR-009 + architecture/
   data-model/workflows/ui-design/changelog, keystonedoc 100 % Health.
+- Owner-Feedback-Runde (gleicher Tag): (1) `SaveDesignModal` nennt bei Geometry jetzt auch
+  den Re-Upload-Weg als Alternative zum Link; (2) Datums-Hinweis „nur Dateien ab 6. Juli 2026"
+  im Dropzone-Text + der no-data-Fehlermeldung ergänzt; (3) **Restore-Schutz**: Restore aus
+  History *und* aus Datei fragt jetzt nach, bevor es ein bereits verändertes Design überschreibt
+  — `isDefaultGeometryComposition`/`isDefaultComposition` (neu, `types/geometry.ts`/
+  `types/composition.ts`) erkennen den unberührten Ausgangszustand (alle Felder außer
+  Layer-`id`/`name`), neues `RestoreConfirmModal` fragt nur nach, wenn wirklich was verloren
+  ginge. Verifiziert: tsc ✓ lint ✓ build ✓ + Node-Harness für die Default-Erkennung
+  (unberührt/verändert, Geometry+Images, „nur andere id/name zählt trotzdem als Default").
+  Doku aktualisiert (workflows neuer Abschnitt, data-model, ui-design), 100 % Health.
 - **Offen (Naim, echter Browser/Mobile):** echter Download→Reupload je Format; iOS Photos-vs-Files
-  Metadaten-Stripping; Panel-Interaktion (Preview-Tab hier backgrounded → nur SSR/Harness).
-  Naim pusht + öffnet PR.
+  Metadaten-Stripping; Panel-Interaktion + Restore-Confirm-Klickpfad (Preview-Tab hier
+  backgrounded → nur SSR/Harness). Naim pusht + öffnet PR.
 
 ## Ziel davor
 **Feature-Ausbau 2026-07** — zwei aufeinander aufbauende Arbeitsströme:
