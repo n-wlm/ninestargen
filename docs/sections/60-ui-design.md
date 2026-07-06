@@ -156,7 +156,10 @@ Danger `#EF4444`. Fonts: Inter (UI), JetBrains Mono (numeric/hex fields).
   explainer on top, the "Recent" download list below) — white rounded cards over a
   blurred backdrop, matching the export dropdown style. The dropzone is a dashed
   click-or-drag target; import failures show an inline amber note keyed to the
-  reason (no-data / unreadable / unsupported).
+  reason (no-data / unreadable / unsupported). Because only files downloaded on
+  or after 6 July 2026 (this feature's launch) carry the embedded data, a muted
+  caption under the dropzone and the no-data message both say so — an older
+  download reads as an expected limitation, not a bug.
   A rounded `overflow-hidden` card that also fills a corner with colour (e.g.
   `TemplatesModal`'s gradient header) must use a **`ring-1` outline, not a
   `border`** — a hairline `border` on such a card leaves a faint light seam at

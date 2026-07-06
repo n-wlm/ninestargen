@@ -3,9 +3,9 @@ id: requirements
 title: Requirements
 order: 10
 status: current
-last_updated: 2026-07-04
+last_updated: 2026-07-06
 owner: @naim
-linked_paths: app/GeneratorClient.tsx, components/controls/, lib/export.ts
+linked_paths: app/GeneratorClient.tsx, components/controls/, lib/export.ts, lib/project-metadata.ts
 summary: What the two modes must do, plus the technical constraints they operate under.
 ---
 
@@ -20,6 +20,8 @@ summary: What the two modes must do, plus the technical constraints they operate
 - As a **user**, I want to export my design as PNG/SVG/JPG at high resolution.
 - As a **user**, I want to come back to a design later — via a shareable link
   (geometry) or a local history (images).
+- As a **user**, I want a geometry file I downloaded to also work as a restore
+  point, so I can pick a design back up even if I lost the link.
 
 ## Functional requirements
 
@@ -41,6 +43,7 @@ summary: What the two modes must do, plus the technical constraints they operate
 | FR-14 | Returning visitors see an unobtrusive "What's new" indicator for unseen releases | could |
 | FR-15 | Mode switch and the document actions (History, Share, Download) live in one top bar; the canvas stays free of chrome | should |
 | FR-16 | Layers are a prominent, standalone surface (floating panel on desktop, Controls/Layers toggle on mobile) — the **same** pattern in both modes | should |
+| FR-17 | Geometry: exported PNG/SVG/JPG embed the design's build instructions (same standard as the share link); re-uploading that file via the **Projects** panel restores the design without needing the link | should |
 
 ## Technical requirements
 

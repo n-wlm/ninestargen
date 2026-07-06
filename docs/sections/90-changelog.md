@@ -25,7 +25,10 @@ the sections touched, and a one-line summary.
   (folder icon) opens a panel with a drag/click **Restore from a file** dropzone +
   explainer above the recent-downloads list; a one-time first-visit nudge
   (`nsg:projects-hint-seen`) invites returning users to continue. Import failures
-  show inline reasons (no-data / unreadable / unsupported). Verified: tsc ✓ lint ✓
+  show inline reasons (no-data / unreadable / unsupported); since only files
+  downloaded on or after this feature's launch (6 July 2026) carry the embedded
+  data, the dropzone caption and the no-data message both say so, so an older
+  download reads as an expected limitation, not a bug. Verified: tsc ✓ lint ✓
   build ✓ + a Node round-trip harness embedding→extracting a multi-layer
   composition across all three formats (identical) and asserting the embedded query
   equals `compositionToParams` (one standard). Live download→reupload + mobile
